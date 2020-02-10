@@ -1,5 +1,6 @@
 grammar CSP2SAT;
 
+WS  : [ \t\r]+ -> skip;
 
 TK_CLASS: 'class';
 
@@ -88,7 +89,7 @@ conditional:
 
 rang: TK_IN expr TK_RANG_DOTS expr;
 
-functionCall: TK_IDENT TK_LPAREN list TK_RPAREN;
+functionCall: TK_IDENT TK_LPAREN list TK_RPAREN ;
 
 
 list: TK_IDENT | comprehensionList;

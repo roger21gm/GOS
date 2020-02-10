@@ -29,6 +29,6 @@ include_directories(${ANTLR_CSP2SAT_OUTPUT_DIR})
 file(GLOB CSP2SAT_SRC "src/*.cpp")
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/antlr4cpp_generated_src/CSP2SAT)
 include_directories(${PROJECT_SOURCE_DIR}/deps)
-add_executable(CSP2SAT ${CSP2SAT_SRC} ${ANTLR_CSP2SAT_CXX_OUTPUTS})
+add_executable(CSP2SAT ${CSP2SAT_SRC} ${ANTLR_CSP2SAT_CXX_OUTPUTS} src/CSP2SATMainListener.cpp src/CSP2SATMainListener.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

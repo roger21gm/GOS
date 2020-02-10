@@ -3,6 +3,7 @@
 
 // antlr4 runtime
 #include "antlr4-runtime.h"
+#include "CSP2SATMainListener.h"
 
 // generated lexer and parser
 #include <CSP2SATLexer.h>
@@ -21,11 +22,11 @@ void execute_expression(const std::string &expr) {
     CommonTokenStream tokens(&lexer);
     CSP2SATParser parser(&tokens);
 
-    tree::ParseTree *tree = parser.input();
-    //CalcListener listener;
+    tree::ParseTree *tree = parser.init();
+    CSP2SATMainListener listener;
 
-    //ParseTreeWalker *walker = new ParseTreeWalker();
-    //walker->walk(&listener, tree);
+    ParseTreeWalker *walker = new ParseTreeWalker();
+    walker->walk(&listener, tree);
 }
 
 int main() {

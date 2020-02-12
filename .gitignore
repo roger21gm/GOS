@@ -2,3 +2,4 @@ cmake-build-debug
 .idea
 .DS_Store
 gen
+deps/antlr/.nosync

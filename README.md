@@ -1,38 +1,56 @@
-# Especificació del llenguatge
+# Language specification
 
-## Típus de dades
+## Data types
 
-### Tipus bàsics
+### Basic types
 
-**`int`** Representa un tipus enter. 
+**`int`**  Represents an integer. 
 
-**`bool`**  Representa un booleà. Pot prendre per valor **true** o **false**
+**`bool`**  Represents a boolean. It can take **true** or **false** values.
 
-`_`  Representa un valor buit o nul.
+`_`  Represents a **null** value.
 
 
 
-### Tipus definits
+### User defined types
 
-- **Classes** Estructura que serà composada d'atributs (variables `var`, `aux` i constants `const`) i `constraint`s.
+- **Types** Struct constructed by variables `var` and constants `const` of any type.
 
-- **Arrays** Es podran definir arrays d'una o dos dimensions de qualsevol típus bàsic o classe. Es podrà limitar el domini de les variables de l'array a partir d'un rang.
+  ```java
+  type type_name {
+    <
+      <constant definition> |
+      <variable definition>
+    >*
+    <comparator implentation>?
+  }
+  ```
+
+  - **Comparator implementation** It will be possible to implement the operators `<` and `==` and use boolean operations between instances of the same type.
+
+    ```
+    
+    ```
+
+- **Arrays** You can define one or two-dimentional arrays of any type. You can also limit variables domain from a range.
+
+- **Sets** You can define a set of any type and limit its domain from a range.
 
   
 
-## Estructura general d'un programa
+## General structure of a program
 
-Un programa s'escriurà en un mínim de dos fitxers que definiran un model per un problema concret.
+A program will be written in at least two files that will define a model for a particular problem.
 
-- **Fitxer del model:** Descriurà l'estructura del problema.
+- **Model file:** It will describe the structure of the problem.
 
   ```pseudocode
-  <definició de constants d'entrada>*
-  <definició de classes>*
-  <bloc de sortida>?
+  types: <<type definition> ; >*
+  vars: <<<var definition> | <const definition>> ; >*
+  constraints: <<constraint definition> ; >*
   ```
 
-- **Fitxer de les dades:** Contindrà les constants usades i requerides pel model.
+- **Data file:** It will contain the constants and variables required by the model. The data file must be in a JSON format fitting the required constants from the model.
 
   ```pseudocode
   <bloc d'assignació de constants>
@@ -40,10 +58,9 @@ Un programa s'escriurà en un mínim de dos fitxers que definiran un model per u
 
 
 
+## Identifiers
 
-## Identificadors
-
-Els **identificadors** són una paraula sense espais que només pot contenir caràcters de l'abecedari gregorià, números i barres baixes: 
+The **identifiers** are words without whitespaces. It can only contain characters from the Gregorian alphabet, numbers and underscores:
 
 ```pseudocode
 [A-Z|a-z|_][A-Z|a-z|0-9|_]*
@@ -51,9 +68,9 @@ Els **identificadors** són una paraula sense espais que només pot contenir car
 
 
 
-## Comentaris
+## Comments
 
-**Comentaris** d'una sola línia iniciats amb un coixinet,  **#**.
+One liner **comments** must begin with a pad, **#**
 
 ```pseudocode
 #.*
@@ -63,204 +80,117 @@ Els **identificadors** són una paraula sense espais que només pot contenir car
 
 ## Expressions
 
-Una **expressió** pot ser:
+An expression could be:
 
-- Un **valor constant** de típus bàsic
+- A **constant value** of a basic type.
 
-- Una **constant**
+- A **constant** or **variable**.
 
-- Una **variable**
+- An **access to a property of a defined type**:
 
-- Una **operació** sobre una o vàries expressions
+  - User-defined type:
 
-- Una estructura `if-then-else` que s'expressa com:
+    ```pseudocode
+    𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟<.<𝑎𝑡𝑡𝑟𝑖𝑏𝑢𝑡𝑒_𝑛𝑎𝑚𝑒>>+
+    ```
 
-  ```pseudocode
-  condició ? exprCert : exprFals
-  ```
+  - Array access:
 
-  - ***condició*** ha de ser una expressió de típus bool.
-  - ***exprCert*** i ***exprFals*** han de ser una expressió del mateix típus.
+    ```pseudocode
+    𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟[<expr_int>]<[expr_int]>?<.<𝑎𝑡𝑡𝑟𝑖𝑏𝑢𝑡𝑒_𝑛𝑎𝑚𝑒>>*
+    ```
 
-- Una **funció definida**
+- An **operation** between one or some expressions.
 
-- Un valor nul `_`
-
-Els **operadors** per les expressions són:
-
-- `+`,  `-`,  `*`:  **suma**, **resta** i **multiplicació**. El resultat és un `int`.
-- `/`,  `mod`: **divisió entera** i **mòdul**. El resultat és un `int`.
-- `==`, `!=`: **igualtat** i **desigualtat**. El resultat és un `bool`.
-- `<`, `<=`, `>`, `>=`: **més petit**, **més petit o igual**, **més gran** o **més gran o igual**. El resultat és un `bool`.
-- `!`, `&&`, `||`: **negació lògica**, ***and* lògica**, ***or* lògica**. Definits únicament per `bool` i retorna `bool`.
-
-
-
-## Classes
-
-Una `class` serà composada per atributs i  `constraint`s.
-
-```java
-class nom_classe {
-  <definició constants>*
-  <definició variables aux>*
-  <definició variables de decisió>*
-  <constraints>*
-  <definició de funcions>*
-  <implementació comparadors>?
-}
-```
-
-- **Definició de funcions** Es podran generar mètodes  amb un valor de retorn que es podran cridar des d'altres classes que tinguin instàncies de la classe
+- An `if-then-else` structure, expressed as:
 
   ```pseudocode
-  function <tipus> 𝑛𝑜𝑚_𝑓𝑢𝑛𝑐𝑖𝑜 (<<tipus><ident> <,<tipus><ident>>*>?){
-  	𝐫𝐞𝐭𝐮𝐫𝐧 <expr>
-  }
+  condition ? exprTrue : exprFalse
   ```
 
-- **Implementació dels operadors** Es requerirà implementar únicament els operadors comparadors de `<` i `==` per tal de poder utilitzar realitzar operacions booleanes amb les instàncies dels objetes.
+  - ***condition*** must be a boolean expression.
+  - ***exprTrue*** i ***exprFalse*** must be expressions of the same type.
+
+- A defined **function**:
+
+  - `sum(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <range|array>) { <expr> } `
+
+- A **null** value `_`
+
+The expression **operators** are:
+
+- `+`,  `-`,  `*`:  **add**, **diff** and **multiply**. The result is an `int`.
+- `/`,  `mod`: **integer division** i **module**. The result is an `int`.
+- `==`, `!=`: **equality** i **inequality**. The result is a `bool`.
+- `<`, `<=`, `>`, `>=`: **lower**, **lower or equal**, **greater** or **greater or equal**. The result is a `bool`.
+- `!`, `&&`, `||`: **logic negation**, **logic *and***, **logic *or***. Only defined for bool expressions. The result is a `bool`
 
 
 
-### Constants
+## Variable and constant definition
 
-Una constant van precedides per `const` i poden ser:
+They must be preceded by `var` and `const` respectively. It will be assigned through the data file. There are two ways of defining a variable or constant:
 
-- Un típus bàsic
-- Un típus definit
+- Defining an **instance of a basic or defined type**:
 
-Les constants s'hauran d'assignar des del fitxer de dades.
+  ```pseudocode
+  <𝐜𝐨𝐧𝐬𝐭|𝐯𝐚𝐫> <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟 <range>?; 
+  ```
+
+- Defining an **array** of a basic or defined type:
+
+  ```pseudocode
+  <𝐜𝐨𝐧𝐬𝐭|𝐯𝐚𝐫> <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟 [<expr_int>] <[<intenger_expr>]>? <range>?; 
+  ```
+
+It is also possible to define a pre-defined auxiliary constants by assigning the value in the model:
 
 ```pseudocode
-𝐜𝐨𝐧𝐬𝐭 <tipus> 𝑛𝑜𝑚_𝑐𝑜𝑛𝑠𝑡𝑎𝑛𝑡 <definicio_array>? <rang>?; 
+<𝐜𝐨𝐧𝐬𝐭> <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟 := <expr>
 ```
 
 
-
-### Variables
-
-Existiran dos típus de variables `var` i `aux`. Les `var` seran les variables de decisió del model i les `aux` seran variables pre-calculades per simplificar les restriccions. Es podrà limitar el domini de les variables a partir d'un rang.
-
-Una variable pot ser de típus bàsic o definit.
-
-- **Definició de variables:**
-
-  ```pseudocode
-  𝐯𝐚𝐫 <tipus> 𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒 <rang>?;
-  ```
-
-  Les variables auxiliars `aux` s'hauran d'assignar al moment de definirles:
-
-  ```pseudocode
-  𝐚𝐮𝐱 <tipus> 𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒 = <expr>;
-  ```
-
-- **Assignació de variables**:
-
-  - De típus bàsic 
-
-    ```
-    𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒 = <expr>;
-    ```
-
-  - Objectes:
-
-    ```pseudocode
-    𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒.nom_atribut = <expr>;
-    ```
-
-  - Arrays:
-
-    ```pseudocode
-    𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒 = [<<expr><,<expr>>*>?]
-    ```
-
-    
 
 ### Constraints
 
-Només es podran definir constraints dins una class. Es definiran `constraint`s sobre les variables de la classe:
-
-`constraint constraint_name { <restricció>* };`
-
-Es podran usar els següents típus de **<restricció>**:
+It will be able possible to define constraints on the variables in the model:
 
 - `forall` loops
 
   ```pseudocode
-  𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <rang|array>) {
-  	<restricció>*
+  𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <range|array>) {
+  	<constraint>*
   }
   ```
 
 - `if-then-else` 
 
   ```pseudocode
-  <𝐢𝐟 ( <exrp_booleana> ){	<restricció>* }>
-  <𝐞𝐥𝐬𝐞 𝐢𝐟 (<expr_booleana>){ <restricció>* }>*
-  <𝐞𝐥𝐬𝐞 { <restricció>* }>?
+  <𝐢𝐟 ( <boolean_expr> ){	<constraint>* }>
+  <𝐞𝐥𝐬𝐞 𝐢𝐟 (<boolean_expr>){ <constraint>* }>*
+  <𝐞𝐥𝐬𝐞 { <constraint>* }>?
   ```
 
-- operació relacional
+- relational operation
 
-  ```pseudocode
-  <expr_int> <op_relacional> <expr_int>
-  ```
+  - `==`, `!=`: **equality** and **inequality**.
+  - `<`, `<=`, `>`, `>=`: **lower**, **lower or equal**, **greater** or **greater or equal**.
 
-- crida a funció
+- constraint function
 
-  ```pseudocode
-  𝑛𝑜𝑚_𝑓𝑢𝑛𝑐𝑖𝑜(<<expr><,<expr>>*>?)
-  ```
-
-  - `𝐚𝐥𝐥_𝐝𝐢𝐟𝐟𝐞𝐫𝐞𝐧𝐭(<list|array>)`
-
-
-
-## Arrays
-
-Es podran definir arrays d'una o dos dimensions de qualsevol típus bàsic o classe. Es podrà limitar el domini de les variables de l'array a partir d'un rang.
-
-- **Definició d'un array** Per definir un array ho farem de la mateixa manera que una variable però afegint el número de dimensions i la mida de cada dimensió. 
-
-  ```pseudocode
-  <aux|var|const> nom_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒[<expr_int>] <[<expr_int>]>? <rang>?
-  ```
-
-- **Accés a un array** Per accedir a una posició d'un array es farà:
-
-  ```pseudocode
-  𝑖𝑑_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒[<expr_int>]<[<expr_int>]>?
-  ```
-
+  - AMO
+  - ALO
+  - (...)
   
 
-## Objectes
-
-Un objecte és una instància concreta d'una `class`. 
-
-- Accés a atributs d'un objecte
-
-  ```pseudocode
-  𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒.nom_atribut
-  ```
-
-- Accés a funcions d'un objecte
-
-  ```pseudocode
-  𝑛𝑜𝑚_𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒.nom_funcio(<<expr><,<expr>>*>?)
-  ```
-
-  
 
 
 
 ## Estructures generadores
 
-### Rangs
+### Ranges
 
-Podrem definir rangs de valors per tal de limitar el domini d'una variable de decisió:
+We can define ranges to limit the possible values of a domain.
 
 ```javascript
 in <expr_int>..<expr_int>
@@ -268,27 +198,27 @@ in <expr_int>..<expr_int>
 
 
 
-### Llistes per comprensió
+### Comprehension lists
 
-Una llista per comprensió definirà una array anònima. Es podran generar de diverses maneres:
+A comprehension list will define an anonymous array. It is possible to generate comprehension lists in a multiple ways:
 
-- A partir de variables temporals `[ a * b | b, a in 1..10 where b < 3 and a != 4]`:
+- From temporal variables: `[ a * b | b, a in 1..10 where b < 3 and a != 4]`:
 
   ```pseudocode
-  [<expr_int> | <nom_var><,<nom_var>>? <rang> <<nom_var><,<nom_var>>? <rang>>? <where <expr_bool>>?]
+  [<expr_int> | <var_id><,<var_id>>? <range> <<var_id><,<var_id>>? <range>>? <where <expr_bool>>?]
   ```
 
-- A partir d'un array definit d'una sola dimensió `[ point.x * 2 | point in points where point.y > 4]`
+- From a one-dimensional predefined array: `[ point.x * 2 | point in points where point.y > 4]`
 
   ```pseudocode
-  [ <expr_int> | <nom_var> in <array> <where <expr_bool>>?]
+  [ <expr_int> | <var_id> in <array> <where <expr_bool>>?]
   ```
 
-- També es permetrà també generar llistes per comprensió a partir d'arrays de dos dimensions prèviament definides de la següent manera:
+- From two-dimensional arrays:
 
   ```pseudocode
-  array[i][_] equival a [ sudoku[i][j] | j in 1..n]
-  array[_][j] equival a [ sudoku[i][j] | i in 1..n]
+  array[i][_] equival a [ sudoku[i][j] | j in 1..n ]
+  array[_][j] equival a [ sudoku[i][j] | i in 1..n ]
   ```
 
 
@@ -299,94 +229,105 @@ Una llista per comprensió definirà una array anònima. Es podran generar de di
 
 Amb input:
 
-```pseudocode
-nQueens.n = 7;
+```json
+nQueens: {
+  n: 7
+}
 ```
 
 I el model:
 
 ```pseudocode
-# Definició de les constants d'entrada.
-const Queens nQueens;
 
-# Definició de classes amb variables i restriccions.
-class Queens {
-		const int n;
-    var int q[n] in 1..n;
+types:
+  Queens {
+      const int n;
+      var int q[n] in 1..n;
+  }
+
+vars:
+	const Queens nQueens;
+
+
+constraint:
+   forall (i in 1..n) {
+   	forall (j in i+1..n) {
+   		q[i] != q[j];
+   		q[i]+i != q[j]+j;
+   		q[i]-i != q[j]-j;
+   	};
+   };
     
-    constraint noAttack {
-        forall (i in 1..n) {
-            forall (j in i+1..n) {
-                q[i] != q[j];
-                q[i]+i != q[j]+j;
-               q[i]-i != q[j]-j;
-            }
-        }
-    }
-}
+
+
 ```
 
 ### Sudoku 
 
 Amb input:
 
-```pseudocode
-iniSudoku.n = 9
-iniSudoku.initial = [
-    1, _, _, 5, _, _, _, _, 1,
-    _, _, _, _, _, _, _, _, _,
-    _, _, _, _, _, _, _, 8, _,
-    _, 8, _, _, _, 5, _, _, _,
-    _, _, _, _, _, _, _, _, _,
-    _, _, _, _, _, _, _, _, _,
-    _, _, _, 9, _, _, _, _, _,
-    _, _, _, _, _, _, _, _, _,
-    _, _, 7, _, _, _, _, _, 2,
-]
+```json
+inisudoku : {
+	n: 9,
+	initial: [
+      1, _, _, 5, _, _, _, _, 1,
+      _, _, _, _, _, _, _, _, _,
+      _, _, _, _, _, _, _, 8, _,
+      _, 8, _, _, _, 5, _, _, _,
+      _, _, _, _, _, _, _, _, _,
+      _, _, _, _, _, _, _, _, _,
+      _, _, _, 9, _, _, _, _, _,
+      _, _, _, _, _, _, _, _, _,
+      _, _, 7, _, _, _, _, _, 2,
+  ]
+}
 ```
 
 I el model:
 
 ```pseudocode
-# Definició de les constants d'entrada.
-const Sudoku iniSudoku;
+types:
+	Sudoku {
+  		const int n;
+    	const int initial[n][n] in 1..n;
+    
+    	# Variables auxiliars
+    	const int ssSize := sqrt(n); //subSquareSize
+    
+    	# Variables a calcular
+    	var int sudoku[n][n] in 1..n;
+ }
+	
 
-class Sudoku {
-    //Input (constructor)
-    const int n;
-    const int initial[n][n] in 0..n;
-    
-    //Variables auxiliars
-    aux int ssSize = sqrt(n); //subSquareSize
-    
-    //Variables a calcular
-    var int sudoku[n][n] in 1..n;
-    
-    constraint fillInitial {
-        forall (i in 1..n) {
-            forall (j in 1..n) {
-                if( initial[i][j] != _ )
-                    sudoku[i][j] = initial[i][j]
-            }
-        }
+vars:
+	const Sudoku iniSudoku;
+
+
+constraint:
+
+    # Fill initial
+    forall (i in 1..n) {
+    		forall (j in 1..n) {
+    				if( initial[i][j] != _ )
+    					sudoku[i][j] == initial[i][j]
+    		}
     }
     
-    constraint uniqueRowsCols {
-        forall (i in 1..n) {
-            all_different(sudoku[i][_])
-            all_different(sudoku[_][i])
-        }
+    # uniqueRowsCols
+    forall (i in 1..n) {
+    		all_different(sudoku[i][_])
+    		all_different(sudoku[_][i])
     }
     
-    constraint uniqueSubSquares {
-        forall (i in 1..ssSize) {
-            forall (j in 1..ssSize) {
-                alldifferent(
-                    [ sudoku[a][b] | a, b in (i*(ssSize-1))..(i*(ssSize-1)+ssSize) ]
-                );
-            }
-        }
+    # uniqueSubSquares    
+    forall (i in 1..ssSize) {
+	  		forall (j in 1..ssSize) {
+  		  		alldifferent(
+    					[ sudoku[a][b] | a, b in (i*(ssSize-1))..(i*(ssSize-1)+ssSize) ]
+    				);
+    		}
     }
+    
 }
 ```
 
@@ -396,38 +337,68 @@ class Sudoku {
 
 Amb input:
 
-```pseudocode
-bigSquare.sideSize = 5
-bigSquare.nSquares = 8
-
-bigSquare.s[0].size = 3
-bigSquare.s[1].size = 2
-bigSquare.s[2].size = 2
-bigSquare.s[3].size = 2
-bigSquare.s[4].size = 1
-bigSquare.s[5].size = 1
-bigSquare.s[6].size = 1
-bigSquare.s[7].size = 1
+```json
+bigSquare : {
+    sideSize: 5,
+    nSquares: 8,
+    s:[
+        {
+          size: 3,
+        },
+        {
+          size: 2,
+        },
+        {
+          size: 2,
+        },
+        {
+          size: 3,
+        },
+        {
+          size: 2,
+        },
+        {
+          size: 2,
+        },
+        {
+          size: 2,
+        },
+        {
+          size: 2,
+        }
+    ]
+} 
 ```
 
 I el model:
 
 ```pseudocode
-const PackSquare bigSquare;
+types:
+		Square {
+				var int x;
+        var int y;
+        const int size;
+		}
+		PackSquare {
+				const int sideSize;
+        const int nSquares;
+        const Square s[nSquares];
+		}
+		
+		
+vars:
+		const PackSquare bigSquare;
 
-class PackSquare {
-	const int sideSize;
-	const int nSquares;
-	const Square s[nSquares];
-	
-	constraint inside {
+
+constraints:
+		
+		# inside
 		forall(i in 1..nSquares){
 			s[i].x <= sideSize - s[i].size + 1;
 			s[i].y <= sideSize - s[i].size + 1;
 		}
-	}
-	
-	constraint noOverlap {
+		
+		# noOverlap
 		forall (i in 1..nSquares){
 			forall (j in i+1..nSquares){
 				   s[i].x + s[i].size <= s[j].x 
@@ -436,17 +407,8 @@ class PackSquare {
 				|| s[j].y + s[j].size <= s[i].y 
 			}
 		}
-	}
-	
-	constraint fitArea {
-		sum (i in 1..nSquares)(s[i].size * s[i].size) = sideSize * sideSize;
-	}
-}
-
-class Square {
-	var int x;
-  var int y;
-  const int size;
-}
+		
+		# fitArea
+		sum (i in 1..nSquares){s[i].size *f s[i].size} == sideSize * sideSize;
 ```
 

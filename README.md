@@ -8,8 +8,6 @@
 
 **`bool`**  Represents a boolean. It can take **true** or **false** values.
 
-`_`  Represents a **null** value.
-
 
 
 ### User defined types
@@ -17,35 +15,28 @@
 - **Types** Struct constructed by variables `var` and constants `const` of any type.
 
   ```java
-  type type_name {
+  type_name {
     <
       <constant definition> |
       <variable definition>
     >*
-    <comparator implentation>?
   }
   ```
 
-  - **Comparator implementation** It will be possible to implement the operators `<` and `==` and use boolean operations between instances of the same type.
-
-    ```
-    
-    ```
-
-- **Arrays** You can define one or two-dimentional arrays of any type. You can also limit variables domain from a range.
+- **Arrays** You can define *n*-dimentional arrays of any type. You can also limit variables domain from a range.
 
 - **Sets** You can define a set of any type and limit its domain from a range.
 
   
 
-## General structure of a program
+## General program structure
 
 A program will be written in at least two files that will define a model for a particular problem.
 
 - **Model file:** It will describe the structure of the problem.
 
   ```pseudocode
-  types: <<type definition> ; >*
+  types: <<user-defined types definition> ; >*
   vars: <<<var definition> | <const definition>> ; >*
   constraints: <<constraint definition> ; >*
   ```
@@ -63,7 +54,7 @@ A program will be written in at least two files that will define a model for a p
 The **identifiers** are words without whitespaces. It can only contain characters from the Gregorian alphabet, numbers and underscores:
 
 ```pseudocode
-[A-Z|a-z|_][A-Z|a-z|0-9|_]*
+_*[A-Z|a-z][A-Z|a-z|0-9|_]*
 ```
 
 
@@ -73,10 +64,10 @@ The **identifiers** are words without whitespaces. It can only contain character
 One liner **comments** must begin with a pad, **#**
 
 ```pseudocode
-#.*
+//.*
 ```
 
-
+- multiline
 
 ## Expressions
 
@@ -86,7 +77,7 @@ An expression could be:
 
 - A **constant** or **variable**.
 
-- An **access to a property of a defined type**:
+- An **access to a defined type property**:
 
   - User-defined type:
 
@@ -109,13 +100,12 @@ An expression could be:
   ```
 
   - ***condition*** must be a boolean expression.
+
   - ***exprTrue*** i ***exprFalse*** must be expressions of the same type.
 
-- A defined **function**:
+    
 
-  - `sum(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <range|array>) { <expr> } `
 
-- A **null** value `_`
 
 The expression **operators** are:
 
@@ -123,9 +113,27 @@ The expression **operators** are:
 - `/`,  `mod`: **integer division** i **module**. The result is an `int`.
 - `==`, `!=`: **equality** i **inequality**. The result is a `bool`.
 - `<`, `<=`, `>`, `>=`: **lower**, **lower or equal**, **greater** or **greater or equal**. The result is a `bool`.
-- `!`, `&&`, `||`: **logic negation**, **logic *and***, **logic *or***. Only defined for bool expressions. The result is a `bool`
+- `!`, `&`, `|`: **logic negation**, **logic *and***, **logic *or***. Only defined for bool expressions. The result is a `bool`
 
+The operator priority is:
 
+ 1.  `!`
+
+ 2.  `/`,  `mod`,`*`
+
+ 3.  `+`,  `-`
+
+ 4.  `==`, `!=`, `<`, `<=`, `>`, `>=`
+
+ 5.  `&&`, `||`
+
+ 6.  `if-then-else`
+
+     
+
+     
+
+     
 
 ## Variable and constant definition
 
@@ -153,12 +161,12 @@ It is also possible to define a pre-defined auxiliary constants by assigning the
 
 ### Constraints
 
-It will be able possible to define constraints on the variables in the model:
+It will be able possible to define constraints in the boolean decision variables on the model:
 
 - `forall` loops
 
   ```pseudocode
-  𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <range|array>) {
+  𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <range|array|list>) {
   	<constraint>*
   }
   ```
@@ -173,20 +181,34 @@ It will be able possible to define constraints on the variables in the model:
 
 - relational operation
 
-  - `==`, `!=`: **equality** and **inequality**.
-  - `<`, `<=`, `>`, `>=`: **lower**, **lower or equal**, **greater** or **greater or equal**.
+  - **Variable** : 
+    - Single variable identifier: `x`
+    - Array access: `x[0]`
+    - User defined type attribute: `x.attr`
+  - **Literal** : It could be a variable or it's negation: `x` and `!x`
+  - **OR** operation:
+    - Using operator `|`  between literals: `x1 | x2 | ... | xn`
+    - Using reserved word `or`  and a list of literals:  `or( <literal list> )`
+  - **AND** operation: 
+    - Using operator `&` between literals:  `x1 & x2 & ... & xn`
+    - Using reserved word `and ` and a list of literals: `and( <literal list> )`
+  - **Implication**: Between **AND** and **OR** operations.
+    - **AND ⇒ OR** 
+    - **OR ⇐  AND**
+  - **Biconditional**:
+    - **literal ⇔ AND**
+    - **literal ⇔ OR**
+    - **AND ⇔ literal**
+    - **OR ⇔ literal**
 
-- constraint function
+- Global constraints:
 
-  - AMO
-  - ALO
-  - (...)
-  
+  - Cardinalities
 
 
 
 
-## Estructures generadores
+## Generator structures 
 
 ### Ranges
 
@@ -200,7 +222,7 @@ in <expr_int>..<expr_int>
 
 ### Comprehension lists
 
-A comprehension list will define an anonymous array. It is possible to generate comprehension lists in a multiple ways:
+A comprehension list will define an anonymous list. It is possible to generate comprehension lists in a multiple ways:
 
 - From temporal variables: `[ a * b | b, a in 1..10 where b < 3 and a != 4]`:
 
@@ -238,28 +260,22 @@ nQueens: {
 I el model:
 
 ```pseudocode
-
 types:
   Queens {
       const int n;
-      var int q[n] in 1..n;
-  }
+      var bool q[n][n];
+  };
 
 vars:
 	const Queens nQueens;
 
 
-constraint:
-   forall (i in 1..n) {
-   	forall (j in i+1..n) {
-   		q[i] != q[j];
-   		q[i]+i != q[j]+j;
-   		q[i]-i != q[j]-j;
+constraints:
+   	forall (i in 1..n) {
+	   	sum(nQueens.q[i][_]) == 1;
+		sum(nQueens.q[_][i]) == 1;
+		sum([sQueens.q[i][j] | j in 1..n]);
    	};
-   };
-    
-
-
 ```
 
 ### Sudoku 
@@ -270,7 +286,7 @@ Amb input:
 inisudoku : {
 	n: 9,
 	initial: [
-      1, _, _, 5, _, _, _, _, 1,
+      1, 0, 0, 5, 0, _, _, _, 1,
       _, _, _, _, _, _, _, _, _,
       _, _, _, _, _, _, _, 8, _,
       _, 8, _, _, _, 5, _, _, _,
@@ -295,8 +311,8 @@ types:
     	const int ssSize := sqrt(n); //subSquareSize
     
     	# Variables a calcular
-    	var int sudoku[n][n] in 1..n;
- }
+    	var bool sudoku[n][n][n]
+ };
 	
 
 vars:
@@ -308,10 +324,10 @@ constraint:
     # Fill initial
     forall (i in 1..n) {
     		forall (j in 1..n) {
-    				if( initial[i][j] != _ )
-    					sudoku[i][j] == initial[i][j]
+    				if( initial[i][j] != 0 )
+    					sudoku[i][j][initial[i][j]]
     		}
-    }
+    };
     
     # uniqueRowsCols
     forall (i in 1..n) {
@@ -394,17 +410,17 @@ constraints:
 		
 		# inside
 		forall(i in 1..nSquares){
-			s[i].x <= sideSize - s[i].size + 1;
-			s[i].y <= sideSize - s[i].size + 1;
+        s[i].x <= sideSize - s[i].size + 1;
+        s[i].y <= sideSize - s[i].size + 1;
 		}
 		
 		# noOverlap
 		forall (i in 1..nSquares){
 			forall (j in i+1..nSquares){
-				   s[i].x + s[i].size <= s[j].x 
-				|| s[j].x + s[j].size <= s[i].x 
-				|| s[i].y + s[i].size <= s[i].y 
-				|| s[j].y + s[j].size <= s[i].y 
+          s[i].x + s[i].size <= s[j].x 
+          || s[j].x + s[j].size <= s[i].x 
+          || s[i].y + s[i].size <= s[i].y 
+          || s[j].y + s[j].size <= s[i].y 
 			}
 		}
 		

@@ -10,14 +10,12 @@
 
 using namespace std;
 
-
 class Scope {
-
 public:
     virtual string getScopeName() = 0;
     virtual Scope * getEnclosingScope() = 0;
     virtual void define(Symbol * sym) = 0;
-    virtual Symbol * resolve(string name) = 0;
+    virtual Symbol * resolve(const string &name) = 0;
 };
 
 

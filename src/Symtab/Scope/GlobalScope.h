@@ -8,7 +8,7 @@
 
 #include "BaseScope.h"
 
-class GlobalScope: BaseScope {
+class GlobalScope: public BaseScope {
 public:
     GlobalScope() : BaseScope(nullptr) {}
 

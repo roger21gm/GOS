@@ -11,6 +11,10 @@
 class BuildInTypeSymbol: public Symbol, public Type  {
 public:
     explicit BuildInTypeSymbol(const string &name) : Symbol(name) {}
+
+    string getName() override {
+        return Symbol::getName();
+    }
 };
 
 

@@ -22,6 +22,7 @@ public:
     string getName() {
         return this->name;
     }
+
     string name;
     Type *type = nullptr;
     Scope *scope = nullptr;

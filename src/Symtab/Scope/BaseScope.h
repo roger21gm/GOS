@@ -13,28 +13,27 @@ using namespace std;
 
 class BaseScope: public Scope {
 
-private:
-    Scope * enclosingScope;
-    map<string, Symbol*> symbols;
-
 public:
-    explicit BaseScope(Scope *parent) : enclosingScope(parent) {}
-
-    Scope *getEnclosingScope() override {
-        return this->enclosingScope;
-    }
-
-    Symbol * resolve(string name) override {
-        if ( symbols.find(name) != symbols.end() ) return symbols[name];
-        if ( enclosingScope != nullptr ) return enclosingScope->resolve(name);
-        return nullptr;
-    }
-
     void define(Symbol *sym) override {
         sym->scope = this;
         symbols[sym->getName()] = sym;
     }
 
+    explicit BaseScope(Scope *parent) : enclosingScope(parent) {}
+
+    Scope * getEnclosingScope() override {
+        return this->enclosingScope;
+    }
+
+    Symbol * resolve(const string& name) override {
+        if ( symbols.find(name) != symbols.end() ) return symbols[name];
+        if ( enclosingScope != nullptr ) return enclosingScope->resolve(name);
+        return nullptr;
+    }
+
+private:
+    Scope * enclosingScope;
+    map<string, Symbol*> symbols;
 };
 
 

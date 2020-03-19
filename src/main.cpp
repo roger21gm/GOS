@@ -9,7 +9,6 @@
 #include <CSP2SATLexer.h>
 #include <CSP2SATParser.h>
 
-#include "Symtab/SymtbolTable.h"
 
 // custom listener
 
@@ -30,9 +29,7 @@ void execute_expression(const std::string &expr) {
     CSP2SATCustomVisitor visitor;
     visitor.visit(tree);
 
-    SymtbolTable st;
 
-    cout << st.gloabls.getScopeName() << endl;
 
 }
 
@@ -54,7 +51,9 @@ int main() {
 
     execute_expression(""
                        "vars:"
-                       "    const int n in 1+2..5;");
+                       "    const int n;"
+                       "    var bool nQueens;"
+                       "    var bool nReines;");
 
 
 

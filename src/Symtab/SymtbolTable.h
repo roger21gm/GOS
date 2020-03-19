@@ -7,15 +7,17 @@
 
 
 #include "Scope/GlobalScope.h"
+#include "Symbol/BuildInTypeSymbol.h"
 
 class SymtbolTable {
 
 public:
-
     GlobalScope gloabls;
 
     SymtbolTable(){
         gloabls = GlobalScope();
+        this->gloabls.define(new BuildInTypeSymbol("int"));
+        this->gloabls.define(new BuildInTypeSymbol("bool"));
     }
 
 };

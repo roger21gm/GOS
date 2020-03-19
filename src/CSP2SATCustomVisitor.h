@@ -6,11 +6,15 @@
 #define CSP2SAT_CSP2SATCUSTOMVISITOR_H
 
 #include "CSP2SATBaseVisitor.h"
+#include "Symtab/SymtbolTable.h"
 
 using namespace CSP2SAT;
 using namespace std;
 
 class CSP2SATCustomVisitor: public CSP2SATBaseVisitor {
+
+private:
+    SymtbolTable st;
 
 public:
     antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override;

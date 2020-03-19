@@ -1,6 +1,7 @@
 
 #include <support/Any.h>
 #include "CSP2SATCustomVisitor.h"
+#include "Symtab/Symbol/VariableSymbol.h"
 
 antlrcpp::Any CSP2SATCustomVisitor::visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) {
 
@@ -33,10 +34,16 @@ antlrcpp::Any CSP2SATCustomVisitor::visitConstDefinition(CSP2SATParser::ConstDef
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitVarConstDef(CSP2SATParser::VarConstDefContext *ctx) {
-//    if (ctx->rang) {
-//        cout << visit(ctx->rang->expr(0)).as<int >() << endl;
-//        cout << visit(ctx->rang->expr(1)).as<int>() << endl;
-//    }
+    VariableSymbol newVar = VariableSymbol(
+            ctx->name->getText(),
+            (Type *)(st.gloabls.resolve(ctx->type->getText()))
+            );
+
+
+    cout << newVar.getName() << "  " <<  st.gloabls.resolve(ctx->type->getText())->getName() << endl;
+
+    st.gloabls.define(&newVar);
+
     return CSP2SATBaseVisitor::visitVarConstDef(ctx);
 }
 

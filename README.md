@@ -245,6 +245,53 @@ A comprehension list will define an anonymous list. It is possible to generate c
 
 
 
+## Implementation details
+
+### Symbol Table
+
+Symbol table will be used to store variables and constants definitions and its values. Mainly it will answer two questions:
+
+- Given a declaration of a name, is there already a declaration of the same name in the current scope?
+- Given a use of a name, to which declaration does it correspond using the "most closely nested" rule, or is it undelcared?
+
+#### Assumptions
+
+- Use static scoping
+- Require that all names must be declared before they are used
+- Do not allow multiple declarations of a name in the same scope (even for different types)
+- Do allow the same name to be declared in multiple nested scopes.
+
+
+
+#### Operations
+
+1. Look up a name in the current scope only (to check if it's multiply declared)
+
+2. Look up a name in the current and enclosing scopes
+
+   1. To check for a use of an undeclared name.
+   2. To link a use with the corresponding symbol-table entry
+
+3. Insert a new name into the symbol table with its attributes.
+
+4. Do what must be done when a new scope is entered.
+
+5. Do what must be done when a scope is exited.
+
+   
+
+#### Implementation - Table per scope
+
+This implementation consistis using one symbol table per scope and chaining it together in a list based on level of nesting.
+
+
+
+#### Implementation - Global table
+
+This implementation consists on representing all symbols in one table and nesting level to all items.
+
+
+
 ## Exemples
 
 ### Problema de les _n_-reines

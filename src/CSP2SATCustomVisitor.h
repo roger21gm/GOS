@@ -11,6 +11,7 @@ using namespace CSP2SAT;
 using namespace std;
 
 class CSP2SATCustomVisitor: public CSP2SATBaseVisitor {
+
 public:
     antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override;
 

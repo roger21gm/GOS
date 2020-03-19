@@ -9,7 +9,10 @@
 #include <CSP2SATLexer.h>
 #include <CSP2SATParser.h>
 
+#include "Symtab/SymtbolTable.h"
+
 // custom listener
+
 
 using namespace std;
 using namespace antlr4;
@@ -27,7 +30,9 @@ void execute_expression(const std::string &expr) {
     CSP2SATCustomVisitor visitor;
     visitor.visit(tree);
 
+    SymtbolTable st;
 
+    cout << st.gloabls.getScopeName() << endl;
 
 }
 

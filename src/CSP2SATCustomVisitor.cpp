@@ -33,10 +33,11 @@ antlrcpp::Any CSP2SATCustomVisitor::visitConstDefinition(CSP2SATParser::ConstDef
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitVarConstDef(CSP2SATParser::VarConstDefContext *ctx) {
-    if (ctx->rang) {
-        cout << visit(ctx->rang->expr(0)).as<int >() << endl;
-        cout << visit(ctx->rang->expr(1)).as<int>() << endl;
-    }
+//    if (ctx->rang) {
+//        cout << visit(ctx->rang->expr(0)).as<int >() << endl;
+//        cout << visit(ctx->rang->expr(1)).as<int>() << endl;
+//    }
+    return CSP2SATBaseVisitor::visitVarConstDef(ctx);
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitAuxiliarConstDef(CSP2SATParser::AuxiliarConstDefContext *ctx) {
@@ -84,6 +85,7 @@ antlrcpp::Any CSP2SATCustomVisitor::visitExpr_6(CSP2SATParser::Expr_6Context *ct
     } else {
         return visit(ctx->expr_5(0));
     }
+    return visitExpr_6(ctx);
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitExpr_5(CSP2SATParser::Expr_5Context *ctx) {
@@ -103,6 +105,7 @@ antlrcpp::Any CSP2SATCustomVisitor::visitExpr_5(CSP2SATParser::Expr_5Context *ct
     } else {
         return visit(ctx->expr_4(0));
     }
+    return visitExpr_5(ctx);
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitExpr_4(CSP2SATParser::Expr_4Context *ctx) {

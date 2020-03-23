@@ -9,15 +9,27 @@
 #include "Scope/GlobalScope.h"
 #include "Symbol/BuildInTypeSymbol.h"
 
+
+
 class SymtbolTable {
 
+
+
 public:
+
+    static const int tCustom = 0;
+    static const int tInt = 1;
+    static const int tBool = 2;
+
+    BuildInTypeSymbol _integer = BuildInTypeSymbol("int", tInt);
+    BuildInTypeSymbol _boolean = BuildInTypeSymbol("bool", tBool);
+
     GlobalScope gloabls;
 
     SymtbolTable(){
         gloabls = GlobalScope();
-        this->gloabls.define(new BuildInTypeSymbol("int"));
-        this->gloabls.define(new BuildInTypeSymbol("bool"));
+        this->gloabls.define(&_integer);
+        this->gloabls.define(&_boolean);
     }
 
 };

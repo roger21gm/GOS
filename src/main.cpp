@@ -50,9 +50,13 @@ int main() {
 //                       "  };");
 
     execute_expression(""
+                       "types:"
+                       "     Queens {"
+                       "         const int n1;"
+                       "     };"
                        "vars:"
+                       "    const Queens nQueens;"
                        "    const int n;"
-                       "    var bool nQueens;"
                        "    var bool nReines;");
 
 

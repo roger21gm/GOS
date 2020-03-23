@@ -12,6 +12,7 @@ using namespace std;
 class Type {
 public:
     virtual string getName() = 0;
+    virtual int getTypeIndex() = 0;
 };
 
 

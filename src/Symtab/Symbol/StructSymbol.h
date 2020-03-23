@@ -20,6 +20,19 @@ public:
         return fields[name];
     }
 
+    Symbol *resolve(const string &name) override {
+        return ScopedSymbol::resolve(name);
+    }
+
+    string getName() override {
+        return ScopedSymbol::getName();
+    }
+
+    int getTypeIndex() override {
+        return SymtbolTable::tCustom;
+    }
+
+
     map<string, Symbol *> getMembers() override {
         return fields;
     }

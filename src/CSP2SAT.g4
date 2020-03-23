@@ -25,7 +25,8 @@ TK_CONSTRAINT: 'constraint';
 TK_INT_VALUE: ('1'..'9')('0'..'9')* | '0';
 TK_BOOLEAN_VALUE: 'true' | 'false';
 
-TK_BASE_TYPE: 'int' | 'bool';
+TK_BASE_TYPE_INT : 'int';
+TK_BASE_TYPE_BOOL : 'bool';
 
 TK_IN: 'in';
 TK_RANGE_DOTS: '..';
@@ -96,18 +97,18 @@ csp2sat: typeDefinitionBlock? varDefinitionBlock? constraintDefinitionBlock?;
 
 
 typeDefinitionBlock: TK_TYPES TK_COLON typeDefinition* ;
-typeDefinition: TK_IDENT TK_LBRACKET (varDefinition | constDefinition)* TK_RBRACKET TK_SEMICOLON;
+typeDefinition: name=TK_IDENT TK_LBRACKET (varDefinition | constDefinition)* TK_RBRACKET TK_SEMICOLON;
 
 varDefinitionBlock: TK_VARS TK_COLON (varDefinition | constDefinition)*;
 
 constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 
 
-varDefinition: TK_VAR varConstDef TK_SEMICOLON;
-constDefinition: TK_CONST (varConstDef | auxiliarConstDef) TK_SEMICOLON;
 
-varConstDef: type=(TK_IDENT | TK_BASE_TYPE) name=TK_IDENT (TK_LCLAUDATOR index=expr TK_RCLAUDATOR)*  rang=range?;
-auxiliarConstDef: (TK_IDENT | TK_BASE_TYPE) TK_IDENT TK_ASSIGN expr;
+varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL name=TK_IDENT  rang=range? TK_SEMICOLON; //TODO: array access var/const
+constDefinition: TK_CONST type=(TK_IDENT | TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT) name=TK_IDENT rang=range? TK_SEMICOLON;
+
+//auxiliarConstDef: (TK_IDENT | TK_BASE_TYPE) TK_IDENT TK_ASSIGN expr;
 
 constraintDefinition: (forall | ifThenElse | expr | functionCall) TK_SEMICOLON;
 

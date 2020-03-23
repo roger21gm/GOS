@@ -34,14 +34,19 @@ public:
         return this->enclosingScope;
     }
 
-    void define(Symbol *sym) {
+    void define(Symbol *sym) override {
         sym->scope = this;
         getMembers()[sym->getName()] = sym;
     }
 
-    Symbol *resolve(string name)  {
-        if ( getMembers().find(name) != getMembers().end() ) return getMembers()[name];
-        if ( enclosingScope != nullptr ) return enclosingScope->resolve(name);
+    Symbol *resolve(const string& name) override {
+
+        map<string, Symbol*> fields = getMembers();
+
+        if ( fields.find(name) != fields.end() )
+            return fields[name];
+        if ( enclosingScope != nullptr )
+            return enclosingScope->resolve(name);
         return nullptr;
     }
 

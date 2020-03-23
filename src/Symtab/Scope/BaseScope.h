@@ -26,8 +26,10 @@ public:
     }
 
     Symbol * resolve(const string& name) override {
-        if ( symbols.find(name) != symbols.end() ) return symbols[name];
-        if ( enclosingScope != nullptr ) return enclosingScope->resolve(name);
+        if ( symbols.find(name) != symbols.end() )
+            return symbols[name];
+        if ( enclosingScope != nullptr )
+            return enclosingScope->resolve(name);
         return nullptr;
     }
 

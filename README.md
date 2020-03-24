@@ -261,8 +261,6 @@ Symbol table will be used to store variables and constants definitions and its v
 - Do not allow multiple declarations of a name in the same scope (even for different types)
 - Do allow the same name to be declared in multiple nested scopes.
 
-
-
 #### Operations
 
 1. Look up a name in the current scope only (to check if it's multiply declared)
@@ -291,6 +289,10 @@ This implementation consistis using one symbol table per scope and chaining it t
 This implementation consists on representing all symbols in one table and nesting level to all items.
 
 
+
+#### Implemented class diagram
+
+![CSP2SAT](/Users/roger21gm/CLionProjects/CSP2SAT/img/CSP2SAT.png)
 
 ## Exemples
 

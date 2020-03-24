@@ -292,7 +292,9 @@ This implementation consists on representing all symbols in one table and nestin
 
 #### Implemented class diagram
 
-![CSP2SAT](/Users/roger21gm/CLionProjects/CSP2SAT/img/CSP2SAT.png)
+![CSP2SAT](img/CSP2SAT.png)
+
+
 
 ## Exemples
 

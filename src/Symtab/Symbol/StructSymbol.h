@@ -33,8 +33,8 @@ public:
     }
 
 
-    map<string, Symbol *> getMembers() override {
-        return fields;
+    map<string, Symbol *> *getMembers() override {
+        return &fields;
     }
 };
 

@@ -46,8 +46,10 @@ int main() {
 //    execute_expression("types:"
 //                       "  Queens {"
 //                       "      const int n;"
-//                       "      var int q[1] in 1..3;"
-//                       "  };");
+//                       "      const bool q;"
+//                       "  };"
+//                       "vars:"
+//                       "   const Queens a;");
 
     execute_expression(""
                        "types:"

@@ -36,23 +36,20 @@ public:
 
     void define(Symbol *sym) override {
         sym->scope = this;
-        getMembers()[sym->getName()] = sym;
+        map<string, Symbol*> * fields = getMembers();
+        fields->insert(pair<string, Symbol*>(sym->getName(), sym));
     }
 
     Symbol *resolve(const string& name) override {
-
-        map<string, Symbol*> fields = getMembers();
-
-        if ( fields.find(name) != fields.end() )
-            return fields[name];
+        map<string, Symbol*> *fields = getMembers();
+        if ( fields->find(name) != fields->end() )
+            return fields->find(name)->second;
         if ( enclosingScope != nullptr )
             return enclosingScope->resolve(name);
         return nullptr;
     }
 
-    virtual map<string, Symbol*> getMembers() = 0;
-
-
+    virtual map<string, Symbol*> * getMembers() = 0;
 };
 
 

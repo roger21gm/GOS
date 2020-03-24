@@ -3,7 +3,6 @@
 #include "CSP2SATCustomVisitor.h"
 #include "Symtab/Symbol/VariableSymbol.h"
 #include "Symtab/Symbol/ConstantSymbol.h"
-#include "Symtab/Scope/LocalScope.h"
 #include "Symtab/Symbol/StructSymbol.h"
 
 
@@ -97,42 +96,39 @@ antlrcpp::Any CSP2SATCustomVisitor::visitExpr_base(CSP2SATParser::Expr_baseConte
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) {
-    VariableSymbol newVar = VariableSymbol(
+    VariableSymbol *newVar;
+    newVar = new VariableSymbol(
             ctx->name->getText(),
-            (Type *)(currentScope->resolve(ctx->type->getText()))
+            (Type *) (currentScope->resolve(ctx->type->getText()))
     );
-    cout << "var  " << newVar.getName() << "  " <<  currentScope->resolve(ctx->type->getText())->getName() << endl;
-    currentScope->define(&newVar);
+    cout << "var  " << newVar->getName() << "  " <<  currentScope->resolve(ctx->type->getText())->getName() << endl;
+    currentScope->define(newVar);
     return CSP2SATBaseVisitor::visitVarDefinition(ctx);
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitConstDefinition(CSP2SATParser::ConstDefinitionContext *ctx) {
-    ConstantSymbol newVar = ConstantSymbol(
+    ConstantSymbol *newVar;
+    newVar = new ConstantSymbol(
             ctx->name->getText(),
-            (Type *)(currentScope->resolve(ctx->type->getText()))
+            (Type *) (currentScope->resolve(ctx->type->getText()))
     );
-    currentScope->define(&newVar);
+    currentScope->define(newVar);
     if(currentScope->getScopeName() == st.gloabls.getScopeName()){
-        cout << "1. const  " << newVar.getName() << "  " <<  currentScope->resolve(ctx->type->getText())->getName() << endl;
-        if(currentScope->resolve(ctx->type->getText())){
-            cout << "2. " << ctx->type->getText() << endl;
-            cout << "3. " << currentScope->resolve(ctx->type->getText())->getName() << endl;
-        }
+        cout << "1. const  " << newVar->getName() << "  " <<  currentScope->resolve(ctx->type->getText())->getName() << endl;
     }
-
-
-
 
     return CSP2SATBaseVisitor::visitConstDefinition(ctx);
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitTypeDefinition(CSP2SATParser::TypeDefinitionContext *ctx) {
-    StructSymbol newType = StructSymbol(ctx->name->getText(), currentScope);
-    currentScope->define(&newType);
+    StructSymbol *newType;
+    newType = new StructSymbol(ctx->name->getText(), currentScope);
+    currentScope->define(newType);
 
-    currentScope = &newType;
+    currentScope = newType;
     CSP2SATBaseVisitor::visitTypeDefinition(ctx);
     currentScope = currentScope->getEnclosingScope();
+
     return nullptr;
 }
 

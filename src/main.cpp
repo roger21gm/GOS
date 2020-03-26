@@ -28,9 +28,6 @@ void execute_expression(const std::string &expr) {
 
     CSP2SATCustomVisitor visitor;
     visitor.visit(tree);
-
-
-
 }
 
 int main() {

@@ -14,7 +14,7 @@ private:
     map<string, Symbol*> fields;
 
 public:
-    StructSymbol(const string& name, Scope * parent) : ScopedSymbol(name, parent) {}
+    StructSymbol(const string& name, Scope * parent) : ScopedSymbol(name, parent), Type(SymtbolTable::tCustom) {}
 
     Symbol * resolveMember(const string& name) {
         return fields[name];
@@ -26,10 +26,6 @@ public:
 
     string getName() override {
         return ScopedSymbol::getName();
-    }
-
-    int getTypeIndex() override {
-        return SymtbolTable::tCustom;
     }
 
 

@@ -10,21 +10,11 @@
 
 class BuildInTypeSymbol: public Symbol, public Type  {
 public:
-    explicit BuildInTypeSymbol(const string &name) : Symbol(name) {}
-    BuildInTypeSymbol(const string &name, int typeIndex) : Symbol(name) {
-        this->typeIndex = typeIndex;
-    }
+    BuildInTypeSymbol(const string &name, int typeIndex) : Symbol(name), Type(typeIndex) {}
 
     string getName() override {
         return Symbol::getName();
     }
-
-    int getTypeIndex() override {
-        return this->typeIndex;
-    }
-
-private:
-    int typeIndex {};
 };
 
 

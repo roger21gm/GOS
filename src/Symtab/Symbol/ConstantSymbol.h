@@ -10,7 +10,7 @@
 
 class ConstantSymbol: public Symbol {
 public:
-    ConstantSymbol(const string &name, Type *type) : Symbol(name) {}
+    ConstantSymbol(const string &name, Type *type) : Symbol(name, type) {}
 };
 
 

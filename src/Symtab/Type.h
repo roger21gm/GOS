@@ -11,9 +11,19 @@ using namespace std;
 
 class Type {
 public:
-    virtual string getName() = 0;
-    virtual int getTypeIndex() = 0;
-};
+    Type(int typeIndex) : typeIndex(typeIndex) {
+        cout << typeIndex << endl;
+    }
 
+    virtual string getName() = 0;
+
+    int getTypeIndex() {
+        return this->typeIndex;
+    }
+
+private:
+    int typeIndex;
+
+};
 
 #endif //CSP2SAT_TYPE_H

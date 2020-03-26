@@ -4,6 +4,10 @@
 #include "Symtab/Symbol/VariableSymbol.h"
 #include "Symtab/Symbol/ConstantSymbol.h"
 #include "Symtab/Symbol/StructSymbol.h"
+#include <typeinfo>
+#include <string>
+
+using namespace std;
 
 
 antlrcpp::Any CSP2SATCustomVisitor::visitExpr(CSP2SATParser::ExprContext *ctx) {
@@ -107,14 +111,29 @@ antlrcpp::Any CSP2SATCustomVisitor::visitVarDefinition(CSP2SATParser::VarDefinit
 }
 
 antlrcpp::Any CSP2SATCustomVisitor::visitConstDefinition(CSP2SATParser::ConstDefinitionContext *ctx) {
-    ConstantSymbol *newVar;
-    newVar = new ConstantSymbol(
-            ctx->name->getText(),
-            (Type *) (currentScope->resolve(ctx->type->getText()))
-    );
-    currentScope->define(newVar);
-    if(currentScope->getScopeName() == st.gloabls.getScopeName()){
-        cout << "1. const  " << newVar->getName() << "  " <<  currentScope->resolve(ctx->type->getText())->getName() << endl;
+
+    Type *type = (Type*)currentScope->resolve(ctx->type->getText());
+
+    ConstantSymbol *newConst;
+    if(type->getTypeIndex() == SymtbolTable::tInt || type->getTypeIndex() == SymtbolTable::tBool){
+        newConst = new ConstantSymbol(
+                ctx->name->getText(),
+                (BuildInTypeSymbol*)currentScope->resolve(ctx->type->getText())
+        );
+    }
+    else{
+        newConst = new ConstantSymbol(
+                ctx->name->getText(),
+                (StructSymbol*)currentScope->resolve(ctx->type->getText())
+        );
+    }
+
+
+    currentScope->define(newConst);
+    if(currentScope->getScopeName() == st.gloabls->getScopeName()){
+        cout << "1. const  " << newConst->getName() << "  " <<  currentScope->resolve(ctx->type->getText())->getName() << endl;
+        cout << "2. " << newConst->type->getName() << endl;
+
     }
 
     return CSP2SATBaseVisitor::visitConstDefinition(ctx);

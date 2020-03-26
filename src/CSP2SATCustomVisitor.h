@@ -15,7 +15,7 @@ class CSP2SATCustomVisitor: public CSP2SATBaseVisitor {
 
 private:
     SymtbolTable st;
-    Scope *currentScope = &st.gloabls;
+    Scope *currentScope = st.gloabls;
 
 public:
 

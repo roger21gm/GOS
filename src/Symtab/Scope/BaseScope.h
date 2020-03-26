@@ -15,6 +15,7 @@ class BaseScope: public Scope {
 
 public:
     void define(Symbol *sym) override {
+
         sym->scope = this;
         symbols[sym->getName()] = sym;
     }

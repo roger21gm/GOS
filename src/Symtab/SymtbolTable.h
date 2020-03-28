@@ -6,9 +6,9 @@
 #define CSP2SAT_SYMTBOLTABLE_H
 
 
+#include <iostream>
 #include "Scope/GlobalScope.h"
 #include "Symbol/BuildInTypeSymbol.h"
-
 
 
 class SymtbolTable {
@@ -26,11 +26,6 @@ public:
         gloabls = new GlobalScope();
         this->gloabls->define(_integer);
         this->gloabls->define(_boolean);
-
-        Type* a = (Type*) gloabls->resolve("int");
-        cout << a->getTypeIndex() << endl; // 0
-        Type* b = (BuildInTypeSymbol*) gloabls->resolve("int");
-        cout << b->getTypeIndex() << endl; // 1
     }
 };
 

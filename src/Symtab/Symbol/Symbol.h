@@ -8,11 +8,11 @@
 #include <string>
 #include <utility>
 #include "../Scope/Scope.h"
-#include "../Type.h"
 
 using namespace std;
 
 class Scope;
+class Type;
 
 class Symbol {
 public:

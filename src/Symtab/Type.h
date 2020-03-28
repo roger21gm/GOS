@@ -6,16 +6,17 @@
 #define CSP2SAT_TYPE_H
 
 #include <string>
+#include <utility>
+#include "Symbol/Symbol.h"
 
 using namespace std;
 
-class Type {
-public:
-    Type(int typeIndex) : typeIndex(typeIndex) {
-        cout << typeIndex << endl;
-    }
 
-    virtual string getName() = 0;
+class Type : public Symbol {
+public:
+    Type(int typeIndex, string name) : Symbol(std::move(name)){
+        this->typeIndex = typeIndex;
+    }
 
     int getTypeIndex() {
         return this->typeIndex;

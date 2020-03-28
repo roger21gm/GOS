@@ -7,14 +7,11 @@
 
 
 #include "Symbol.h"
+#include "../Type.h"
 
-class BuildInTypeSymbol: public Symbol, public Type  {
+class BuildInTypeSymbol: public Type {
 public:
-    BuildInTypeSymbol(const string &name, int typeIndex) : Symbol(name), Type(typeIndex) {}
-
-    string getName() override {
-        return Symbol::getName();
-    }
+    BuildInTypeSymbol(const string &name, int typeIndex) : Type(typeIndex, name) {}
 };
 
 

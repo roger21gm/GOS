@@ -6,7 +6,7 @@
 #define CSP2SAT_STRUCTSYMBOL_H
 
 
-class StructSymbol : public Scope, public Symbol, public Type {
+class StructSymbol : public Scope, public Type {
 
 private:
     map<string, Symbol*> fields;
@@ -14,16 +14,12 @@ private:
 
 public:
 
-    StructSymbol(const string& name, Type * type, Scope * enclosingScope) : Symbol (name, type), Type(SymtbolTable::tCustom) {
+    StructSymbol(const string& name, Type * type, Scope * enclosingScope) : Type(SymtbolTable::tCustom, name) {
         this->enclosingScope = enclosingScope;
     }
 
-    StructSymbol(const string& name, Scope * enclosingScope) : Symbol (name), Type(SymtbolTable::tCustom) {
+    StructSymbol(const string& name, Scope * enclosingScope) : Type(SymtbolTable::tCustom, name) {
         this->enclosingScope = enclosingScope;
-    }
-
-    string getName() override {
-        return Symbol::getName();
     }
 
     string getScopeName() override {

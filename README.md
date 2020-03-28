@@ -313,7 +313,7 @@ This implementation consists on representing all symbols in one table and nestin
 
 #### Implemented class diagram
 
-![CSP2SAT](https://www.lucidchart.com/publicSegments/view/cb0bff32-bd48-4d1c-b599-e5abb4241e50/image.pdf)
+![CSP2SAT](https://www.lucidchart.com/publicSegments/view/8e8e563e-99ce-4d85-b132-69ef4e8ff61f/image.png)
 
 
 

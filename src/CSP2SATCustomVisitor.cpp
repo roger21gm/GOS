@@ -4,7 +4,6 @@
 #include "Symtab/Symbol/VariableSymbol.h"
 #include "Symtab/Symbol/ConstantSymbol.h"
 #include "Symtab/Symbol/StructSymbol.h"
-#include <typeinfo>
 #include <string>
 
 using namespace std;
@@ -90,9 +89,9 @@ antlrcpp::Any CSP2SATCustomVisitor::visitExpr_base(CSP2SATParser::Expr_baseConte
             return stoi(ctx->valueBaseType()->TK_INT_VALUE()->getText());
     } else if (ctx->TK_LPAREN())
         return visit(ctx->expr());
-    else if (ctx->TK_IDENT())
-        //TODO return value && type?
-        return currentScope->resolve(ctx->TK_IDENT()->getText());
+    else if (ctx->varAccess())
+        visit(ctx->varAccess());
+//        return currentScope->resolve(ctx->TK_IDENT()->getText());
     else {
 
     }
@@ -115,19 +114,23 @@ antlrcpp::Any CSP2SATCustomVisitor::visitConstDefinition(CSP2SATParser::ConstDef
     Type *type = (Type*)currentScope->resolve(ctx->type->getText());
 
     ConstantSymbol *newConst;
-    if(type->getTypeIndex() == SymbolTable::tInt || type->getTypeIndex() == SymbolTable::tBool){
-        newConst = new ConstantSymbol(
-                ctx->name->getText(),
-                (BuiltInTypeSymbol*)currentScope->resolve(ctx->type->getText())
-        );
-    }
-    else{
-        newConst = new ConstantSymbol(
-                ctx->name->getText(),
-                (StructSymbol*)currentScope->resolve(ctx->type->getText())
-        );
-    }
+//    if(type->getTypeIndex() == SymbolTable::tInt || type->getTypeIndex() == SymbolTable::tBool){
+//        newConst = new ConstantSymbol(
+//                ctx->name->getText(),
+//                (BuiltInTypeSymbol*) currentScope->resolve(ctx->type->getText())
+//        );
+//    }
+//    else{
+//        newConst = new ConstantSymbol(
+//                ctx->name->getText(),
+//                (StructSymbol*)currentScope->resolve(ctx->type->getText())
+//        );
+//    }
 
+    newConst = new ConstantSymbol(
+            ctx->name->getText(),
+            (Type*) currentScope->resolve(ctx->type->getText())
+    );
 
     currentScope->define(newConst);
     if(currentScope->getScopeName() == st.gloabls->getScopeName()){
@@ -154,5 +157,42 @@ antlrcpp::Any CSP2SATCustomVisitor::visitTypeDefinition(CSP2SATParser::TypeDefin
 antlrcpp::Any CSP2SATCustomVisitor::visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) {
     CSP2SATBaseVisitor::visitCsp2sat(ctx);
     return nullptr;
+}
+
+antlrcpp::Any CSP2SATCustomVisitor::visitVarDefinitionBlock(CSP2SATParser::VarDefinitionBlockContext *ctx) {
+    CSP2SATBaseVisitor::visitVarDefinitionBlock(ctx);
+
+
+    StructSymbol* a = (StructSymbol*) currentScope->resolve("Queens");
+
+
+
+
+
+    return nullptr;
+}
+
+antlrcpp::Any CSP2SATCustomVisitor::visitVarAccess(CSP2SATParser::VarAccessContext *ctx) {
+
+    Symbol * curr = currentScope->resolve(ctx->id->getText());
+
+    switch (curr->type->getTypeIndex()){
+        case SymbolTable::tCustom: {
+            cout << "és struct" << endl;
+            StructSymbol *ss = (StructSymbol *) curr->type;
+            cout << ss->resolve(ctx->attr[0].getText())->getName() << endl;
+            cout << ss->resolve(ctx->attr[0].getText())->type->getName() << endl;
+            break;
+        }
+        case SymbolTable::tArray: {
+            cout << "és array" << endl;
+            break;
+        }
+        default: {
+            cout << "és int or bool" << endl;
+            break;
+        }
+    }
+    return CSP2SATBaseVisitor::visitVarAccess(ctx);
 }
 

@@ -15,8 +15,9 @@ class SymbolTable {
 
 public:
     static const int tCustom = 0;
-    static const int tInt = 1;
-    static const int tBool = 2;
+    static const int tArray = 1;
+    static const int tInt = 2;
+    static const int tBool = 3;
     GlobalScope * gloabls;
 
     SymbolTable(){

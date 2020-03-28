@@ -56,7 +56,9 @@ int main() {
                        "vars:"
                        "    const Queens nQueens;"
                        "    const int n;"
-                       "    var bool nReines;");
+                       "    var bool nReines;"
+                       "constraints:"
+                       "    nQueens.n1;");
 
 
 

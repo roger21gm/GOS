@@ -41,7 +41,9 @@ public:
 
     antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override;
 
+    antlrcpp::Any visitVarDefinitionBlock(CSP2SATParser::VarDefinitionBlockContext *ctx) override;
 
+    antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override;
 };
 
 

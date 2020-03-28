@@ -188,10 +188,10 @@ It will be able possible to define constraints in the boolean decision variables
   - **Literal** : It could be a variable or it's negation: `x` and `!x`
   - **OR** operation:
     - Using operator `|`  between literals: `x1 | x2 | ... | xn`
-    - Using reserved word `or`  and a list of literals:  `or( <literal list> )`
+    - Using prefix operator `||`  and a list of literals:  `||( <literal list> )`
   - **AND** operation: 
     - Using operator `&` between literals:  `x1 & x2 & ... & xn`
-    - Using reserved word `and ` and a list of literals: `and( <literal list> )`
+    - Using prefix operator `&& ` and a list of literals: `&&( <literal list> )`
   - **Implication**: Between **AND** and **OR** operations.
     - **AND ⇒ OR** 
     - **OR ⇐  AND**
@@ -207,12 +207,27 @@ It will be able possible to define constraints in the boolean decision variables
 
 
 
+IF: 
+
+- and - or - not
+
+CLÀSUSULES: 
+
+- ! - & - |
+- &&(<list>) - ||(<list>)
+
+
+
+
+
 
 ## Generator structures 
 
 ### Ranges
 
 We can define ranges to limit the possible values of a domain.
+
+//TODO: Possibilitat de posar noms a rangs
 
 ```javascript
 in <expr_int>..<expr_int>
@@ -242,6 +257,12 @@ A comprehension list will define an anonymous list. It is possible to generate c
   array[i][_] equival a [ sudoku[i][j] | j in 1..n ]
   array[_][j] equival a [ sudoku[i][j] | i in 1..n ]
   ```
+
+
+
+#### Idees
+
+Posar noms a dominis
 
 
 

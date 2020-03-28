@@ -14,11 +14,11 @@ private:
 
 public:
 
-    StructSymbol(const string& name, Type * type, Scope * enclosingScope) : Type(SymtbolTable::tCustom, name) {
+    StructSymbol(const string& name, Type * type, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
         this->enclosingScope = enclosingScope;
     }
 
-    StructSymbol(const string& name, Scope * enclosingScope) : Type(SymtbolTable::tCustom, name) {
+    StructSymbol(const string& name, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
         this->enclosingScope = enclosingScope;
     }
 

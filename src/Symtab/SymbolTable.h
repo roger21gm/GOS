@@ -2,16 +2,16 @@
 // Created by Roger Generoso Masós on 19/03/2020.
 //
 
-#ifndef CSP2SAT_SYMTBOLTABLE_H
-#define CSP2SAT_SYMTBOLTABLE_H
+#ifndef CSP2SAT_SYMBOLTABLE_H
+#define CSP2SAT_SYMBOLTABLE_H
 
 
 #include <iostream>
 #include "Scope/GlobalScope.h"
-#include "Symbol/BuildInTypeSymbol.h"
+#include "Symbol/BuiltInTypeSymbol.h"
 
 
-class SymtbolTable {
+class SymbolTable {
 
 public:
     static const int tCustom = 0;
@@ -19,9 +19,9 @@ public:
     static const int tBool = 2;
     GlobalScope * gloabls;
 
-    SymtbolTable(){
-        BuildInTypeSymbol *_integer = new BuildInTypeSymbol("int", tInt);
-        BuildInTypeSymbol *_boolean = new BuildInTypeSymbol("bool", tBool);
+    SymbolTable(){
+        BuiltInTypeSymbol *_integer = new BuiltInTypeSymbol("int", tInt);
+        BuiltInTypeSymbol *_boolean = new BuiltInTypeSymbol("bool", tBool);
 
         gloabls = new GlobalScope();
         this->gloabls->define(_integer);
@@ -30,4 +30,4 @@ public:
 };
 
 
-#endif //CSP2SAT_SYMTBOLTABLE_H
+#endif //CSP2SAT_SYMBOLTABLE_H

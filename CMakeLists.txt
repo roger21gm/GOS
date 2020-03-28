@@ -30,6 +30,6 @@ include_directories(${ANTLR_CSP2SAT_OUTPUT_DIR})
 file(GLOB CSP2SAT_SRC "src/*.cpp")
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
-add_executable(CSP2SAT ${CSP2SAT_SRC} ${ANTLR_CSP2SAT_CXX_OUTPUTS} src/main.cpp src/CSP2SATCustomVisitor.cpp src/CSP2SATCustomVisitor.h src/Symtab/SymtbolTable.h src/Symtab/Symbol/Symbol.h src/Symtab/Type.h src/Symtab/Scope/Scope.h src/Symtab/Scope/BaseScope.h src/Symtab/Scope/GlobalScope.h src/Symtab/Scope/LocalScope.h src/Symtab/Symbol/VariableSymbol.h src/Symtab/Symbol/BuildInTypeSymbol.h src/Symtab/Symbol/StructSymbol.h src/Symtab/Symbol/ConstantSymbol.h)
+add_executable(CSP2SAT ${CSP2SAT_SRC} ${ANTLR_CSP2SAT_CXX_OUTPUTS} src/main.cpp src/CSP2SATCustomVisitor.cpp src/CSP2SATCustomVisitor.h src/Symtab/SymbolTable.h src/Symtab/Symbol/Symbol.h src/Symtab/Type.h src/Symtab/Scope/Scope.h src/Symtab/Scope/BaseScope.h src/Symtab/Scope/GlobalScope.h src/Symtab/Scope/LocalScope.h src/Symtab/Symbol/VariableSymbol.h src/Symtab/Symbol/BuiltInTypeSymbol.h src/Symtab/Symbol/StructSymbol.h src/Symtab/Symbol/ConstantSymbol.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

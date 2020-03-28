@@ -6,7 +6,7 @@
 #define CSP2SAT_CSP2SATCUSTOMVISITOR_H
 
 #include "CSP2SATBaseVisitor.h"
-#include "Symtab/SymtbolTable.h"
+#include "Symtab/SymbolTable.h"
 
 using namespace CSP2SAT;
 using namespace std;
@@ -14,7 +14,7 @@ using namespace std;
 class CSP2SATCustomVisitor: public CSP2SATBaseVisitor {
 
 private:
-    SymtbolTable st;
+    SymbolTable st;
     Scope *currentScope = st.gloabls;
 
 public:

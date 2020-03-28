@@ -115,10 +115,10 @@ antlrcpp::Any CSP2SATCustomVisitor::visitConstDefinition(CSP2SATParser::ConstDef
     Type *type = (Type*)currentScope->resolve(ctx->type->getText());
 
     ConstantSymbol *newConst;
-    if(type->getTypeIndex() == SymtbolTable::tInt || type->getTypeIndex() == SymtbolTable::tBool){
+    if(type->getTypeIndex() == SymbolTable::tInt || type->getTypeIndex() == SymbolTable::tBool){
         newConst = new ConstantSymbol(
                 ctx->name->getText(),
-                (BuildInTypeSymbol*)currentScope->resolve(ctx->type->getText())
+                (BuiltInTypeSymbol*)currentScope->resolve(ctx->type->getText())
         );
     }
     else{

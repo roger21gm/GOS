@@ -6,31 +6,45 @@
 #define CSP2SAT_STRUCTSYMBOL_H
 
 
-#include "ScopedSymbol.h"
-
-class StructSymbol : public ScopedSymbol, public Type {
+class StructSymbol : public Scope, public Symbol, public Type {
 
 private:
     map<string, Symbol*> fields;
+    Scope * enclosingScope = nullptr;
 
 public:
-    StructSymbol(const string& name, Scope * parent) : ScopedSymbol(name, parent), Type(SymtbolTable::tCustom) {}
 
-    Symbol * resolveMember(const string& name) {
-        return fields[name];
+    StructSymbol(const string& name, Type * type, Scope * enclosingScope) : Symbol (name, type), Type(SymtbolTable::tCustom) {
+        this->enclosingScope = enclosingScope;
     }
 
-    Symbol *resolve(const string &name) override {
-        return ScopedSymbol::resolve(name);
+    StructSymbol(const string& name, Scope * enclosingScope) : Symbol (name), Type(SymtbolTable::tCustom) {
+        this->enclosingScope = enclosingScope;
     }
 
     string getName() override {
-        return ScopedSymbol::getName();
+        return Symbol::getName();
     }
 
+    string getScopeName() override {
+        return this->name;
+    }
 
-    map<string, Symbol *> *getMembers() override {
-        return &fields;
+    Scope *getEnclosingScope() override {
+        return this->enclosingScope;
+    }
+
+    void define(Symbol *sym) override {
+        sym->scope = this;
+        fields.insert(pair<string, Symbol*>(sym->getName(), sym));
+    }
+
+    Symbol *resolve(const string& name) override {
+        if ( fields.find(name) != fields.end() )
+            return fields.find(name)->second;
+        if ( enclosingScope != nullptr )
+            return enclosingScope->resolve(name);
+        return nullptr;
     }
 };
 

@@ -14,11 +14,17 @@ using namespace std;
 class CSP2SATCustomBaseVisitor: public CSP2SATBaseVisitor {
 
 protected:
-    SymbolTable st;
-    Scope *currentScope = st.gloabls;
+    SymbolTable * st;
+    Scope *currentScope;
 
 
 public:
+
+    CSP2SATCustomBaseVisitor(SymbolTable * symbolTable) {
+        this->st = symbolTable;
+        this->currentScope = this->st->gloabls;
+    }
+
     antlrcpp::Any visitExpr(CSP2SATParser::ExprContext *ctx) override {
         if (ctx->TK_INTERROGANT()) {
             return 0;

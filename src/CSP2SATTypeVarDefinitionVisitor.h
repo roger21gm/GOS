@@ -18,6 +18,8 @@ using namespace std;
 class CSP2SATTypeVarDefinitionVisitor: public CSP2SATCustomBaseVisitor {
 
 public:
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable * symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
+
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
         VariableSymbol *newVar;
         newVar = new VariableSymbol(
@@ -46,7 +48,6 @@ public:
         currentScope = newType;
         CSP2SATBaseVisitor::visitTypeDefinition(ctx);
         currentScope = currentScope->getEnclosingScope();
-
         return nullptr;
     }
 };

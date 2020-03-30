@@ -21,15 +21,23 @@ antlr_target(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/CSP2SAT.g4
         PACKAGE CSP2SAT
         VISITOR
-        LISTENER
 )
+
+antlr_target(
+        JSON
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/JSON.g4
+        PACKAGE CSP2SAT
+        VISITOR
+)
+
 include_directories(${ANTLR_CSP2SAT_OUTPUT_DIR})
+include_directories(${ANTLR_JSON_OUTPUT_DIR})
 
 
 # build CSP2SAT
 file(GLOB CSP2SAT_SRC "src/*.cpp")
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
-add_executable(CSP2SAT ${CSP2SAT_SRC} ${ANTLR_CSP2SAT_CXX_OUTPUTS} src/main.cpp src/Symtab/SymbolTable.h  src/Symtab/Symbol/Symbol.h src/Symtab/Type.h src/Symtab/Scope/Scope.h src/Symtab/Scope/BaseScope.h src/Symtab/Scope/GlobalScope.h src/Symtab/Scope/LocalScope.h src/Symtab/Symbol/Assignable/VariableSymbol.h src/Symtab/Symbol/BuiltInTypeSymbol.h src/Symtab/Symbol/StructSymbol.h src/Symtab/Symbol/Assignable/ConstantSymbol.h src/Symtab/Value/Value.h src/Symtab/Symbol/ArraySymbol.h src/Symtab/Value/StructValue.h  src/Symtab/Value/ArrayValue.h src/Symtab/Value/BoolValue.h src/Symtab/Value/IntValue.h src/Symtab/Symbol/Assignable/AssignableSymbol.h src/CSP2SATCustomBaseVisitor.h)
+add_executable(CSP2SAT src/main.cpp ${ANTLR_CSP2SAT_CXX_OUTPUTS} ${ANTLR_JSON_CXX_OUTPUTS})
 target_link_libraries(CSP2SAT antlr4_static)
 

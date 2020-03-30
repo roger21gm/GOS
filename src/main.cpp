@@ -18,47 +18,31 @@ using namespace antlr4;
 using namespace CSP2SAT;
 using namespace tree;
 
-void execute_expression(const std::string &expr) {
-    ANTLRInputStream input(expr);
+int main() {
+
+    SymbolTable * symbolTable = new SymbolTable();
+
+
+    ANTLRInputStream input(
+            ""
+            "types:"
+            "     Queens {"
+            "         const int n1;"
+            "     };"
+            "vars:"
+            "    const Queens nQueens;"
+            "constraints:"
+            "    nQueens.n1;"
+    );
+
     CSP2SATLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     CSP2SATParser parser(&tokens);
 
     CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
 
-    CSP2SATTypeVarDefinitionVisitor visitor;
-    visitor.visit(tree);
-}
-
-int main() {
-//    std::string prefix = ">>> ";
-//
-//    // parse and interpet the expression readen from the standard input
-//    std::cout << prefix;
-//    std::string line;
-//    while( std::getline(std::cin,line) ) {
-//        execute_expression(line);
-//        std::cout << prefix;
-//    }
-//    execute_expression("types:"
-//                       "  Queens {"
-//                       "      const int n;"
-//                       "      const bool q;"
-//                       "  };"
-//                       "vars:"
-//                       "   const Queens a;");
-
-    execute_expression(""
-                       "types:"
-                       "     Queens {"
-                       "         const int n1;"
-                       "     };"
-                       "vars:"
-                       "    const Queens nQueens;"
-                       "constraints:"
-                       "    nQueens.n1;");
-
-
+    CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
+    visitor->visit(tree);
 
     return 0;
 }

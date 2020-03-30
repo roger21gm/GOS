@@ -9,14 +9,16 @@
 class StructSymbol : public Scope, public Type {
 
 private:
-    map<string, Symbol*> fields;
+    map<string, Symbol*> fields = {};
     Scope * enclosingScope = nullptr;
 
 public:
 
-    StructSymbol(const string& name, Type * type, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
+    StructSymbol(string name, Type * type, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
         this->enclosingScope = enclosingScope;
+        this->type = type;
     }
+
 
     StructSymbol(const string& name, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
         this->enclosingScope = enclosingScope;
@@ -41,6 +43,10 @@ public:
         if ( enclosingScope != nullptr )
             return enclosingScope->resolve(name);
         return nullptr;
+    }
+
+    map<string, Symbol*> getFields() {
+        return this->fields;
     }
 };
 

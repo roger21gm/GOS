@@ -11,14 +11,15 @@
 #include "../Symtab/Symbol/Assignable/ConstantSymbol.h"
 #include "../Symtab/Symbol/StructSymbol.h"
 #include "CSP2SATCustomBaseVisitor.h"
+#include "Utils.h"
 
 using namespace CSP2SAT;
 using namespace std;
 
-class CSP2SATTypeVarDefinitionVisitor: public CSP2SATCustomBaseVisitor {
+class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable * symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
 
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
         VariableSymbol *newVar;
@@ -31,11 +32,19 @@ public:
     }
 
     antlrcpp::Any visitConstDefinition(CSP2SATParser::ConstDefinitionContext *ctx) override {
-        ConstantSymbol *newConst;
-        newConst = new ConstantSymbol(
-                ctx->name->getText(),
-                (Type*) currentScope->resolve(ctx->type->getText())
-        );
+
+        Type *type = (Type *) currentScope->resolve(ctx->type->getText());
+        Symbol *newConst;
+
+        if (type->getTypeIndex() == SymbolTable::tCustom) {
+            newConst = Utils::createCustomTypeConstant(ctx->name->getText(), (StructSymbol *) type, currentScope);
+        } else {
+            newConst = new ConstantSymbol(
+                    ctx->name->getText(),
+                    type
+            );
+        }
+
         currentScope->define(newConst);
         return CSP2SATBaseVisitor::visitConstDefinition(ctx);
     }
@@ -50,6 +59,9 @@ public:
         currentScope = currentScope->getEnclosingScope();
         return nullptr;
     }
+
+
+
 };
 
 

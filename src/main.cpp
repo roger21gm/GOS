@@ -30,9 +30,13 @@ int main() {
             "types:"
             "     Queens {"
             "         const int n1;"
+            "         const int n2;"
+            "     };"
+            "     Queens2 {"
+            "         const Queens queens;"
             "     };"
             "vars:"
-            "    const int nQueens;"
+            "    const Queens2 nQueens;"
     );
 
     CSP2SATLexer lexer(&input);
@@ -42,21 +46,21 @@ int main() {
     CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
     visitor->visit(tree);
 
-//
-//    ANTLRInputStream input2(
-//            "{"
-//            "     \"nQueens\": {"
-//            "           \"n1\": 150"
-//            "      }"
-//            "}"
-//    );
-
 
     ANTLRInputStream input2(
             "{"
-            "     \"nQueens\": 13500"
+            "     \"nQueens\": {"
+            "           \"queens\": { \"n1\": 1350, \"n2\": 2508 }"
+            "      }"
             "}"
     );
+
+
+//    ANTLRInputStream input2(
+//            "{"
+//            "     \"nQueens\": 13500"
+//            "}"
+//    );
 
     JSONLexer lexer2(&input2);
     CommonTokenStream tokens2(&lexer2);
@@ -65,7 +69,16 @@ int main() {
     CSP2SATInputJSONVisitor * visitor2 = new CSP2SATInputJSONVisitor(symbolTable);
     visitor2->visit(tree2);
 
-    cout << ((AssignableSymbol*)symbolTable->gloabls->resolve("nQueens"))->getValue()->getRealValue() << endl;
+
+    StructSymbol * queens = (StructSymbol*)symbolTable->gloabls->resolve("nQueens");
+    StructSymbol * queensQ = ((StructSymbol*) queens->resolve("queens"));
+    AssignableSymbol * queensN1 = ((AssignableSymbol*) queensQ->resolve("n1"));
+    AssignableSymbol * queensN2 = ((AssignableSymbol*) queensQ->resolve("n2"));
+
+
+    cout << queensN1->getValue()->getRealValue() << endl;
+    cout << queensN2->getValue()->getRealValue() << endl;
+
 
     return 0;
 }

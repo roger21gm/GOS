@@ -3,7 +3,7 @@
 
 // antlr4 runtime
 #include "antlr4-runtime.h"
-#include "CSP2SATCustomVisitor.h"
+#include "CSP2SATTypeVarDefinitionVisitor.h"
 
 // generated lexer and parser
 #include <CSP2SATLexer.h>
@@ -26,7 +26,7 @@ void execute_expression(const std::string &expr) {
 
     CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
 
-    CSP2SATCustomVisitor visitor;
+    CSP2SATTypeVarDefinitionVisitor visitor;
     visitor.visit(tree);
 }
 
@@ -55,8 +55,6 @@ int main() {
                        "     };"
                        "vars:"
                        "    const Queens nQueens;"
-                       "    const int n;"
-                       "    var bool nReines;"
                        "constraints:"
                        "    nQueens.n1;");
 

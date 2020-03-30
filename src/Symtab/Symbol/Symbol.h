@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include "../Scope/Scope.h"
+#include "../Value/Value.h"
 
 using namespace std;
 

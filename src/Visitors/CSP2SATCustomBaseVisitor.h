@@ -5,7 +5,7 @@
 #ifndef CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
 #define CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
 
-#include "Symtab/SymbolTable.h"
+#include "../Symtab/SymbolTable.h"
 #include "CSP2SATBaseVisitor.h"
 
 using namespace CSP2SAT;

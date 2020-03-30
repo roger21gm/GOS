@@ -6,10 +6,10 @@
 #define CSP2SAT_CSP2SATTYPEVARDEFINITIONVISITOR_H
 
 #include "CSP2SATBaseVisitor.h"
-#include "Symtab/SymbolTable.h"
-#include "Symtab/Symbol/Assignable/VariableSymbol.h"
-#include "Symtab/Symbol/Assignable/ConstantSymbol.h"
-#include "Symtab/Symbol/StructSymbol.h"
+#include "../Symtab/SymbolTable.h"
+#include "../Symtab/Symbol/Assignable/VariableSymbol.h"
+#include "../Symtab/Symbol/Assignable/ConstantSymbol.h"
+#include "../Symtab/Symbol/StructSymbol.h"
 #include "CSP2SATCustomBaseVisitor.h"
 
 using namespace CSP2SAT;

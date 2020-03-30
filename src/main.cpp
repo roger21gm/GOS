@@ -32,9 +32,7 @@ int main() {
             "         const int n1;"
             "     };"
             "vars:"
-            "    const Queens nQueens;"
-            "constraints:"
-            "    nQueens.n1;"
+            "    const int nQueens;"
     );
 
     CSP2SATLexer lexer(&input);
@@ -44,12 +42,19 @@ int main() {
     CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
     visitor->visit(tree);
 
+//
+//    ANTLRInputStream input2(
+//            "{"
+//            "     \"nQueens\": {"
+//            "           \"n1\": 150"
+//            "      }"
+//            "}"
+//    );
+
 
     ANTLRInputStream input2(
             "{"
-            "     \"nQueens\": {"
-            "           \"n1\": 150"
-            "      }"
+            "     \"nQueens\": 13500"
             "}"
     );
 
@@ -59,6 +64,8 @@ int main() {
     JSONParser::JsonContext *tree2 = parser2.json();
     CSP2SATInputJSONVisitor * visitor2 = new CSP2SATInputJSONVisitor(symbolTable);
     visitor2->visit(tree2);
+
+    cout << ((AssignableSymbol*)symbolTable->gloabls->resolve("nQueens"))->getValue()->getRealValue() << endl;
 
     return 0;
 }

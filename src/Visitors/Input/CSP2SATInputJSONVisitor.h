@@ -7,6 +7,10 @@
 
 #include "JSONBaseVisitor.h"
 #include "../../Symtab/SymbolTable.h"
+#include "../../Symtab/Symbol/Assignable/AssignableSymbol.h"
+#include "../../Symtab/Value/IntValue.h"
+#include "../../Symtab/Value/StructValue.h"
+#include "../../Symtab/Value/ArrayValue.h"
 
 using namespace CSP2SAT;
 using namespace std;
@@ -14,34 +18,56 @@ using namespace std;
 class CSP2SATInputJSONVisitor : public JSONBaseVisitor {
 private:
     SymbolTable * st;
+    Scope * currentScope;
 
 
 public:
-    explicit CSP2SATInputJSONVisitor(SymbolTable *st) : st(st) {}
+    explicit CSP2SATInputJSONVisitor(SymbolTable *st) : st(st) {
+        currentScope = st->gloabls;
+    }
 
     antlrcpp::Any visitJson(JSONParser::JsonContext *ctx) override {
-        cout << ctx->getText() <<endl;
-        return JSONBaseVisitor::visitJson(ctx);
+        JSONBaseVisitor::visitJson(ctx);
+        return nullptr;
     }
 
     antlrcpp::Any visitObj(JSONParser::ObjContext *ctx) override {
-        cout << ctx->getText() <<endl;
-        return JSONBaseVisitor::visitObj(ctx);
+        JSONBaseVisitor::visitObj(ctx);
+        return nullptr;
     }
 
     antlrcpp::Any visitPair(JSONParser::PairContext *ctx) override {
-        cout << ctx->getText() <<endl;
-        return JSONBaseVisitor::visitPair(ctx);
+
+        Value * val = JSONBaseVisitor::visitPair(ctx);
+
+        string varName = ctx->STRING()->getText();
+        varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
+        AssignableSymbol * var = (AssignableSymbol*) this->st->gloabls->resolve(varName);
+        var->setValue(val);
+
+        return nullptr;
     }
 
     antlrcpp::Any visitArr(JSONParser::ArrContext *ctx) override {
-        cout << ctx->getText() <<endl;
-        return JSONBaseVisitor::visitArr(ctx);
+        JSONBaseVisitor::visitArr(ctx);
+
+        return nullptr;
     }
 
     antlrcpp::Any visitValue(JSONParser::ValueContext *ctx) override {
-        cout << ctx->getText() <<endl;
-        return JSONBaseVisitor::visitValue(ctx);
+        if(ctx->NUMBER())
+            return (Value*) new IntValue(stoi(ctx->getText()));
+//        else if(ctx->obj()){
+//            return (Value*) new StructValue();
+//        }
+//        else if(ctx->arr()){
+//            return (Value*) new ArrayValue();
+//        }
+//        else{
+//            cerr << "Error!" << endl;
+//        }
+        JSONBaseVisitor::visitValue(ctx);
+        return nullptr;
     }
 };
 

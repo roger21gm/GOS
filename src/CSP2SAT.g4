@@ -1,6 +1,8 @@
 grammar CSP2SAT;
 
-WS  : [ \t\r]+ -> skip;
+WS
+   : [ \t\n\r] + -> skip
+   ;
 
 LINE_COMMENT : '//' ~[\r\n]* -> skip;
 

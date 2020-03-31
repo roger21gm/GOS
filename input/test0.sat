@@ -1,0 +1,11 @@
+types:
+    Queens {
+        const int n1;
+        const int n2;
+    };
+    Queens2 {
+        const Queens queens;
+    };
+
+vars:
+    const Queens2 nQueens;

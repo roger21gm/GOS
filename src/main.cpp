@@ -24,20 +24,21 @@ int main() {
 
     SymbolTable * symbolTable = new SymbolTable();
 
+    ifstream inFile;
+    inFile.open("../input/i0.json"); //open the input file
+    stringstream inputStream;
+    inputStream << inFile.rdbuf(); //read the file
+    string inputStr = inputStream.str(); //str holds the content of the file
 
-    ANTLRInputStream input(
-            ""
-            "types:"
-            "     Queens {"
-            "         const int n1;"
-            "         const int n2;"
-            "     };"
-            "     Queens2 {"
-            "         const Queens queens;"
-            "     };"
-            "vars:"
-            "    const Queens2 nQueens;"
-    );
+
+    ifstream modelFile;
+    modelFile.open("../input/test0.sat"); //open the input file
+    stringstream modelStream;
+    modelStream << modelFile.rdbuf(); //read the file
+    string modelStr = modelStream.str(); //str holds the content of the file
+
+
+    ANTLRInputStream input(modelStr);
 
     CSP2SATLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
@@ -47,20 +48,7 @@ int main() {
     visitor->visit(tree);
 
 
-    ANTLRInputStream input2(
-            "{"
-            "     \"nQueens\": {"
-            "           \"queens\": { \"n1\": 1350, \"n2\": 2508 }"
-            "      }"
-            "}"
-    );
-
-
-//    ANTLRInputStream input2(
-//            "{"
-//            "     \"nQueens\": 13500"
-//            "}"
-//    );
+    ANTLRInputStream input2(inputStr);
 
     JSONLexer lexer2(&input2);
     CommonTokenStream tokens2(&lexer2);

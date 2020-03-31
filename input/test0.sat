@@ -5,7 +5,10 @@ types:
     };
     Queens2 {
         const Queens queens;
+        const int n1;
     };
 
 vars:
     const Queens2 nQueens;
+    const int n1;
+    const Queens nQueens2;

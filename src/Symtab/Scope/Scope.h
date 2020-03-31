@@ -16,6 +16,7 @@ public:
     virtual Scope * getEnclosingScope() = 0;
     virtual void define(Symbol * sym) = 0;
     virtual Symbol * resolve(const string &name) = 0;
+    virtual map<string, Symbol*> getScopeSymbols() = 0;
 };
 
 

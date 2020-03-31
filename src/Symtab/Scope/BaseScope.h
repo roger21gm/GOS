@@ -34,6 +34,11 @@ public:
         return nullptr;
     }
 
+    map<string, Symbol*> getScopeSymbols() override {
+        return this->symbols;
+    }
+
+
 private:
     Scope * enclosingScope;
     map<string, Symbol*> symbols;

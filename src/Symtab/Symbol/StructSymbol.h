@@ -45,7 +45,7 @@ public:
         return nullptr;
     }
 
-    map<string, Symbol*> getFields() {
+    map<string, Symbol*> getScopeSymbols() override {
         return this->fields;
     }
 };

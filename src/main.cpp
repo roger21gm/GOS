@@ -20,6 +20,24 @@ using namespace antlr4;
 using namespace CSP2SAT;
 using namespace tree;
 
+void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
+    map<string, Symbol*> currentScopeSymbols = currentScope->getScopeSymbols();
+
+    for(pair<string, Symbol *> sym : currentScopeSymbols){
+        if(sym.second->type){
+            if(sym.second->type->getTypeIndex() == SymbolTable::tCustom)
+                showAllDefinedVariables( (StructSymbol*) sym.second, prefix + "." + sym.first );
+            else{
+                cout << "const -> " << (prefix == "" ? "" : prefix.substr(1, prefix.length()-1) + ".") + sym.first  << " -> " << ((AssignableSymbol*)sym.second)->getValue()->getRealValue() << endl;
+            }
+
+        }
+        else {
+            cout << "defined type -> " << prefix +  sym.first << endl;
+        }
+    }
+}
+
 int main() {
 
     SymbolTable * symbolTable = new SymbolTable();
@@ -39,7 +57,6 @@ int main() {
 
 
     ANTLRInputStream input(modelStr);
-
     CSP2SATLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     CSP2SATParser parser(&tokens);
@@ -49,7 +66,6 @@ int main() {
 
 
     ANTLRInputStream input2(inputStr);
-
     JSONLexer lexer2(&input2);
     CommonTokenStream tokens2(&lexer2);
     JSONParser parser2(&tokens2);
@@ -58,15 +74,9 @@ int main() {
     visitor2->visit(tree2);
 
 
-    StructSymbol * queens = (StructSymbol*)symbolTable->gloabls->resolve("nQueens");
-    StructSymbol * queensQ = ((StructSymbol*) queens->resolve("queens"));
-    AssignableSymbol * queensN1 = ((AssignableSymbol*) queensQ->resolve("n1"));
-    AssignableSymbol * queensN2 = ((AssignableSymbol*) queensQ->resolve("n2"));
 
 
-    cout << queensN1->getValue()->getRealValue() << endl;
-    cout << queensN2->getValue()->getRealValue() << endl;
-
+    showAllDefinedVariables(symbolTable->gloabls);
 
     return 0;
 }

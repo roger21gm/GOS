@@ -28,17 +28,14 @@ public:
     }
 
     antlrcpp::Any visitJson(JSONParser::JsonContext *ctx) override {
-        cout << "visitJson" << ctx->getText() << endl;
         return JSONBaseVisitor::visitJson(ctx);
     }
 
     antlrcpp::Any visitObj(JSONParser::ObjContext *ctx) override {
-        cout << "visitObj" << ctx->getText() << endl;
         return JSONBaseVisitor::visitObj(ctx);
     }
 
     antlrcpp::Any visitPair(JSONParser::PairContext *ctx) override {
-        cout << "visitPair" << ctx->getText() << endl;
         string varName = ctx->STRING()->getText();
         varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
         Symbol * var = currentScope->resolve(varName);
@@ -57,16 +54,12 @@ public:
     }
 
     antlrcpp::Any visitArr(JSONParser::ArrContext *ctx) override {
-        cout << "visitArr" << ctx->getText() << endl;
         JSONBaseVisitor::visitArr(ctx);
 
         return nullptr;
     }
 
     antlrcpp::Any visitValue(JSONParser::ValueContext *ctx) override {
-        cout << "visitValue" << ctx->getText() << endl;
-
-
         if(ctx->NUMBER())
             return (Value*) new IntValue(stoi(ctx->getText()));
         else if(ctx->obj()){

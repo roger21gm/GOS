@@ -14,17 +14,18 @@
 class Utils {
 
 public:
-    static StructSymbol * createCustomTypeConstant(const string& name, StructSymbol * customType, Scope * currentScope) {
+    static StructSymbol * createCustomTypeConstant(const string& name, StructSymbol * customType, Scope * enclosingScope) {
 
         StructSymbol * newCustomTypeConst = new StructSymbol(
                 name,
-                (Type*) customType,
-                currentScope
+                customType,
+                enclosingScope
         );
-        for(pair<string, Symbol *> sym : customType->getFields()){
+        for(pair<string, Symbol *> sym : customType->getScopeSymbols()){
             if(sym.second->type->getTypeIndex() == SymbolTable::tCustom){
-                StructSymbol * customTypeAttribtue = (StructSymbol *) sym.second->type;
-                newCustomTypeConst->define(createCustomTypeConstant(sym.first, customTypeAttribtue, customTypeAttribtue));
+                StructSymbol * customTypeAttribtue = (StructSymbol *) sym.second;
+                StructSymbol * newVar = createCustomTypeConstant(sym.first, customTypeAttribtue, newCustomTypeConst);
+                newCustomTypeConst->define(newVar);
             }else{
                 newCustomTypeConst->define(new ConstantSymbol(sym.first, sym.second->type));
             }

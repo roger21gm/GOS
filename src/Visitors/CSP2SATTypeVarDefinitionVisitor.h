@@ -33,8 +33,11 @@ public:
 
     antlrcpp::Any visitConstDefinition(CSP2SATParser::ConstDefinitionContext *ctx) override {
 
+        CSP2SATBaseVisitor::visitConstDefinition(ctx);
         Type *type = (Type *) currentScope->resolve(ctx->type->getText());
         Symbol *newConst;
+
+        string name = ctx->name->getText();
 
         if (type->getTypeIndex() == SymbolTable::tCustom) {
             newConst = Utils::createCustomTypeConstant(ctx->name->getText(), (StructSymbol *) type, currentScope);
@@ -46,7 +49,7 @@ public:
         }
 
         currentScope->define(newConst);
-        return CSP2SATBaseVisitor::visitConstDefinition(ctx);
+        return nullptr;
     }
 
     antlrcpp::Any visitTypeDefinition(CSP2SATParser::TypeDefinitionContext *ctx) override {

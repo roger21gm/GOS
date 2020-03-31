@@ -28,7 +28,7 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
             if(sym.second->type->getTypeIndex() == SymbolTable::tCustom)
                 showAllDefinedVariables( (StructSymbol*) sym.second, prefix + "." + sym.first );
             else{
-                cout << "const -> " << (prefix == "" ? "" : prefix.substr(1, prefix.length()-1) + ".") + sym.first  << " -> " << ((AssignableSymbol*)sym.second)->getValue()->getRealValue() << endl;
+                cout << "const -> " << (prefix.empty() ? "" : prefix.substr(1, prefix.length()-1) + ".") + sym.first  << " -> " << ((AssignableSymbol*)sym.second)->getValue()->getRealValue() << endl;
             }
 
         }
@@ -43,14 +43,14 @@ int main() {
     SymbolTable * symbolTable = new SymbolTable();
 
     ifstream inFile;
-    inFile.open("../input/i0.json"); //open the input file
+    inFile.open("../input/i1.json"); //open the input file
     stringstream inputStream;
     inputStream << inFile.rdbuf(); //read the file
     string inputStr = inputStream.str(); //str holds the content of the file
 
 
     ifstream modelFile;
-    modelFile.open("../input/test0.sat"); //open the input file
+    modelFile.open("../input/test1.sat"); //open the input file
     stringstream modelStream;
     modelStream << modelFile.rdbuf(); //read the file
     string modelStr = modelStream.str(); //str holds the content of the file

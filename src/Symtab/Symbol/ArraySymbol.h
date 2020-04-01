@@ -56,6 +56,14 @@ public:
         }
         return scopeSymbols;
     }
+
+    int getSize() {
+        return this->size;
+    }
+
+    Type * getElementsType () {
+        return this->elementsType;
+    }
 };
 
 

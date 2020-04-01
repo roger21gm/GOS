@@ -28,12 +28,31 @@ public:
                 StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
                 StructSymbol *newVar = createCustomTypeConstant(sym.first, customTypeAttribtue, newCustomTypeConst);
                 newCustomTypeConst->define(newVar);
+            } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
+                ArraySymbol *aSy = (ArraySymbol *) sym.second;
+                ArraySymbol * newArrayConst = createArrayConstantFromArrayType(sym.first, newCustomTypeConst, aSy);
+                newCustomTypeConst->define(newArrayConst);
             } else {
                 newCustomTypeConst->define(new ConstantSymbol(sym.first, sym.second->type));
             }
         }
 
         return newCustomTypeConst;
+    }
+
+    static ArraySymbol *createArrayConstantFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType) {
+
+        vector<int> dimensions;
+
+        Symbol * currType = arrayType;
+
+        while(currType->type && currType->type->getTypeIndex() == SymbolTable::tArray){
+            ArraySymbol * currDimension = (ArraySymbol*) currType;
+            dimensions.push_back(currDimension->getSize());
+            currType = currDimension->resolve("0");
+        }
+
+        return createArrayConstant(name, enclosingScope, dimensions, arrayType->getElementsType());
     }
 
     static ArraySymbol *

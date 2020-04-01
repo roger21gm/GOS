@@ -1,7 +1,11 @@
 types:
+    B {
+        const int b1;
+    };
     A {
         const int a1;
-        const int a2;
+        const int a2[2];
+        const B b1[2];
     };
 
 vars:

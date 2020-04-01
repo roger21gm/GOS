@@ -9,8 +9,6 @@
 #include "../../Symtab/SymbolTable.h"
 #include "../../Symtab/Symbol/Assignable/AssignableSymbol.h"
 #include "../../Symtab/Value/IntValue.h"
-#include "../../Symtab/Value/StructValue.h"
-#include "../../Symtab/Value/ArrayValue.h"
 #include "../../Symtab/Symbol/StructSymbol.h"
 
 using namespace CSP2SAT;
@@ -46,7 +44,12 @@ public:
             JSONBaseVisitor::visitPair(ctx);
             this->currentScope = a->getEnclosingScope();
         }
-
+        else if(ctx->value()->arr()){
+            ArraySymbol* a = (ArraySymbol*) var;
+            this->currentScope = a;
+            JSONBaseVisitor::visitPair(ctx);
+            this->currentScope = a->getEnclosingScope();
+        }
         else{
             Value * val = JSONBaseVisitor::visitPair(ctx);
             ((AssignableSymbol*)var)->setValue(val);
@@ -55,8 +58,24 @@ public:
     }
 
     antlrcpp::Any visitArr(JSONParser::ArrContext *ctx) override {
-        JSONBaseVisitor::visitArr(ctx);
-
+        for (int i = 0; i < ctx->value().size(); ++i) {
+            if(ctx->value()[i]->obj()){
+                StructSymbol * arrElem = (StructSymbol*) this->currentScope->resolve(to_string(i));
+                this->currentScope = arrElem;
+                visit(ctx->value()[i]);
+                this->currentScope = arrElem->getEnclosingScope();
+            }
+            else if (ctx->value()[i]->arr()){
+                ArraySymbol * arrElem = (ArraySymbol*) this->currentScope->resolve(to_string(i));
+                this->currentScope = arrElem;
+                visit(ctx->value()[i]);
+                this->currentScope = arrElem->getEnclosingScope();
+            }
+            else{
+                Value * val = JSONBaseVisitor::visit(ctx->value()[i]);
+                ((AssignableSymbol *) this->currentScope->resolve(to_string(i)))->setValue(val);
+            }
+        }
         return nullptr;
     }
 
@@ -65,12 +84,14 @@ public:
             return (Value*) new IntValue(stoi(ctx->getText()));
         else if(ctx->obj()){
             JSONBaseVisitor::visitValue(ctx);
-        }else{
+        }
+        else if(ctx->arr()){
+            return JSONBaseVisitor::visitValue(ctx);
+        }
+        else{
             JSONBaseVisitor::visitValue(ctx);
         }
-//        else if(ctx->arr()){
-//            return (Value*) new ArrayValue();
-//        }
+
 //        else{
 //            cerr << "Error!" << endl;
 //        }

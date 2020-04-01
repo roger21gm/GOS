@@ -1,4 +1,9 @@
+types:
+    A {
+        const int a1;
+        const int a2;
+    };
+
 vars:
-    const int a[10][5];
-    const int b;
-    const int c;
+    const int a[10][2];
+    const A b[2][2][2];

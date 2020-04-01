@@ -48,14 +48,11 @@ public:
             );
             for (int i = 0; i < dimentions[0]; ++i) {
                 Symbol *constElement;
-                if(elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    constElement = createCustomTypeConstant(to_string(i), (StructSymbol*) elementsType, newArray);
+                if (elementsType->getTypeIndex() == SymbolTable::tCustom)
+                    constElement = createCustomTypeConstant(to_string(i), (StructSymbol *) elementsType, newArray);
                 else {
                     constElement = new ConstantSymbol(to_string(i), elementsType);
-                    ((AssignableSymbol*) constElement)->setValue(new IntValue(i));
                 }
-
-
                 newArray->define(constElement);
             }
             return newArray;
@@ -67,7 +64,7 @@ public:
                     elementsType,
                     dimentions[0]
             );
-            for (int i = 0; i < dimentions[0]; ++i) {
+            for (int i = 0; i < dimentions[0]; i++) {
                 auto *constElement = createArrayConstant(to_string(i), newDimention, restOfDimenstions, elementsType);
                 newDimention->define(constElement);
             }

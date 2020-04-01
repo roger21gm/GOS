@@ -26,7 +26,10 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
     for(pair<string, Symbol *> sym : currentScopeSymbols){
         if(sym.second->type){
             if(sym.second->type->getTypeIndex() == SymbolTable::tCustom)
-                showAllDefinedVariables( (StructSymbol*) sym.second, prefix + "." + sym.first );
+                if(!isdigit(sym.first[0]))
+                    showAllDefinedVariables( (StructSymbol*) sym.second, prefix + "." + sym.first );
+                else
+                    showAllDefinedVariables( (StructSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
             else if(sym.second->type->getTypeIndex() == SymbolTable::tArray)
                 showAllDefinedVariables( (ArraySymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
             else{
@@ -92,6 +95,6 @@ int main() {
     CSP2SATInputJSONVisitor * visitor2 = new CSP2SATInputJSONVisitor(symbolTable);
     visitor2->visit(tree2);
     showAllDefinedVariables(symbolTable->gloabls);
-
+    
     return 0;
 }

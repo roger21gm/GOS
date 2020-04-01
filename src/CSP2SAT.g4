@@ -107,10 +107,11 @@ constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 
 
 
-varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL name=TK_IDENT  rang=range? TK_SEMICOLON; //TODO: array access var/const
-constDefinition: TK_CONST type=(TK_IDENT | TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT) name=TK_IDENT rang=range? TK_SEMICOLON;
+varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* rang=range? TK_SEMICOLON;
 
-//auxiliarConstDef: (TK_IDENT | TK_BASE_TYPE) TK_IDENT TK_ASSIGN expr;
+
+constDefinition: TK_CONST type=(TK_IDENT | TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT) name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* rang=range? TK_SEMICOLON;
+
 
 constraintDefinition: (forall | ifThenElse | expr | functionCall) TK_SEMICOLON;
 
@@ -141,7 +142,6 @@ expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess; //TODO: Functio
 
 
 varAccess: id=TK_IDENT (TK_DOT attr=TK_IDENT | TK_LCLAUDATOR expr TK_RCLAUDATOR)*;
-
 
 
 valueBaseType: TK_INT_VALUE | TK_BOOLEAN_VALUE;

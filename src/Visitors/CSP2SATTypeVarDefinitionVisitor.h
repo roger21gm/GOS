@@ -39,15 +39,23 @@ public:
 
         string name = ctx->name->getText();
 
-        if (type->getTypeIndex() == SymbolTable::tCustom) {
+        if(!ctx->expr().empty()) {
+            vector<int> dimentions;
+            for( auto expr : ctx->expr()) {
+                int a = visit(expr);
+                dimentions.push_back(a);
+            }
+            newConst = Utils::createArrayConstant(ctx->name->getText(), currentScope, dimentions, type);
+        }
+        else if (type->getTypeIndex() == SymbolTable::tCustom) {
             newConst = Utils::createCustomTypeConstant(ctx->name->getText(), (StructSymbol *) type, currentScope);
-        } else {
+        }
+        else {
             newConst = new ConstantSymbol(
                     ctx->name->getText(),
                     type
             );
         }
-
         currentScope->define(newConst);
         return nullptr;
     }

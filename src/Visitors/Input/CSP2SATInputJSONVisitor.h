@@ -46,6 +46,7 @@ public:
             JSONBaseVisitor::visitPair(ctx);
             this->currentScope = a->getEnclosingScope();
         }
+
         else{
             Value * val = JSONBaseVisitor::visitPair(ctx);
             ((AssignableSymbol*)var)->setValue(val);

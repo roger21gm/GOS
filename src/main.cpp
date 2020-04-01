@@ -27,10 +27,28 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
         if(sym.second->type){
             if(sym.second->type->getTypeIndex() == SymbolTable::tCustom)
                 showAllDefinedVariables( (StructSymbol*) sym.second, prefix + "." + sym.first );
+            else if(sym.second->type->getTypeIndex() == SymbolTable::tArray)
+                showAllDefinedVariables( (ArraySymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
             else{
-                cout << "const -> " << (prefix.empty() ? "" : prefix.substr(1, prefix.length()-1) + ".") + sym.first  << " -> " << ((AssignableSymbol*)sym.second)->getValue()->getRealValue() << endl;
-            }
+                string output = "const -> ";
 
+                if(!prefix.empty() && prefix[0] == '.')
+                    output += prefix.substr(1, prefix.length()-1);
+                else
+                    output += prefix;
+
+                if(isdigit(sym.first[0])){
+                    output += "[" + sym.first + "]";
+                }
+                else if(prefix.empty()){
+                    output += sym.first;
+                }
+                else {
+                    output += "." + sym.first ;
+                }
+
+                cout << output  << " -> " << ((AssignableSymbol*)sym.second)->getValue()->getRealValue() << endl;
+            }
         }
         else {
             cout << "defined type -> " << prefix +  sym.first << endl;
@@ -43,14 +61,14 @@ int main() {
     SymbolTable * symbolTable = new SymbolTable();
 
     ifstream inFile;
-    inFile.open("../input/i1.json"); //open the input file
+    inFile.open("../input/i2.json"); //open the input file
     stringstream inputStream;
     inputStream << inFile.rdbuf(); //read the file
     string inputStr = inputStream.str(); //str holds the content of the file
 
 
     ifstream modelFile;
-    modelFile.open("../input/test1.sat"); //open the input file
+    modelFile.open("../input/test2.sat"); //open the input file
     stringstream modelStream;
     modelStream << modelFile.rdbuf(); //read the file
     string modelStr = modelStream.str(); //str holds the content of the file
@@ -65,6 +83,7 @@ int main() {
     visitor->visit(tree);
 
 
+
     ANTLRInputStream input2(inputStr);
     JSONLexer lexer2(&input2);
     CommonTokenStream tokens2(&lexer2);
@@ -72,10 +91,6 @@ int main() {
     JSONParser::JsonContext *tree2 = parser2.json();
     CSP2SATInputJSONVisitor * visitor2 = new CSP2SATInputJSONVisitor(symbolTable);
     visitor2->visit(tree2);
-
-
-
-
     showAllDefinedVariables(symbolTable->gloabls);
 
     return 0;

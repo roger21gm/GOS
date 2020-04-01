@@ -1,0 +1,4 @@
+vars:
+    const int a[10][5];
+    const int b;
+    const int c;

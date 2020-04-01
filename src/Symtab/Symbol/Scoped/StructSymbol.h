@@ -6,34 +6,24 @@
 #define CSP2SAT_STRUCTSYMBOL_H
 
 
-class StructSymbol : public Scope, public Type {
+#include "ScopedSymbol.h"
+
+class StructSymbol : public ScopedSymbol {
 
 private:
     map<string, Symbol*> fields = {};
-    Scope * enclosingScope = nullptr;
 
 public:
 
-    StructSymbol(string name, Type * type, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
-        this->enclosingScope = enclosingScope;
+    //Constructor for creating typed constants of this custom type.
+    StructSymbol(string name, Type * type, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {
         this->type = type;
     }
 
-
-    StructSymbol(const string& name, Scope * enclosingScope) : Type(SymbolTable::tCustom, name) {
-        this->enclosingScope = enclosingScope;
-    }
-
-    string getScopeName() override {
-        return this->name;
-    }
-
-    Scope *getEnclosingScope() override {
-        return this->enclosingScope;
-    }
+    //Constructor for creating the definition of the custom type.
+    StructSymbol(const string& name, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {}
 
     void define(Symbol *sym) override {
-        sym->scope = this;
         fields.insert(pair<string, Symbol*>(sym->getName(), sym));
     }
 

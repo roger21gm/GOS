@@ -9,7 +9,7 @@
 #include "../Symtab/SymbolTable.h"
 #include "../Symtab/Symbol/Assignable/VariableSymbol.h"
 #include "../Symtab/Symbol/Assignable/ConstantSymbol.h"
-#include "../Symtab/Symbol/StructSymbol.h"
+#include "../Symtab/Symbol/Scoped/StructSymbol.h"
 #include "CSP2SATCustomBaseVisitor.h"
 #include "Utils.h"
 

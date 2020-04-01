@@ -6,11 +6,11 @@
 #define CSP2SAT_UTILS_H
 
 
-#include "../Symtab/Symbol/StructSymbol.h"
+#include "../Symtab/Symbol/Scoped/StructSymbol.h"
 #include "../Symtab/Scope/Scope.h"
 #include "../Symtab/SymbolTable.h"
 #include "../Symtab/Symbol/Assignable/ConstantSymbol.h"
-#include "../Symtab/Symbol/ArraySymbol.h"
+#include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../Symtab/Value/IntValue.h"
 
 class Utils {

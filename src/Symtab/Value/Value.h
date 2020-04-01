@@ -9,10 +9,7 @@ using namespace std;
 
 class Value {
 public:
-    Value() = default;
-
     virtual string getRealValue() = 0;
-    virtual bool isBaseType() = 0;
 };
 
 

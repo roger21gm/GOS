@@ -22,7 +22,7 @@ public:
     }
 
 private:
-    Value * val{};
+    Value * val;
 };
 
 

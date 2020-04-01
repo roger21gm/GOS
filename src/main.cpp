@@ -25,20 +25,13 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
 
     for(pair<string, Symbol *> sym : currentScopeSymbols){
         if(sym.second->type){
-            if(sym.second->type->getTypeIndex() == SymbolTable::tCustom)
+            if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray)
                 if(!isdigit(sym.first[0]))
-                    showAllDefinedVariables( (StructSymbol*) sym.second, prefix + "." + sym.first );
+                    showAllDefinedVariables( (ScopedSymbol*) sym.second, prefix + "." + sym.first );
                 else
-                    showAllDefinedVariables( (StructSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
-            else if(sym.second->type->getTypeIndex() == SymbolTable::tArray)
-                if(!isdigit(sym.first[0]))
-                    showAllDefinedVariables( (ArraySymbol*) sym.second, prefix + "." + sym.first );
-                else
-                    showAllDefinedVariables( (ArraySymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
-
+                    showAllDefinedVariables( (ScopedSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
             else{
                 string output = "const -> ";
-
                 if(!prefix.empty() && prefix[0] == '.')
                     output += prefix.substr(1, prefix.length()-1);
                 else

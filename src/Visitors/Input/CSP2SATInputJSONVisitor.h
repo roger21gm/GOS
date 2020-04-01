@@ -9,7 +9,7 @@
 #include "../../Symtab/SymbolTable.h"
 #include "../../Symtab/Symbol/Assignable/AssignableSymbol.h"
 #include "../../Symtab/Value/IntValue.h"
-#include "../../Symtab/Symbol/StructSymbol.h"
+#include "../../Symtab/Symbol/Scoped/StructSymbol.h"
 
 using namespace CSP2SAT;
 using namespace std;

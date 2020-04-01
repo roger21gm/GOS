@@ -26,7 +26,7 @@ public:
 
     string name;
     Type *type = nullptr;
-    Scope *scope = nullptr;
+
 };
 
 

@@ -20,10 +20,6 @@ public:
         return to_string(realIntValue);
     }
 
-    bool isBaseType() override {
-        return true;
-    }
-
 private:
     int realIntValue;
 };

@@ -6,38 +6,25 @@
 #define CSP2SAT_ARRAYSYMBOL_H
 
 
-#include "../Type.h"
-#include "../Scope/Scope.h"
-#include "../SymbolTable.h"
+#include "ScopedSymbol.h"
 #include <list>
 #include <vector>
 
-class ArraySymbol : public Scope, public Type {
+class ArraySymbol : public ScopedSymbol {
 
 private:
-    Scope * enclosingScope;
     vector<Symbol*> elements;
     Type * elementsType;
     int size;
 
 public:
-    ArraySymbol(const string &name, Scope * enclosingScope, Type * arrayElementsType, int size) : Type(SymbolTable::tArray, name) {
+    ArraySymbol(const string &name, Scope * enclosingScope, Type * arrayElementsType, int size) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
         this->size = size;
         this->elementsType = arrayElementsType;
-        this->enclosingScope = enclosingScope;
         this->type = this;
     }
 
-    string getScopeName() override {
-        return this->name;
-    }
-
-    Scope *getEnclosingScope() override {
-        return this->enclosingScope;
-    }
-
     void define(Symbol *sym) override {
-        sym->scope = this;
         elements.push_back(sym);
     }
 

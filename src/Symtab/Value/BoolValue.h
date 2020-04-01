@@ -15,9 +15,6 @@ public:
         return "nullptr";
     }
 
-    bool isBaseType() override {
-        return true;
-    }
 };
 
 

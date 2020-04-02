@@ -138,17 +138,13 @@ expr_5: expr_4 (op=( TK_OP_REL_LT | TK_OP_REL_GT | TK_OP_REL_GE | TK_OP_REL_LE |
 expr_4: expr_3 (op=(TK_OP_ARIT_SUM | TK_OP_ARIT_DIFF) expr_3)*;
 expr_3: expr_2 (op=(TK_OP_ARIT_MULT | TK_OP_ARIT_DIV | TK_OP_ARIT_MOD) expr_2)*;
 expr_2: op=TK_OP_LOGIC_NOT? expr_base;
-expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess; //TODO: Function CALL??
+expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess;
 
 
-varAccess: id=TK_IDENT (TK_DOT attr=TK_IDENT | TK_LCLAUDATOR expr TK_RCLAUDATOR)*;
+varAccess: id=TK_IDENT varAccessObjectOrArray*;
+varAccessObjectOrArray: (TK_DOT attr=TK_IDENT | TK_LCLAUDATOR index=expr TK_RCLAUDATOR);
 
-
-valueBaseType: TK_INT_VALUE | TK_BOOLEAN_VALUE;
-
-array_access: TK_IDENT TK_LCLAUDATOR expr TK_RCLAUDATOR (TK_LCLAUDATOR expr TK_RCLAUDATOR)?;
-object_attribute: (TK_IDENT | array_access) TK_DOT expr;
-
+valueBaseType: integer=TK_INT_VALUE | boolean=TK_BOOLEAN_VALUE;
 
 constraint:
     constraint_double_implication

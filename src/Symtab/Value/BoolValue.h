@@ -10,11 +10,17 @@
 #include "Value.h"
 
 class BoolValue : public Value {
+private:
+    bool val;
+
 public:
-    string getRealValue() override {
-        return "nullptr";
+    BoolValue(bool value){
+        this->val = value;
     }
 
+    int getRealValue() override {
+        return this->val ? 1 : 0;
+    }
 };
 
 

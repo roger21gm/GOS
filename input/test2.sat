@@ -11,3 +11,10 @@ types:
 vars:
     const int a[10][2];
     const A b[2][2][2];
+    const int c;
+
+
+constraints:
+    a[5][1];
+    b[0][0][0].b1[0].b1;
+    c;

@@ -22,6 +22,11 @@ public:
         return this->typeIndex;
     }
 
+    bool isAssignable() override {
+        return false;
+    }
+
+
 private:
     int typeIndex;
 

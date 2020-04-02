@@ -42,8 +42,8 @@ public:
         if(!ctx->expr().empty()) {
             vector<int> dimentions;
             for( auto expr : ctx->expr()) {
-                int a = visit(expr);
-                dimentions.push_back(a);
+                Value * a = visit(expr);
+                dimentions.push_back(a->getRealValue());
             }
             newConst = Utils::createArrayConstant(ctx->name->getText(), currentScope, dimentions, type);
         }
@@ -71,6 +71,9 @@ public:
         return nullptr;
     }
 
+    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
+        return nullptr;
+    }
 
 
 };

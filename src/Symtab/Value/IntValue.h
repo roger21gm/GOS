@@ -16,8 +16,8 @@ public:
         this->realIntValue = intVal;
     }
 
-    string getRealValue() override {
-        return to_string(realIntValue);
+    int getRealValue() override {
+        return realIntValue;
     }
 
 private:

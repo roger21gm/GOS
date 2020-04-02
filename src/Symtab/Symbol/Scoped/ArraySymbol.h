@@ -51,6 +51,11 @@ public:
     Type * getElementsType () {
         return this->elementsType;
     }
+
+    bool isAssignable() override {
+        return false;
+    }
+
 };
 
 

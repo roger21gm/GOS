@@ -24,9 +24,10 @@ public:
         return this->name;
     }
 
+    virtual bool isAssignable() = 0;
+
     string name;
     Type *type = nullptr;
-
 };
 
 

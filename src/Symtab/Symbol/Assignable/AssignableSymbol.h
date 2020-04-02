@@ -21,6 +21,10 @@ public:
         this->val = value;
     }
 
+    bool isAssignable() override {
+        return true;
+    }
+
 private:
     Value * val;
 };

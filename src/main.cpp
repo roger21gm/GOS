@@ -5,6 +5,7 @@
 #include "antlr4-runtime.h"
 #include "Visitors/CSP2SATTypeVarDefinitionVisitor.h"
 #include "Visitors/Input/CSP2SATInputJSONVisitor.h"
+#include "Visitors/CSP2SATConstraintsVisitor.h"
 
 // generated lexer and parser
 #include <CSP2SATLexer.h>
@@ -85,6 +86,20 @@ int main() {
     JSONParser::JsonContext *tree2 = parser2.json();
     CSP2SATInputJSONVisitor * visitor2 = new CSP2SATInputJSONVisitor(symbolTable);
     visitor2->visit(tree2);
+
+
+    ANTLRInputStream input3(modelStr);
+    CSP2SATLexer lexer3(&input3);
+    CommonTokenStream tokens3(&lexer3);
+    CSP2SATParser parser3(&tokens3);
+    CSP2SATParser::Csp2satContext *tree3 = parser3.csp2sat();
+    CSP2SATConstraintsVisitor * visitor3 = new CSP2SATConstraintsVisitor(symbolTable);
+    visitor3->visit(tree3);
+
+
+
+
+
     showAllDefinedVariables(symbolTable->gloabls);
 
     return 0;

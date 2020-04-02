@@ -12,6 +12,11 @@
 class BuiltInTypeSymbol: public Type {
 public:
     BuiltInTypeSymbol(const string &name, int typeIndex) : Type(typeIndex, name) {}
+
+    bool isAssignable() override {
+        return false;
+    }
+
 };
 
 

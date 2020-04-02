@@ -9,7 +9,7 @@ using namespace std;
 
 class Value {
 public:
-    virtual string getRealValue() = 0;
+    virtual int getRealValue() = 0;
 };
 
 

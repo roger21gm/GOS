@@ -31,9 +31,9 @@ public:
         return CSP2SATBaseVisitor::visitVarDefinition(ctx);
     }
 
-    antlrcpp::Any visitConstDefinition(CSP2SATParser::ConstDefinitionContext *ctx) override {
+    antlrcpp::Any visitParamDefinition(CSP2SATParser::ParamDefinitionContext *ctx) override {
+        CSP2SATBaseVisitor::visitParamDefinition(ctx);
 
-        CSP2SATBaseVisitor::visitConstDefinition(ctx);
         Type *type = (Type *) currentScope->resolve(ctx->type->getText());
         Symbol *newConst;
 
@@ -60,13 +60,13 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitTypeDefinition(CSP2SATParser::TypeDefinitionContext *ctx) override {
+    antlrcpp::Any visitEntityDefinition(CSP2SATParser::EntityDefinitionContext *ctx) override {
         StructSymbol *newType;
         newType = new StructSymbol(ctx->name->getText(), currentScope);
         currentScope->define(newType);
 
         currentScope = newType;
-        CSP2SATBaseVisitor::visitTypeDefinition(ctx);
+        CSP2SATBaseVisitor::visitEntityDefinition(ctx);
         currentScope = currentScope->getEnclosingScope();
         return nullptr;
     }

@@ -1,0 +1,14 @@
+entities:
+    A {
+        param int a;
+        param int b;
+        param int c[2];
+    };
+
+viewpoint:
+    param int a;
+    param int b[5];
+    param A c;
+
+constraints:
+    a + 10;

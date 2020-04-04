@@ -7,8 +7,8 @@ WS
 LINE_COMMENT : '//' ~[\r\n]* -> skip;
 
 // basic structure
-TK_TYPES: 'types';
-TK_VARS: 'vars';
+TK_ENTITIES: 'entities';
+TK_VIEWPOINT: 'viewpoint';
 TK_CONSTRAINTS: 'constraints';
 
 TK_COLON: ':';
@@ -18,7 +18,7 @@ TK_UNDERSCORE: '_';
 
 TK_ASSIGN: ':=';
 
-TK_CONST: 'const';
+TK_PARAM: 'param';
 TK_VAR: 'var';
 TK_AUX: 'aux';
 
@@ -95,22 +95,19 @@ TK_IDENT: ( ('a'..'z' | 'A'..'Z' | '_')('a'..'z' | 'A'..'Z' | '_' | '0'..'9')* )
 
 // SINTÀCTIC
 
-csp2sat: typeDefinitionBlock? varDefinitionBlock? constraintDefinitionBlock?;
+csp2sat: entityDefinitionBlock? viewpointBlock? constraintDefinitionBlock?;
 
+entityDefinitionBlock: TK_ENTITIES TK_COLON entityDefinition* ;
+entityDefinition: name=TK_IDENT TK_LBRACKET (varDefinition | paramDefinition)* TK_RBRACKET TK_SEMICOLON;
 
-typeDefinitionBlock: TK_TYPES TK_COLON typeDefinition* ;
-typeDefinition: name=TK_IDENT TK_LBRACKET (varDefinition | constDefinition)* TK_RBRACKET TK_SEMICOLON;
-
-varDefinitionBlock: TK_VARS TK_COLON (varDefinition | constDefinition)*;
+viewpointBlock: TK_VIEWPOINT TK_COLON (varDefinition | paramDefinition)*;
 
 constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 
 
 
-varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* rang=range? TK_SEMICOLON;
-
-
-constDefinition: TK_CONST type=(TK_IDENT | TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT) name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* rang=range? TK_SEMICOLON;
+varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL? name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* TK_SEMICOLON;
+paramDefinition: TK_PARAM type=(TK_IDENT | TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT) name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* TK_SEMICOLON;
 
 
 constraintDefinition: (forall | ifThenElse | expr | functionCall) TK_SEMICOLON;

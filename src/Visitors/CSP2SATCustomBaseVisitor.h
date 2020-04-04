@@ -28,6 +28,48 @@ public:
         this->currentScope = this->st->gloabls;
     }
 
+    antlrcpp::Any visitExpr_4(CSP2SATParser::Expr_4Context *ctx) override {
+        Value * result = visit(ctx->expr_3(0));
+        if(ctx->expr_3().size() > 1){
+            IntValue * res = new IntValue(result->getRealValue());
+            for(int i=0; i < ctx->opSumDiff().size(); i++){
+                Value * currValue = visit(ctx->expr_3(i+1));
+                if(ctx->opSumDiff(i)->getText() == "+")
+                    res->setRealValue(res->getRealValue() + currValue->getRealValue());
+                else
+                    res->setRealValue(res->getRealValue() - currValue->getRealValue());
+            }
+            return (Value*) res;
+        }
+        return result;
+    }
+
+    antlrcpp::Any visitExpr_3(CSP2SATParser::Expr_3Context *ctx) override {
+        Value * result = visit(ctx->expr_2(0));
+        if(ctx->expr_2().size() > 1){
+            IntValue * res = new IntValue(result->getRealValue());
+            for(int i=0; i < ctx->opMulDivMod().size(); i++){
+                Value * currValue = visit(ctx->expr_2(i+1));
+                if(ctx->opMulDivMod(i)->getText() == "*")
+                    res->setRealValue(res->getRealValue() * currValue->getRealValue());
+                else if (ctx->opMulDivMod(i)->getText() == "/")
+                    res->setRealValue(res->getRealValue() / currValue->getRealValue());
+                else
+                    res->setRealValue(res->getRealValue() % currValue->getRealValue());
+            }
+            return (Value*) res;
+        }
+        return result;
+    }
+
+    antlrcpp::Any visitExpr_base(CSP2SATParser::Expr_baseContext *ctx) override {
+        if(ctx->expr()){
+            return visit(ctx->expr());
+        }
+        return CSP2SATBaseVisitor::visitExpr_base(ctx);
+    }
+
+
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
         cout << ctx->getText() << " -> ";
         Symbol * var = this->currentScope->resolve(ctx->id->getText());

@@ -12,20 +12,20 @@
 
 ### User defined types
 
-- **Types** Struct constructed by variables `var` and constants `const` of any type.
+- **Entities** Struct constructed by variables `var` and parameters `param` of any type.
 
   ```java
-  type_name {
+  entity_name {
     <
-      <constant definition> |
+      <parameter definition> |
       <variable definition>
     >*
   }
   ```
 
-- **Arrays** You can define *n*-dimentional arrays of any type. You can also limit variables domain from a range.
+- **Arrays** You can define *n*-dimentional arrays of any basic type or defined entity.
 
-- **Sets** You can define a set of any type and limit its domain from a range.
+- **Sets** You can define a set of any type and limit its domain from a range. (???)
 
   
 
@@ -36,15 +36,15 @@ A program will be written in at least two files that will define a model for a p
 - **Model file:** It will describe the structure of the problem.
 
   ```pseudocode
-  types: <<user-defined types definition> ; >*
-  vars: <<<var definition> | <const definition>> ; >*
+  entities: <<user-defined entities definition> ; >*
+  viewpoint: <<<var definition> | <param definition>> ; >*
   constraints: <<constraint definition> ; >*
   ```
 
-- **Data file:** It will contain the constants and variables required by the model. The data file must be in a JSON format fitting the required constants from the model.
+- **Data file:** It will contain the params required by the model. The data file must be in a JSON format fitting the required params from the model.
 
   ```pseudocode
-  <bloc d'assignació de constants>
+  <Parameters assignation block>
   ```
 
 
@@ -88,7 +88,7 @@ An expression could be:
   - Array access:
 
     ```pseudocode
-    𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟[<expr_int>]<[expr_int]>?<.<𝑎𝑡𝑡𝑟𝑖𝑏𝑢𝑡𝑒_𝑛𝑎𝑚𝑒>>*
+    𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟[<expr_int>]<[expr_int]>*
     ```
 
 - An **operation** between one or some expressions.
@@ -135,26 +135,32 @@ The operator priority is:
 
      
 
-## Variable and constant definition
+## Variable and params definition
 
-They must be preceded by `var` and `const` respectively. It will be assigned through the data file. There are two ways of defining a variable or constant:
+They must be preceded by `var` and `param` respectively. It will be assigned through the data file. There are two ways of defining a variable or constant:
 
-- Defining an **instance of a basic or defined type**:
-
-  ```pseudocode
-  <𝐜𝐨𝐧𝐬𝐭|𝐯𝐚𝐫> <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟 <range>?; 
-  ```
-
-- Defining an **array** of a basic or defined type:
+- Defining an **instance of a basic**:
 
   ```pseudocode
-  <𝐜𝐨𝐧𝐬𝐭|𝐯𝐚𝐫> <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟 [<expr_int>] <[<intenger_expr>]>? <range>?; 
+  <param|𝐯𝐚𝐫> <basic type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟; 
   ```
 
-It is also possible to define a pre-defined auxiliary constants by assigning the value in the model:
+- Defining an **instance of a defined entity**:
+
+  ```pseudocode
+  <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟; 
+  ```
+  
+- Defining an **array** of a basic type or defined entity:
+
+  ```pseudocode
+  <instance basic | instance entity> [<expr_int>] <[<intenger_expr>]>*;
+  ```
+
+It is also possible to define a pre-defined auxiliary basic type constants by assigning the value in the model:
 
 ```pseudocode
-<𝐜𝐨𝐧𝐬𝐭> <type> 𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟 := <expr>
+<instance basic> := <expr>
 ```
 
 

@@ -20,6 +20,14 @@ public:
         return realIntValue;
     }
 
+    void setRealValue(int realVal){
+        this->realIntValue = realVal;
+    }
+
+    bool isBoolean() override {
+        return false;
+    }
+
 private:
     int realIntValue;
 };

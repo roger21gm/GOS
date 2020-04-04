@@ -21,6 +21,14 @@ public:
     int getRealValue() override {
         return this->val ? 1 : 0;
     }
+
+    void setRealValue(int val) override {
+        this->val = val == 1;
+    }
+
+    bool isBoolean() override {
+        return true;
+    }
 };
 
 

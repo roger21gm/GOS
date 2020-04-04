@@ -59,14 +59,14 @@ int main() {
     SymbolTable * symbolTable = new SymbolTable();
 
     ifstream inFile;
-    inFile.open("../input/i2.json"); //open the input file
+    inFile.open("../input/i3.json"); //open the input file
     stringstream inputStream;
     inputStream << inFile.rdbuf(); //read the file
     string inputStr = inputStream.str(); //str holds the content of the file
 
 
     ifstream modelFile;
-    modelFile.open("../input/test2.sat"); //open the input file
+    modelFile.open("../input/test3.sat"); //open the input file
     stringstream modelStream;
     modelStream << modelFile.rdbuf(); //read the file
     string modelStr = modelStream.str(); //str holds the content of the file

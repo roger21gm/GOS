@@ -16,7 +16,7 @@
 class Utils {
 
 public:
-    static StructSymbol *createCustomTypeConstant(const string &name, StructSymbol *customType, Scope *enclosingScope) {
+    static StructSymbol *createCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
                 name,
@@ -26,11 +26,11 @@ public:
         for (pair<string, Symbol *> sym : customType->getScopeSymbols()) {
             if (sym.second->type->getTypeIndex() == SymbolTable::tCustom) {
                 StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
-                StructSymbol *newVar = createCustomTypeConstant(sym.first, customTypeAttribtue, newCustomTypeConst);
+                StructSymbol *newVar = createCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst);
                 newCustomTypeConst->define(newVar);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                 ArraySymbol *aSy = (ArraySymbol *) sym.second;
-                ArraySymbol * newArrayConst = createArrayConstantFromArrayType(sym.first, newCustomTypeConst, aSy);
+                ArraySymbol * newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
                 newCustomTypeConst->define(newArrayConst);
             } else {
                 newCustomTypeConst->define(new ConstantSymbol(sym.first, sym.second->type));
@@ -40,23 +40,19 @@ public:
         return newCustomTypeConst;
     }
 
-    static ArraySymbol *createArrayConstantFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType) {
-
+    static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType) {
         vector<int> dimensions;
-
         Symbol * currType = arrayType;
-
         while(currType->type && currType->type->getTypeIndex() == SymbolTable::tArray){
             ArraySymbol * currDimension = (ArraySymbol*) currType;
             dimensions.push_back(currDimension->getSize());
             currType = currDimension->resolve("0");
         }
-
-        return createArrayConstant(name, enclosingScope, dimensions, arrayType->getElementsType());
+        return createArrayParam(name, enclosingScope, dimensions, arrayType->getElementsType());
     }
 
     static ArraySymbol *
-    createArrayConstant(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType) {
+    createArrayParam(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType) {
 
         if (dimentions.size() == 1) {
             ArraySymbol *newArray = new ArraySymbol(
@@ -68,7 +64,7 @@ public:
             for (int i = 0; i < dimentions[0]; ++i) {
                 Symbol *constElement;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    constElement = createCustomTypeConstant(to_string(i), (StructSymbol *) elementsType, newArray);
+                    constElement = createCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
                 else {
                     constElement = new ConstantSymbol(to_string(i), elementsType);
                 }
@@ -84,7 +80,7 @@ public:
                     dimentions[0]
             );
             for (int i = 0; i < dimentions[0]; i++) {
-                auto *constElement = createArrayConstant(to_string(i), newDimention, restOfDimenstions, elementsType);
+                auto *constElement = createArrayParam(to_string(i), newDimention, restOfDimenstions, elementsType);
                 newDimention->define(constElement);
             }
             return newDimention;

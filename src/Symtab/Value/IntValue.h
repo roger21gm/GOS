@@ -20,7 +20,7 @@ public:
         return realIntValue;
     }
 
-    void setRealValue(int realVal){
+    void setRealValue(int realVal) override {
         this->realIntValue = realVal;
     }
 

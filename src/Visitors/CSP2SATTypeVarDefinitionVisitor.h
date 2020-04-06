@@ -45,10 +45,10 @@ public:
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newConst = Utils::createArrayConstant(ctx->name->getText(), currentScope, dimentions, type);
+            newConst = Utils::createArrayParam(ctx->name->getText(), currentScope, dimentions, type);
         }
         else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = Utils::createCustomTypeConstant(ctx->name->getText(), (StructSymbol *) type, currentScope);
+            newConst = Utils::createCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope);
         }
         else {
             newConst = new ConstantSymbol(

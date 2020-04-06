@@ -129,19 +129,26 @@ list:
 
 range: TK_IN expr TK_RANGE_DOTS expr;
 
-expr: expr_6 | (expr_6 TK_INTERROGANT expr TK_COLON expr);
-expr_6: expr_5 (op=( TK_OP_LOGIC_AND | TK_OP_LOGIC_OR_PIPE ) expr_5)*;
+expr:
+    exprAnd #exprTop
+    | condition = exprAnd TK_INTERROGANT op1=expr TK_COLON op2=expr #exprTernary;
 
-opRelational: TK_OP_REL_LT | TK_OP_REL_GT | TK_OP_REL_GE | TK_OP_REL_LE | TK_OP_REL_EQ | TK_OP_REL_NEQ;
-expr_5: expr_4 (opRelational expr_4)*;
+exprAnd: exprOr (TK_OP_LOGIC_AND exprOr)*;
+exprOr: exprEq (TK_OP_LOGIC_OR_PIPE exprEq)*;
+
+opEquality: TK_OP_REL_EQ | TK_OP_REL_NEQ;
+exprEq: exprRel (opEquality exprRel)*;
+
+opRelational: TK_OP_REL_LT | TK_OP_REL_GT | TK_OP_REL_GE | TK_OP_REL_LE;
+exprRel: exprSumDiff (opRelational exprSumDiff)*;
 
 opSumDiff : TK_OP_ARIT_SUM | TK_OP_ARIT_DIFF;
-expr_4: expr_3 (opSumDiff expr_3)*;
+exprSumDiff: exprMulDivMod (opSumDiff exprMulDivMod)*;
 
 opMulDivMod: TK_OP_ARIT_MULT | TK_OP_ARIT_DIV | TK_OP_ARIT_MOD;
-expr_3: expr_2 (opMulDivMod expr_2)*;
+exprMulDivMod: exprNot (opMulDivMod exprNot)*;
 
-expr_2: op=TK_OP_LOGIC_NOT? expr_base;
+exprNot: op=TK_OP_LOGIC_NOT? expr_base;
 
 expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess;
 

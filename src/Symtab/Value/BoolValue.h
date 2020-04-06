@@ -14,16 +14,24 @@ private:
     bool val;
 
 public:
+    BoolValue() {
+        val = true;
+    }
+
     BoolValue(bool value){
         this->val = value;
+    }
+
+    BoolValue(int value){
+        this->val = value == 1;
     }
 
     int getRealValue() override {
         return this->val ? 1 : 0;
     }
 
-    void setRealValue(int val) override {
-        this->val = val == 1;
+    void setRealValue(int value) override {
+        this->val = value == 1;
     }
 
     bool isBoolean() override {

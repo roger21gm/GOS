@@ -11,4 +11,4 @@ viewpoint:
     param A c;
 
 constraints:
-    a + 10;
+    !(false & true) ? 1 : 2;

@@ -28,39 +28,156 @@ public:
         this->currentScope = this->st->gloabls;
     }
 
-    antlrcpp::Any visitExpr_4(CSP2SATParser::Expr_4Context *ctx) override {
-        Value * result = visit(ctx->expr_3(0));
-        if(ctx->expr_3().size() > 1){
-            IntValue * res = new IntValue(result->getRealValue());
-            for(int i=0; i < ctx->opSumDiff().size(); i++){
-                Value * currValue = visit(ctx->expr_3(i+1));
-                if(ctx->opSumDiff(i)->getText() == "+")
-                    res->setRealValue(res->getRealValue() + currValue->getRealValue());
-                else
-                    res->setRealValue(res->getRealValue() - currValue->getRealValue());
+    antlrcpp::Any visitExprTernary(CSP2SATParser::ExprTernaryContext *ctx) override {
+        Value * condition = visit(ctx->condition);
+        if(condition->getRealValue())
+            return visit(ctx->op1);
+        else
+            return visit(ctx->op2);
+    }
+
+    antlrcpp::Any visitExprAnd(CSP2SATParser::ExprAndContext *ctx) override {
+        Value * result = visit(ctx->exprOr(0));
+        if(ctx->exprOr().size() > 1){
+            BoolValue * res = new BoolValue(true);
+            for(int i=0; i < ctx->exprOr().size(); i++){
+                Value * currValue = visit(ctx->exprOr(i));
+                res->setRealValue(res->getRealValue() && currValue->getRealValue());
             }
             return (Value*) res;
         }
         return result;
     }
 
-    antlrcpp::Any visitExpr_3(CSP2SATParser::Expr_3Context *ctx) override {
-        Value * result = visit(ctx->expr_2(0));
-        if(ctx->expr_2().size() > 1){
-            IntValue * res = new IntValue(result->getRealValue());
-            for(int i=0; i < ctx->opMulDivMod().size(); i++){
-                Value * currValue = visit(ctx->expr_2(i+1));
-                if(ctx->opMulDivMod(i)->getText() == "*")
-                    res->setRealValue(res->getRealValue() * currValue->getRealValue());
-                else if (ctx->opMulDivMod(i)->getText() == "/")
-                    res->setRealValue(res->getRealValue() / currValue->getRealValue());
-                else
-                    res->setRealValue(res->getRealValue() % currValue->getRealValue());
+    antlrcpp::Any visitExprOr(CSP2SATParser::ExprOrContext *ctx) override {
+        Value * result = visit(ctx->exprEq(0));
+        if(ctx->exprEq().size() > 1){
+            BoolValue * res = new BoolValue(false);
+            for(int i=0; i < ctx->exprEq().size(); i++){
+                Value * currValue = visit(ctx->exprEq(i));
+                if(currValue->isBoolean())
+                    res->setRealValue(res->getRealValue() || currValue->getRealValue());
+                else {
+                    cerr << ctx->exprEq(i)->getText() << " is not a boolean value" << endl;
+                    throw;
+                }
             }
             return (Value*) res;
         }
         return result;
     }
+
+
+    antlrcpp::Any visitExprEq(CSP2SATParser::ExprEqContext *ctx) override {
+        Value * lVal = visit(ctx->exprRel(0));
+        if (ctx->exprRel().size() == 2) {
+            Value * rVal = visit(ctx->exprRel(1));
+            if(lVal->isBoolean() == rVal->isBoolean()){
+                BoolValue *res = new BoolValue();
+                if (ctx->opEquality(0)->getText() == "==")
+                    res->setRealValue(lVal->getRealValue() == rVal->getRealValue());
+                else
+                    res->setRealValue(lVal->getRealValue() != rVal->getRealValue());
+                return (Value *) res;
+            } else {
+                cerr << "Equality operation types don't match" << endl;
+                throw;
+            }
+        }
+        else if(ctx->exprRel().size() > 2) {
+            cerr << "Invalid equality operation int vs bool" << endl;
+            throw;
+        }
+        return lVal;
+    }
+
+
+    antlrcpp::Any visitExprRel(CSP2SATParser::ExprRelContext *ctx) override {
+        Value * lVal = visit(ctx->exprSumDiff(0));
+        if (ctx->exprSumDiff().size() == 2) {
+            Value *rVal = visit(ctx->exprSumDiff(1));
+            if(lVal->isBoolean() == rVal->isBoolean()){
+                BoolValue *res = new BoolValue();
+                if (ctx->opRelational(0)->getText() == "<")
+                    res->setRealValue(lVal->getRealValue() < rVal->getRealValue());
+                else if (ctx->opRelational(0)->getText() == ">")
+                    res->setRealValue(lVal->getRealValue() > rVal->getRealValue());
+                else if (ctx->opRelational(0)->getText() == "<=")
+                    res->setRealValue(lVal->getRealValue() <= rVal->getRealValue());
+                else
+                    res->setRealValue(lVal->getRealValue() >= rVal->getRealValue());
+                return (Value *) res;
+            } else {
+                cerr << "Relational operation types don't match" << endl;
+                throw;
+            }
+        }
+        else if(ctx->exprSumDiff().size() > 2) {
+            cerr << "Invalid relational operation int vs bool" << endl;
+            throw;
+        }
+        return lVal;
+    }
+
+    antlrcpp::Any visitExprSumDiff(CSP2SATParser::ExprSumDiffContext *ctx) override {
+        Value * result = visit(ctx->exprMulDivMod(0));
+        if(ctx->exprMulDivMod().size() > 1){
+            IntValue * res = new IntValue(result->getRealValue());
+            for(int i=0; i < ctx->opSumDiff().size(); i++){
+                Value * currValue = visit(ctx->exprMulDivMod(i+1));
+                if(!currValue->isBoolean()){
+                    if(ctx->opSumDiff(i)->getText() == "+")
+                        res->setRealValue(res->getRealValue() + currValue->getRealValue());
+                    else
+                        res->setRealValue(res->getRealValue() - currValue->getRealValue());
+                }
+                else {
+                    cerr << ctx->exprMulDivMod(i+1)->getText() << " is not an int value" << endl;
+                    throw;
+                }
+
+            }
+            return (Value*) res;
+        }
+        return result;
+    }
+
+    antlrcpp::Any visitExprMulDivMod(CSP2SATParser::ExprMulDivModContext *ctx) override {
+        Value * result = visit(ctx->exprNot(0));
+        if(ctx->exprNot().size() > 1){
+            IntValue * res = new IntValue(result->getRealValue());
+            for(int i=0; i < ctx->opMulDivMod().size(); i++){
+                Value * currValue = visit(ctx->exprNot(i+1));
+                if(!currValue->isBoolean()){
+                    if(ctx->opMulDivMod(i)->getText() == "*")
+                        res->setRealValue(res->getRealValue() * currValue->getRealValue());
+                    else if (ctx->opMulDivMod(i)->getText() == "/")
+                        res->setRealValue(res->getRealValue() / currValue->getRealValue());
+                    else
+                        res->setRealValue(res->getRealValue() % currValue->getRealValue());
+                }
+                else {
+
+                }
+            }
+            return (Value*) res;
+        }
+        return result;
+    }
+
+    antlrcpp::Any visitExprNot(CSP2SATParser::ExprNotContext *ctx) override {
+        Value * result = visit(ctx->expr_base());
+        if(ctx->op){
+            if(result->isBoolean()){
+                return (Value*) new BoolValue(!result->getRealValue());
+            } else {
+                cerr << ctx->getText() << ": can't negate a non-boolean value" << endl;
+                throw;
+            }
+        }
+        return result;
+    }
+
 
     antlrcpp::Any visitExpr_base(CSP2SATParser::Expr_baseContext *ctx) override {
         if(ctx->expr()){
@@ -71,7 +188,6 @@ public:
 
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
-        cout << ctx->getText() << " -> ";
         Symbol * var = this->currentScope->resolve(ctx->id->getText());
         if(!ctx->varAccessObjectOrArray().empty()){
             Value * val = nullptr;

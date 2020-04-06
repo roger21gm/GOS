@@ -100,7 +100,7 @@ int main() {
 
 
 
-    showAllDefinedVariables(symbolTable->gloabls);
+    //showAllDefinedVariables(symbolTable->gloabls);
 
     return 0;
 }

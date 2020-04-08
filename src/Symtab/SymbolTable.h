@@ -20,15 +20,20 @@ public:
     static const int tBool = 3;
     GlobalScope * gloabls;
 
+
+    static BuiltInTypeSymbol *_integer;
+    static BuiltInTypeSymbol *_boolean;
+
     SymbolTable(){
-        BuiltInTypeSymbol *_integer = new BuiltInTypeSymbol("int", tInt);
-        BuiltInTypeSymbol *_boolean = new BuiltInTypeSymbol("bool", tBool);
 
         gloabls = new GlobalScope();
         this->gloabls->define(_integer);
         this->gloabls->define(_boolean);
     }
 };
+
+BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolTable::tInt);
+BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 
 
 #endif //CSP2SAT_SYMBOLTABLE_H

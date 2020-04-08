@@ -95,11 +95,6 @@ public:
         else{
             JSONBaseVisitor::visitValue(ctx);
         }
-
-//        else{
-//            cerr << "Error!" << endl;
-//        }
-
         return nullptr;
     }
 };

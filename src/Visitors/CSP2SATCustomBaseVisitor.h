@@ -10,6 +10,7 @@
 #include "CSP2SATBaseVisitor.h"
 #include "../Symtab/Value/IntValue.h"
 #include "../Symtab/Value/BoolValue.h"
+#include "../Symtab/Scope/LocalScope.h"
 
 using namespace CSP2SAT;
 using namespace std;
@@ -189,6 +190,7 @@ public:
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
         Symbol * var = this->currentScope->resolve(ctx->id->getText());
+        string a = ctx->id->getText();
         if(!ctx->varAccessObjectOrArray().empty()){
             Value * val = nullptr;
             ScopedSymbol * nestedScope = (ScopedSymbol *) var;

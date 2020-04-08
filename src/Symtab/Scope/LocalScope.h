@@ -1,10 +1,9 @@
 //
-// Created by Roger Generoso Masós on 19/03/2020.
+// Created by Roger Generoso Masós on 08/04/2020.
 //
 
 #ifndef CSP2SAT_LOCALSCOPE_H
 #define CSP2SAT_LOCALSCOPE_H
-
 
 #include "BaseScope.h"
 

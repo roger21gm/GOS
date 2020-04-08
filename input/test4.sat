@@ -12,5 +12,4 @@ viewpoint:
     var bool varTest;
 
 constraints:
-    !(false & true) ? 1 : 2;
-    varTest;
+    [ i * j | i in 1..3, j in 1..3 where i < j];

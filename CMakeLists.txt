@@ -38,6 +38,6 @@ include_directories(${ANTLR_JSON_OUTPUT_DIR})
 file(GLOB CSP2SAT_SRC "src/*.cpp")
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/antlr4cpp_generated_src)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
-add_executable(CSP2SAT src/main.cpp ${ANTLR_CSP2SAT_CXX_OUTPUTS} ${ANTLR_JSON_CXX_OUTPUTS} src/Symtab/Symbol/Scoped/ArraySymbol.h src/Symtab/Symbol/Scoped/ScopedSymbol.h src/Visitors/CSP2SATConstraintsVisitor.h)
+add_executable(CSP2SAT src/main.cpp ${ANTLR_CSP2SAT_CXX_OUTPUTS} ${ANTLR_JSON_CXX_OUTPUTS})
 target_link_libraries(CSP2SAT antlr4_static)
 

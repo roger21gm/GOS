@@ -44,6 +44,10 @@ public:
         return scopeSymbols;
     }
 
+    void setSize(int siz){
+        this->size = siz;
+    }
+
     int getSize() {
         return this->size;
     }

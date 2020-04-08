@@ -39,9 +39,9 @@ public:
 
         string name = ctx->name->getText();
 
-        if(!ctx->expr().empty()) {
+        if(ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             vector<int> dimentions;
-            for( auto expr : ctx->expr()) {
+            for( auto expr : ctx->arrayDefinition()->expr()) {
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }

@@ -106,9 +106,13 @@ constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 
 
 
-varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL? name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* TK_SEMICOLON;
-paramDefinition: TK_PARAM type=(TK_IDENT | TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT) name=TK_IDENT (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)* TK_SEMICOLON;
+varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL? name=TK_IDENT arrayDefinition TK_SEMICOLON;
+paramDefinition: (
+        TK_PARAM type=(TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT)
+        | type=TK_IDENT
+    ) name=TK_IDENT arrayDefinition TK_SEMICOLON;
 
+arrayDefinition: (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)*;
 
 constraintDefinition: (forall | ifThenElse | expr | functionCall) TK_SEMICOLON;
 

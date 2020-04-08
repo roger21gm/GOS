@@ -8,7 +8,7 @@ entities:
 viewpoint:
     param int a;
     param int b[5];
-    param A c;
+    A c;
 
 constraints:
     !(false & true) ? 1 : 2;

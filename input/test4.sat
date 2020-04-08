@@ -9,6 +9,8 @@ viewpoint:
     param int a;
     param int b[5];
     A c;
+    var bool varTest;
 
 constraints:
     !(false & true) ? 1 : 2;
+    varTest;

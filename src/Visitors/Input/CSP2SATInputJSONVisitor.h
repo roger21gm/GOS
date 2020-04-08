@@ -82,6 +82,10 @@ public:
     antlrcpp::Any visitValue(JSONParser::ValueContext *ctx) override {
         if(ctx->NUMBER())
             return (Value*) new IntValue(stoi(ctx->getText()));
+        else if(ctx->getText() == "true")
+            return (Value*) new BoolValue(true);
+        else if(ctx->getText() == "false")
+            return (Value*) new BoolValue(false);
         else if(ctx->obj()){
             JSONBaseVisitor::visitValue(ctx);
         }

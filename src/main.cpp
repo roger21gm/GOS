@@ -6,6 +6,8 @@
 #include "Visitors/CSP2SATTypeVarDefinitionVisitor.h"
 #include "Visitors/Input/CSP2SATInputJSONVisitor.h"
 #include "Visitors/CSP2SATConstraintsVisitor.h"
+#include "smtformula.h"
+
 
 // generated lexer and parser
 #include <CSP2SATLexer.h>
@@ -21,6 +23,7 @@ using namespace antlr4;
 using namespace CSP2SAT;
 using namespace tree;
 
+
 void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
     map<string, Symbol*> currentScopeSymbols = currentScope->getScopeSymbols();
 
@@ -32,7 +35,7 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
                 else
                     showAllDefinedVariables( (ScopedSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
             else{
-                string output = "const -> ";
+                string output = "param -> ";
                 if(!prefix.empty() && prefix[0] == '.')
                     output += prefix.substr(1, prefix.length()-1);
                 else
@@ -45,7 +48,8 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
                     output += "." + sym.first ;
                 }
 
-                cout << output  << " -> " << ((AssignableSymbol*)sym.second)->getValue()->getRealValue() << endl;
+                Value * val = ((AssignableSymbol*)sym.second)->getValue();
+                cout << output  << " -> " << (val ? to_string(val->getRealValue()) : "_") << endl;
             }
         }
         else {
@@ -57,6 +61,8 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
 int main() {
 
     SymbolTable * symbolTable = new SymbolTable();
+
+    SMTFormula * f = new SMTFormula();
 
     ifstream inFile;
     inFile.open("../input/i4.json"); //open the input file

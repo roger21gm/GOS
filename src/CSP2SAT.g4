@@ -119,7 +119,7 @@ constraintDefinition: (forall | ifThenElse | expr | functionCall | list) TK_SEMI
 // CONSTRAINTS
 range: TK_IN min=expr TK_RANGE_DOTS max=expr;
 
-forall: TK_FORALL TK_LPAREN TK_IDENT range TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET;
+forall: TK_FORALL TK_LPAREN TK_IDENT range (TK_COMMA TK_IDENT range)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET;
 
 
 ifThenElse:
@@ -129,8 +129,7 @@ ifThenElse:
 
 functionCall: TK_IDENT TK_LPAREN (expr | list) TK_RPAREN;
 
-list: (TK_LCLAUDATOR resExpr=expr TK_OP_LOGIC_OR_PIPE TK_IDENT range (TK_COMMA TK_IDENT range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR);
-//      (TK_LCLAUDATOR expr TK_OP_LOGIC_OR_PIPE TK_IDENT (TK_COMMA TK_IDENT)* (TK_WHERE expr)? TK_RCLAUDATOR) // [a*b | a in 1..3, b in 1..3 where a < 2]
+list: (TK_LCLAUDATOR resExpr=expr TK_OP_LOGIC_OR_PIPE TK_IDENT range (TK_COMMA TK_IDENT range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR); // [a*b | a in 1..3, b in 1..3 where a < 2]
 //    | (TK_LCLAUDATOR expr TK_OP_LOGIC_OR_PIPE TK_IDENT TK_IN TK_IDENT (TK_WHERE expr)? TK_RCLAUDATOR) // [ point.x | point in points where point.y < 3 ]
 //    | (TK_IDENT TK_LCLAUDATOR expr TK_RCLAUDATOR TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR) // points[2][_]
 //    | (TK_IDENT TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR TK_LCLAUDATOR expr TK_RCLAUDATOR); // points[_][2]

@@ -210,6 +210,18 @@ It will be able possible to define constraints in the boolean decision variables
 - Global constraints:
 
   - Cardinalities
+    - **EO**
+      - EO( [ X[a] [b] | a in 1..3, b in 1..3 ] )
+      - EO( [ X[i] | i in 1..n ])
+      - EO( [!X[i] | i in 1..n])
+      - EO( varX )
+      - EO( varX[_] [0] )
+      - EO( varX[_] [0] )
+      - EO( varX[_] [0] [0] )
+      - EO( [x, y, !z] )
+    - **AMO**
+    - **ALO**
+    - EK
 
 
 
@@ -266,9 +278,19 @@ A comprehension list will define an anonymous list. It is possible to generate c
 
 
 
+
+
+
+
+
+
+
+
 #### Idees
 
 Posar noms a dominis
+
+
 
 
 
@@ -351,8 +373,8 @@ vars:
 constraints:
    	forall (i in 1..n) {
 	   	sum(nQueens.q[i][_]) == 1;
-		sum(nQueens.q[_][i]) == 1;
-		sum([sQueens.q[i][j] | j in 1..n]);
+			sum(nQueens.q[_][i]) == 1;
+			sum([sQueens.q[i][j] | j in 1..n]);
    	};
 ```
 

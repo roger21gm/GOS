@@ -71,6 +71,9 @@ public:
                 visit(ctx->value()[i]);
                 this->currentScope = arrElem->getEnclosingScope();
             }
+            else if(ctx->value()[i]->getText() == "null"){
+                ((AssignableSymbol *) this->currentScope->resolve(to_string(i)))->setValue(nullptr);
+            }
             else{
                 Value * val = JSONBaseVisitor::visit(ctx->value()[i]);
                 ((AssignableSymbol *) this->currentScope->resolve(to_string(i)))->setValue(val);

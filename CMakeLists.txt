@@ -36,8 +36,22 @@ include_directories(${ANTLR_JSON_OUTPUT_DIR})
 
 # build CSP2SAT
 file(GLOB CSP2SAT_SRC "src/*.cpp")
+include_directories(${PROJECT_SOURCE_DIR}/src/api/smtapi/src)
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/antlr4cpp_generated_src)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
-add_executable(CSP2SAT src/main.cpp ${ANTLR_CSP2SAT_CXX_OUTPUTS} ${ANTLR_JSON_CXX_OUTPUTS})
+
+add_executable(
+            CSP2SAT
+            src/main.cpp
+            ${ANTLR_CSP2SAT_CXX_OUTPUTS}
+            ${ANTLR_JSON_CXX_OUTPUTS}
+            src/api/smtapi/src/smtformula.cpp
+            src/api/smtapi/src/smtapi.cpp
+            src/api/smtapi/src/MDD/mddbuilder.cpp
+            src/api/smtapi/src/MDD/amopbbddbuilder.cpp
+            src/api/smtapi/src/MDD/amopbmddbuilder.cpp
+            src/api/smtapi/src/MDD/mdd.cpp
+            src/api/smtapi/src/util/util.cpp
+        )
 target_link_libraries(CSP2SAT antlr4_static)
 

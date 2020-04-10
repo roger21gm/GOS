@@ -189,8 +189,8 @@ public:
 
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
-        Symbol * var = this->currentScope->resolve(ctx->id->getText());
         string a = ctx->id->getText();
+        Symbol * var = this->currentScope->resolve(ctx->id->getText());
         if(!ctx->varAccessObjectOrArray().empty()){
             Value * val = nullptr;
             ScopedSymbol * nestedScope = (ScopedSymbol *) var;

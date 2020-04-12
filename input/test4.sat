@@ -12,4 +12,4 @@ viewpoint:
     var bool varTest;
 
 constraints:
-    [ b[1] | i in 0..4];
+    [ b[i] | i in 0..4];

@@ -187,22 +187,35 @@ public:
         if(ctx->expr()){
             return visit(ctx->expr());
         }
+        else if (ctx->varAccess()){
+            ValueSymbol * value = visit(ctx->varAccess());
+            if (!value->isVariable()) {
+                return (Value*) ((AssignableSymbol*) value)->getValue();
+            }
+            else {
+                cerr << "Arithmetic expressions not allowed with variables" << endl;
+                throw;
+            }
+        }
         return CSP2SATBaseVisitor::visitExpr_base(ctx);
     }
 
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
+        Scope * iniScope = this->currentScope;
         string a = ctx->id->getText();
         Symbol * var = this->currentScope->resolve(ctx->id->getText());
         if(!ctx->varAccessObjectOrArray().empty()){
-            Value * val = nullptr;
+            ValueSymbol * val = nullptr;
             ScopedSymbol * nestedScope = (ScopedSymbol *) var;
             this->currentScope = nestedScope;
             for(int i = 0; i < ctx->varAccessObjectOrArray().size(); i++){
                 auto nestedElem = ctx->varAccessObjectOrArray()[i];
                 string nestedElementToFind;
                 if(nestedElem->index){
+                    this->currentScope = iniScope;
                     nestedElementToFind = to_string(((Value*) visit(nestedElem->index))->getRealValue());
+                    this->currentScope = nestedScope;
                 }
                 else{
                     nestedElementToFind = nestedElem->attr->getText();
@@ -211,7 +224,7 @@ public:
                 if(i == ctx->varAccessObjectOrArray().size()-1){
                     Symbol * valueSymbol = this->currentScope->resolve(nestedElementToFind);
                     if(valueSymbol->isAssignable()){
-                        val = ((AssignableSymbol*) valueSymbol)->getValue();
+                        val = (AssignableSymbol*) valueSymbol;
                     }
                     else throw runtime_error(ctx->getText() + " is not a variable/constant");
                 }
@@ -219,11 +232,11 @@ public:
                     this->currentScope = (ScopedSymbol*) this->currentScope->resolve(nestedElementToFind);
                 }
             }
-            this->currentScope = nestedScope->getEnclosingScope();
+            this->currentScope = iniScope;
             return val;
         } else {
             AssignableSymbol * a = (AssignableSymbol*) var;
-            return (Value*) a->getValue();
+            return (ValueSymbol*) a;
         }
     }
 
@@ -282,8 +295,10 @@ public:
 
             if(condition){
                 if(ctx->varAcc){
-                    cout << "uita!" << endl;
-                    //index++;
+                    ValueSymbol * valueSymbol = visit(ctx->varAcc);
+                    if(valueSymbol->isAssignable())
+                        cout << ((AssignableSymbol*) valueSymbol)->getValue()->getRealValue() << endl;
+                    index++;
                 }
                 else {
                     Value * exprVal = visit(ctx->resExpr);

@@ -187,11 +187,11 @@ public:
         }
         else if (ctx->varAccess()){
             ValueSymbol * value = visit(ctx->varAccess());
-            if (!value->isVariable()) {
+            if(value->isAssignable()){
                 return (Value*) ((AssignableSymbol*) value)->getValue();
             }
             else {
-                cerr << "Arithmetic expressions not allowed with variables" << endl;
+                cerr << "Not allowed arithmetic expressions with variables: " << ctx->getText() << endl;
                 throw;
             }
         }
@@ -206,35 +206,51 @@ public:
         if(!ctx->varAccessObjectOrArray().empty()){
             ValueSymbol * val = nullptr;
             ScopedSymbol * nestedScope = (ScopedSymbol *) var;
-            this->currentScope = nestedScope;
-            for(int i = 0; i < ctx->varAccessObjectOrArray().size(); i++){
-                auto nestedElem = ctx->varAccessObjectOrArray()[i];
-                string nestedElementToFind;
-                if(nestedElem->index){
-                    this->currentScope = iniScope;
-                    nestedElementToFind = to_string(((Value*) visit(nestedElem->index))->getRealValue());
-                    this->currentScope = nestedScope;
-                }
-                else{
-                    nestedElementToFind = nestedElem->attr->getText();
-                }
-
-                if(i == ctx->varAccessObjectOrArray().size()-1){
-                    Symbol * valueSymbol = this->currentScope->resolve(nestedElementToFind);
-                    if(valueSymbol->isAssignable()){
-                        val = (AssignableSymbol*) valueSymbol;
+            if(nestedScope->getTypeIndex() == SymbolTable::tArray || nestedScope->getTypeIndex() == SymbolTable::tCustom) {
+                this->currentScope = nestedScope;
+                ScopedSymbol * prevScope  = nestedScope;
+                for(int i = 0; i < ctx->varAccessObjectOrArray().size(); i++){
+                    auto nestedElem = ctx->varAccessObjectOrArray()[i];
+                    string nestedElementToFind;
+                    if(nestedElem->index){
+                        this->currentScope = iniScope;
+                        nestedElementToFind = to_string(((Value*) visit(nestedElem->index))->getRealValue());
+                        this->currentScope = prevScope;
                     }
-                    else throw runtime_error(ctx->getText() + " is not a variable/constant");
+                    else{
+                        nestedElementToFind = nestedElem->attr->getText();
+                    }
+
+                    if(i == ctx->varAccessObjectOrArray().size()-1){
+                        Symbol * valueSymbol = this->currentScope->resolve(nestedElementToFind);
+                        if(valueSymbol->isAssignable() || (valueSymbol->type && valueSymbol->type->getTypeIndex() == SymbolTable::tVarBool)){
+                            val = (ValueSymbol*) valueSymbol;
+                        }
+                        else throw runtime_error(ctx->getText() + " is not a variable/param");
+                    }
+                    else {
+                        prevScope = (ScopedSymbol*) this->currentScope->resolve(nestedElementToFind);
+                        if(prevScope->getTypeIndex() == SymbolTable::tArray || prevScope->getTypeIndex() == SymbolTable::tCustom) {
+                            this->currentScope = prevScope;
+                        }
+                        else {
+                            cerr << "BAD ACCESS: " << ctx->getText() << endl;
+                            throw;
+                        }
+                    }
                 }
-                else {
-                    this->currentScope = (ScopedSymbol*) this->currentScope->resolve(nestedElementToFind);
-                }
+                this->currentScope = iniScope;
+                return val;
+            } else {
+                cerr << "BAD ACCESS: " << ctx->getText() << endl;
+                throw;
             }
-            this->currentScope = iniScope;
-            return val;
-        } else {
+        } else if(var->type->getTypeIndex() != SymbolTable::tCustom && var->type->getTypeIndex() != SymbolTable::tArray) {
             AssignableSymbol * a = (AssignableSymbol*) var;
             return (ValueSymbol*) a;
+        } else {
+            cerr << "BAD ACCESS: " << ctx->getText() << endl;
+            throw;
         }
     }
 
@@ -273,10 +289,8 @@ public:
             indices[ctx->TK_IDENT(i)->getText()] = 0;
         }
 
-        ArraySymbol * newList = Utils::defineNewArray("aux", listLocalScope, vector<int>{resultListSize},
-                                                      SymbolTable::_integer);
+        ArraySymbol *newList = nullptr;
         int index = 0;
-
         this->currentScope = listLocalScope;
         while(true) {
             auto itCustomAssignation = indices.begin();
@@ -295,16 +309,30 @@ public:
             if(condition){
                 if(ctx->varAcc){
                     ValueSymbol * valueSymbol = visit(ctx->varAcc);
-                    if(valueSymbol->isAssignable())
-                        cout << ((AssignableSymbol*) valueSymbol)->getValue()->getRealValue() << endl;
+                    if(valueSymbol->isAssignable()) {
+                        if(newList == nullptr)
+                            newList = Utils::defineNewArray("aux", listLocalScope, vector<int>{resultListSize}, SymbolTable::_integer);
+
+                        ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(((AssignableSymbol *) valueSymbol)->getValue());
+                    }
                     else {
-                        //TODO: Variable comprehension list
+                        if(newList == nullptr)
+                            newList = new ArraySymbol(
+                                    "aux",
+                                    listLocalScope,
+                                    SymbolTable::_boolean,
+                                    resultListSize
+                            );
+                        newList->define((VariableSymbol*)valueSymbol);
                     }
                     index++;
                 }
                 else {
+                    if(newList == nullptr)
+                        newList = Utils::defineNewArray("aux", listLocalScope, vector<int>{resultListSize}, SymbolTable::_integer);
+
                     Value * exprVal = visit(ctx->resExpr);
-                    ((AssignableSymbol*)newList->resolve(to_string(index)))->setValue(exprVal);
+                    ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(exprVal);
                     index++;
                 }
             }
@@ -340,7 +368,10 @@ public:
         auto it = a.begin();
 
         while(it != a.end()){
-            cout << ((AssignableSymbol*)it->second)->getValue()->getRealValue() << endl;
+            if (it->second->isAssignable())
+                cout << ((AssignableSymbol*)it->second)->getValue()->getRealValue() << endl;
+            else
+                cout << ((VariableSymbol*) it->second)->getVar().id << endl;
             it++;
         }
         return 0;

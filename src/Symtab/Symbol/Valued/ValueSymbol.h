@@ -11,8 +11,6 @@
 class ValueSymbol : public Symbol {
 public:
     ValueSymbol(const string &name, Type *type) : Symbol(name, type) {}
-
-    virtual bool isVariable()  = 0;
 };
 
 

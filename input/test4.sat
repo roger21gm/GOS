@@ -1,13 +1,12 @@
 entities:
     A {
-        var bool a;
+        var bool a[300][300];
         param int b;
     };
 
 viewpoint:
-    param int a;
-    var b;
-    var c[10];
     A b[3];
+    var a;
 
 constraints:
+    [ b[0].a[0][0] | i in 1..10];

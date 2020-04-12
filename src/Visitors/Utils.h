@@ -16,7 +16,7 @@
 class Utils {
 
 public:
-    static StructSymbol *createCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
+    static StructSymbol *definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
                 name,
@@ -26,13 +26,19 @@ public:
         for (pair<string, Symbol *> sym : customType->getScopeSymbols()) {
             if (sym.second->type->getTypeIndex() == SymbolTable::tCustom) {
                 StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
-                StructSymbol *newVar = createCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst);
+                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst);
                 newCustomTypeConst->define(newVar);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                 ArraySymbol *aSy = (ArraySymbol *) sym.second;
                 ArraySymbol * newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
                 newCustomTypeConst->define(newArrayConst);
-            } else {
+            } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
+                newCustomTypeConst->define(new VariableSymbol(
+                            sym.first,
+                            SymbolTable::_f->newBoolVar()
+                        ));
+            }
+            else{
                 newCustomTypeConst->define(new AssignableSymbol(sym.first, sym.second->type));
             }
         }
@@ -64,7 +70,7 @@ public:
             for (int i = 0; i < dimentions[0]; ++i) {
                 Symbol *element;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    element = createCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
+                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
                 else if (elementsType->getTypeIndex() == SymbolTable::tVarBool){
                     element = new VariableSymbol(
                             to_string(i),

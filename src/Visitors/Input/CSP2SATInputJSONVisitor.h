@@ -37,22 +37,30 @@ public:
         varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
         Symbol * var = currentScope->resolve(varName);
 
-        if(ctx->value()->obj()) {
-            StructSymbol* a = (StructSymbol*) var;
-            this->currentScope = a;
-            JSONBaseVisitor::visitPair(ctx);
-            this->currentScope = a->getEnclosingScope();
+        if(var) {
+            if(ctx->value()->obj()) {
+                StructSymbol* a = (StructSymbol*) var;
+                this->currentScope = a;
+                JSONBaseVisitor::visitPair(ctx);
+                this->currentScope = a->getEnclosingScope();
+            }
+            else if(ctx->value()->arr()){
+                ArraySymbol* a = (ArraySymbol*) var;
+                this->currentScope = a;
+                JSONBaseVisitor::visitPair(ctx);
+                this->currentScope = a->getEnclosingScope();
+            }
+            else{
+                Value * val = JSONBaseVisitor::visitPair(ctx);
+                ((AssignableSymbol*)var)->setValue(val);
+            }
         }
-        else if(ctx->value()->arr()){
-            ArraySymbol* a = (ArraySymbol*) var;
-            this->currentScope = a;
-            JSONBaseVisitor::visitPair(ctx);
-            this->currentScope = a->getEnclosingScope();
+        else {
+            cerr << "You are assigning '" << varName << "' and it doesn't exist as a param in the viewpoint" << endl;
+            throw;
         }
-        else{
-            Value * val = JSONBaseVisitor::visitPair(ctx);
-            ((AssignableSymbol*)var)->setValue(val);
-        }
+
+
         return nullptr;
     }
 

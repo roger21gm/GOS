@@ -24,10 +24,6 @@ public:
         return var;
     }
 
-    bool isVariable() override {
-        return true;
-    }
-
 private:
     boolvar var;
 };

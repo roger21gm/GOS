@@ -107,7 +107,7 @@ int main() {
     visitor3->visit(tree3);
 
 
-    showAllDefinedVariables(symbolTable->gloabls);
+    //showAllDefinedVariables(symbolTable->gloabls);
 
     return 0;
 }

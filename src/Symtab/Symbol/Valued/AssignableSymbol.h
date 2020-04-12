@@ -26,11 +26,6 @@ public:
         this->val = value;
     }
 
-    bool isVariable() override {
-        return false;
-    }
-
-
 private:
     Value * val;
 };

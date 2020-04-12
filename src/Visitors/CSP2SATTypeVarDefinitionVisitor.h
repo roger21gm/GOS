@@ -66,7 +66,7 @@ public:
             newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type);
         }
         else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = Utils::createCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope);
+            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope);
         }
         else {
             newConst = new AssignableSymbol(

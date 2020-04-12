@@ -19,16 +19,34 @@ using namespace std;
 class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
+
+
 
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
-        VariableSymbol *newVar;
-        newVar = new VariableSymbol(
-                ctx->name->getText(),
-                this->_f->newBoolVar()
-        );
+
+        CSP2SATBaseVisitor::visitVarDefinition(ctx);
+
+        Symbol *newVar;
+        string name = ctx->name->getText();
+        if(ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
+            vector<int> dimentions;
+            for( auto expr : ctx->arrayDefinition()->expr()) {
+                Value * a = visit(expr);
+                dimentions.push_back(a->getRealValue());
+            }
+            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool);
+        }
+        else {
+            newVar = new VariableSymbol(
+                    ctx->name->getText(),
+                    SymbolTable::_f->newBoolVar()
+            );
+        }
         currentScope->define(newVar);
-        return CSP2SATBaseVisitor::visitVarDefinition(ctx);
+
+        return nullptr;
+
     }
 
     antlrcpp::Any visitParamDefinition(CSP2SATParser::ParamDefinitionContext *ctx) override {
@@ -45,7 +63,7 @@ public:
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newConst = Utils::createArrayParam(ctx->name->getText(), currentScope, dimentions, type);
+            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type);
         }
         else if (type->getTypeIndex() == SymbolTable::tCustom) {
             newConst = Utils::createCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope);

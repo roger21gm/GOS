@@ -35,7 +35,7 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
                 else
                     showAllDefinedVariables( (ScopedSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
             else{
-                string output = "param -> ";
+                string output = sym.second->type->getTypeIndex() != SymbolTable::tVarBool ?  "param -> " : "var -> ";
                 if(!prefix.empty() && prefix[0] == '.')
                     output += prefix.substr(1, prefix.length()-1);
                 else
@@ -48,8 +48,14 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
                     output += "." + sym.first ;
                 }
 
-                Value * val = ((AssignableSymbol*)sym.second)->getValue();
-                cout << output  << " -> " << (val ? to_string(val->getRealValue()) : "_") << endl;
+                if(sym.second->type->getTypeIndex() != SymbolTable::tVarBool){
+                    Value * val = ((AssignableSymbol*)sym.second)->getValue();
+                    cout << output  << " -> " << (val ? to_string(val->getRealValue()) : "_") << endl;
+                }
+                else {
+                    cout << output  << endl;
+                }
+
             }
         }
         else {
@@ -61,8 +67,6 @@ void showAllDefinedVariables(Scope * currentScope, const string& prefix = ""){
 int main() {
 
     SymbolTable * symbolTable = new SymbolTable();
-
-    SMTFormula * f = new SMTFormula();
 
     ifstream inFile;
     inFile.open("../input/i4.json"); //open the input file
@@ -82,7 +86,7 @@ int main() {
     CommonTokenStream tokens(&lexer);
     CSP2SATParser parser(&tokens);
     CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
-    CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable, f);
+    CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
     visitor->visit(tree);
 
     ANTLRInputStream input2(inputStr);
@@ -99,11 +103,11 @@ int main() {
     CommonTokenStream tokens3(&lexer3);
     CSP2SATParser parser3(&tokens3);
     CSP2SATParser::Csp2satContext *tree3 = parser3.csp2sat();
-    CSP2SATConstraintsVisitor * visitor3 = new CSP2SATConstraintsVisitor(symbolTable, f);
+    CSP2SATConstraintsVisitor * visitor3 = new CSP2SATConstraintsVisitor(symbolTable);
     visitor3->visit(tree3);
 
 
-    //showAllDefinedVariables(symbolTable->gloabls);
+    showAllDefinedVariables(symbolTable->gloabls);
 
     return 0;
 }

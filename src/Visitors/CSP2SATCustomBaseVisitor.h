@@ -22,14 +22,12 @@ class CSP2SATCustomBaseVisitor: public CSP2SATBaseVisitor {
 protected:
     SymbolTable * st;
     Scope *currentScope;
-    SMTFormula * _f;
 
 public:
 
-    explicit CSP2SATCustomBaseVisitor(SymbolTable * symbolTable, SMTFormula * f) {
+    explicit CSP2SATCustomBaseVisitor(SymbolTable * symbolTable) {
         this->st = symbolTable;
         this->currentScope = this->st->gloabls;
-        this->_f = f;
     }
 
     antlrcpp::Any visitExprTernary(CSP2SATParser::ExprTernaryContext *ctx) override {
@@ -275,7 +273,8 @@ public:
             indices[ctx->TK_IDENT(i)->getText()] = 0;
         }
 
-        ArraySymbol * newList = Utils::createArrayParam("aux", listLocalScope, vector<int>{resultListSize}, SymbolTable::_integer);
+        ArraySymbol * newList = Utils::defineNewArray("aux", listLocalScope, vector<int>{resultListSize},
+                                                      SymbolTable::_integer);
         int index = 0;
 
         this->currentScope = listLocalScope;
@@ -298,6 +297,9 @@ public:
                     ValueSymbol * valueSymbol = visit(ctx->varAcc);
                     if(valueSymbol->isAssignable())
                         cout << ((AssignableSymbol*) valueSymbol)->getValue()->getRealValue() << endl;
+                    else {
+                        //TODO: Variable comprehension list
+                    }
                     index++;
                 }
                 else {

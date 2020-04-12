@@ -13,7 +13,7 @@
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable, SMTFormula * form) : CSP2SATCustomBaseVisitor(symbolTable, form) {}
+    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
 
 //    antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
 //        if(ctx->expr()){

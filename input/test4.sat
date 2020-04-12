@@ -1,15 +1,13 @@
 entities:
     A {
-        param int a;
+        var bool a;
         param int b;
-        param int c[2];
     };
 
 viewpoint:
     param int a;
-    param int b[5];
-    A c;
-    var bool varTest;
+    var b;
+    var c[10];
+    A b[3];
 
 constraints:
-    [ b[i] | i in 0..4];

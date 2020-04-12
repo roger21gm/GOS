@@ -9,7 +9,7 @@
 #include <iostream>
 #include "Scope/GlobalScope.h"
 #include "Symbol/BuiltInTypeSymbol.h"
-
+#include "../api/smtapi/src/smtformula.h"
 
 class SymbolTable {
 
@@ -21,13 +21,13 @@ public:
     static const int tVarBool = 4;
     GlobalScope * gloabls;
 
+    static SMTFormula * _f;
 
     static BuiltInTypeSymbol *_integer;
     static BuiltInTypeSymbol *_boolean;
     static BuiltInTypeSymbol *_varbool;
 
     SymbolTable(){
-
         gloabls = new GlobalScope();
         this->gloabls->define(_integer);
         this->gloabls->define(_boolean);
@@ -38,6 +38,6 @@ public:
 BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolTable::tInt);
 BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 BuiltInTypeSymbol * SymbolTable::_varbool = new BuiltInTypeSymbol("varbool", SymbolTable::tVarBool);
-
+SMTFormula * SymbolTable::_f = new SMTFormula();
 
 #endif //CSP2SAT_SYMBOLTABLE_H

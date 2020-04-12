@@ -48,11 +48,11 @@ public:
             dimensions.push_back(currDimension->getSize());
             currType = currDimension->resolve("0");
         }
-        return createArrayParam(name, enclosingScope, dimensions, arrayType->getElementsType());
+        return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType());
     }
 
     static ArraySymbol *
-    createArrayParam(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType) {
+    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType) {
 
         if (dimentions.size() == 1) {
             ArraySymbol *newArray = new ArraySymbol(
@@ -62,13 +62,19 @@ public:
                     dimentions[0]
             );
             for (int i = 0; i < dimentions[0]; ++i) {
-                Symbol *constElement;
+                Symbol *element;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    constElement = createCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
-                else {
-                    constElement = new AssignableSymbol(to_string(i), elementsType);
+                    element = createCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
+                else if (elementsType->getTypeIndex() == SymbolTable::tVarBool){
+                    element = new VariableSymbol(
+                            to_string(i),
+                            SymbolTable::_f->newBoolVar()
+                    );
                 }
-                newArray->define(constElement);
+                else {
+                    element = new AssignableSymbol(to_string(i), elementsType);
+                }
+                newArray->define(element);
             }
             return newArray;
         } else {
@@ -80,7 +86,7 @@ public:
                     dimentions[0]
             );
             for (int i = 0; i < dimentions[0]; i++) {
-                auto *constElement = createArrayParam(to_string(i), newDimention, restOfDimenstions, elementsType);
+                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType);
                 newDimention->define(constElement);
             }
             return newDimention;

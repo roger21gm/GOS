@@ -54,17 +54,16 @@ TK_WHERE: 'where';
 
 TK_FORALL: 'forall';
 
-
 // EXPRESSIONS BOOLEANES
 // NOT
 // AND &&
 // OR ||
 
 
-//CLÀUSULES
-TK_OP_LOGIC_NOT: '!';
-TK_OP_LOGIC_AND: '&';
-TK_OP_LOGIC_OR_PIPE: '|';
+//EXPRESSIONS
+TK_OP_LOGIC_NOT: 'not';
+TK_OP_LOGIC_AND: 'and';
+TK_OP_LOGIC_OR: 'or';
 
 TK_OP_ARIT_SUM: '+';
 TK_OP_ARIT_DIFF: '-';
@@ -85,8 +84,9 @@ TK_OP_DOUBLE_IMPLIC: '<->';
 
 TK_INTERROGANT: '?';
 
-TK_CONSTRAINT_OR: 'or';
-TK_CONSTRAINT_AND: 'and';
+TK_CONSTRAINT_OR_PIPE: '|';
+TK_CONSTRAINT_AND: '&';
+TK_CONSTRAINT_NOT: '!';
 
 
 
@@ -129,7 +129,7 @@ ifThenElse:
 
 functionCall: TK_IDENT TK_LPAREN (expr | list) TK_RPAREN;
 
-list: (TK_LCLAUDATOR resExpr=expr TK_OP_LOGIC_OR_PIPE TK_IDENT range (TK_COMMA TK_IDENT range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR); // [a*b | a in 1..3, b in 1..3 where a < 2]
+list: (TK_LCLAUDATOR (varAcc=constraint_literal | resExpr=expr ) TK_CONSTRAINT_OR_PIPE TK_IDENT range (TK_COMMA TK_IDENT range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR); // [a*b | a in 1..3, b in 1..3 where a < 2]
 //    | (TK_LCLAUDATOR expr TK_OP_LOGIC_OR_PIPE TK_IDENT TK_IN TK_IDENT (TK_WHERE expr)? TK_RCLAUDATOR) // [ point.x | point in points where point.y < 3 ]
 //    | (TK_IDENT TK_LCLAUDATOR expr TK_RCLAUDATOR TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR) // points[2][_]
 //    | (TK_IDENT TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR TK_LCLAUDATOR expr TK_RCLAUDATOR); // points[_][2]
@@ -140,7 +140,7 @@ expr:
     | condition=exprAnd TK_INTERROGANT op1=expr TK_COLON op2=expr #exprTernary;
 
 exprAnd: exprOr (TK_OP_LOGIC_AND exprOr)*;
-exprOr: exprEq (TK_OP_LOGIC_OR_PIPE exprEq)*;
+exprOr: exprEq (TK_OP_LOGIC_OR exprEq)*;
 
 opEquality: TK_OP_REL_EQ | TK_OP_REL_NEQ;
 exprEq: exprRel (opEquality exprRel)*;
@@ -163,6 +163,8 @@ varAccessObjectOrArray: (TK_DOT attr=TK_IDENT | TK_LCLAUDATOR index=expr TK_RCLA
 
 valueBaseType: integer=TK_INT_VALUE | boolean=TK_BOOLEAN_VALUE;
 
+
+
 constraint:
     constraint_double_implication
 |   constraint_and_implication
@@ -181,10 +183,11 @@ constraint_and_implication: constraint_and TK_OP_IMPLIC_R constraint_or;
 constraint_or_implication: constraint_or TK_OP_IMPLIC_L constraint_and;
 
 constraint_and:
-        constraint_literal (TK_OP_LOGIC_AND constraint_literal)*
-    |   TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN;
+        constraint_literal (TK_CONSTRAINT_AND constraint_literal)*
+    |   TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN;
 constraint_or:
-        constraint_literal (TK_OP_LOGIC_OR_PIPE constraint_literal)*
-    |   TK_CONSTRAINT_OR TK_LPAREN list TK_RPAREN;
-constraint_literal: TK_OP_LOGIC_NOT? constraint_var;
+        constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)*
+    |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN;
+
+constraint_literal: TK_CONSTRAINT_NOT? constraint_var;
 constraint_var: varAccess;

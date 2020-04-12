@@ -82,7 +82,7 @@ int main() {
     CommonTokenStream tokens(&lexer);
     CSP2SATParser parser(&tokens);
     CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
-    CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
+    CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable, f);
     visitor->visit(tree);
 
     ANTLRInputStream input2(inputStr);
@@ -99,11 +99,8 @@ int main() {
     CommonTokenStream tokens3(&lexer3);
     CSP2SATParser parser3(&tokens3);
     CSP2SATParser::Csp2satContext *tree3 = parser3.csp2sat();
-    CSP2SATConstraintsVisitor * visitor3 = new CSP2SATConstraintsVisitor(symbolTable);
+    CSP2SATConstraintsVisitor * visitor3 = new CSP2SATConstraintsVisitor(symbolTable, f);
     visitor3->visit(tree3);
-
-
-
 
 
     //showAllDefinedVariables(symbolTable->gloabls);

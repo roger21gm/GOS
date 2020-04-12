@@ -9,7 +9,7 @@
 #include "../Symtab/Symbol/Scoped/StructSymbol.h"
 #include "../Symtab/Scope/Scope.h"
 #include "../Symtab/SymbolTable.h"
-#include "../Symtab/Symbol/Assignable/ConstantSymbol.h"
+#include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../Symtab/Value/IntValue.h"
 
@@ -33,7 +33,7 @@ public:
                 ArraySymbol * newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
                 newCustomTypeConst->define(newArrayConst);
             } else {
-                newCustomTypeConst->define(new ConstantSymbol(sym.first, sym.second->type));
+                newCustomTypeConst->define(new AssignableSymbol(sym.first, sym.second->type));
             }
         }
 
@@ -66,7 +66,7 @@ public:
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
                     constElement = createCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
                 else {
-                    constElement = new ConstantSymbol(to_string(i), elementsType);
+                    constElement = new AssignableSymbol(to_string(i), elementsType);
                 }
                 newArray->define(constElement);
             }
@@ -86,6 +86,8 @@ public:
             return newDimention;
         }
     }
+
+
 
 };
 

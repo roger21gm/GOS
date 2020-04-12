@@ -7,6 +7,7 @@
 
 
 #include "ScopedSymbol.h"
+#include "../../../Helpers.h"
 #include <list>
 #include <vector>
 
@@ -29,11 +30,26 @@ public:
     }
 
     Symbol *resolve(const string& name) override {
-        int index = stoi(name);
-        if(index < size){
-            return elements[index];
+
+//        if ( fields.find(name) != fields.end() )
+//            return fields.find(name)->second;
+//        if ( enclosingScope != nullptr )
+//            return enclosingScope->resolve(name);
+
+
+        bool isNumber = Helpers::check_number(name);
+
+        if(isNumber){
+            int index = stoi(name);
+            if(index < size){
+                return elements[index];
+            }
+            cerr << "Accessing array out of range";
+            throw;
         }
-        return nullptr;
+        else
+            return enclosingScope->resolve(name);
+
     }
 
     map<string, Symbol*> getScopeSymbols() override {

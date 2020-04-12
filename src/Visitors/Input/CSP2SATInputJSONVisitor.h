@@ -7,7 +7,6 @@
 
 #include "JSONBaseVisitor.h"
 #include "../../Symtab/SymbolTable.h"
-#include "../../Symtab/Symbol/Assignable/AssignableSymbol.h"
 #include "../../Symtab/Value/IntValue.h"
 #include "../../Symtab/Symbol/Scoped/StructSymbol.h"
 

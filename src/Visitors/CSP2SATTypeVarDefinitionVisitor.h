@@ -7,8 +7,8 @@
 
 #include "CSP2SATBaseVisitor.h"
 #include "../Symtab/SymbolTable.h"
-#include "../Symtab/Symbol/Assignable/VariableSymbol.h"
-#include "../Symtab/Symbol/Assignable/ConstantSymbol.h"
+#include "../Symtab/Symbol/Valued/VariableSymbol.h"
+#include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Scoped/StructSymbol.h"
 #include "CSP2SATCustomBaseVisitor.h"
 #include "Utils.h"
@@ -19,13 +19,13 @@ using namespace std;
 class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
 
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
         VariableSymbol *newVar;
         newVar = new VariableSymbol(
                 ctx->name->getText(),
-                (Type *) (currentScope->resolve(ctx->type->getText()))
+                this->_f->newBoolVar()
         );
         currentScope->define(newVar);
         return CSP2SATBaseVisitor::visitVarDefinition(ctx);
@@ -51,7 +51,7 @@ public:
             newConst = Utils::createCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope);
         }
         else {
-            newConst = new ConstantSymbol(
+            newConst = new AssignableSymbol(
                     ctx->name->getText(),
                     type
             );
@@ -74,7 +74,6 @@ public:
     antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
         return nullptr;
     }
-
 
 };
 

@@ -7,6 +7,8 @@
 
 #include <CSP2SATLexer.h>
 #include "../Symtab/SymbolTable.h"
+#include "../Symtab/Symbol/Scoped/ArraySymbol.h"
+#include "Utils.h"
 #include "CSP2SATBaseVisitor.h"
 #include "../Symtab/Value/IntValue.h"
 #include "../Symtab/Value/BoolValue.h"
@@ -20,13 +22,14 @@ class CSP2SATCustomBaseVisitor: public CSP2SATBaseVisitor {
 protected:
     SymbolTable * st;
     Scope *currentScope;
-
+    SMTFormula * _f;
 
 public:
 
-    explicit CSP2SATCustomBaseVisitor(SymbolTable * symbolTable) {
+    explicit CSP2SATCustomBaseVisitor(SymbolTable * symbolTable, SMTFormula * f) {
         this->st = symbolTable;
         this->currentScope = this->st->gloabls;
+        this->_f = f;
     }
 
     antlrcpp::Any visitExprTernary(CSP2SATParser::ExprTernaryContext *ctx) override {
@@ -226,10 +229,104 @@ public:
 
     antlrcpp::Any visitValueBaseType(CSP2SATParser::ValueBaseTypeContext *ctx) override {
         if (ctx->integer) {
-            return (Value*) new IntValue(stoi(ctx->integer->getText()));
+            return (Value *) new IntValue(stoi(ctx->integer->getText()));
         } else {
-            return (Value*) new BoolValue(ctx->boolean->getText() == "true");
+            return (Value *) new BoolValue(ctx->boolean->getText() == "true");
         }
+    }
+
+
+    antlrcpp::Any visitList(CSP2SATParser::ListContext *ctx) override {
+        int resultListSize = 1;
+
+        map<string, vector<int>> namedRanges;
+        map<string, int> indices;
+        auto * listLocalScope = new LocalScope(this->currentScope);
+
+        auto * newScope = new LocalScope(this->currentScope);
+        for (int i = 0; i < ctx->TK_IDENT().size() ; i++) {
+            listLocalScope->define(new AssignableSymbol(ctx->TK_IDENT(i)->getText(), (Type*)SymbolTable::_integer));
+
+            Value * minRange = visit(ctx->range(i)->min);
+            Value * maxRange = visit(ctx->range(i)->max);
+            int rangeDiff = maxRange->getRealValue() - minRange->getRealValue() + 1;
+            resultListSize *= rangeDiff;
+
+            vector<int> currRange;
+            int currNum = minRange->getRealValue();
+            for(int j=minRange->getRealValue(); j <= maxRange->getRealValue(); j++){
+                currRange.push_back(currNum++);
+            }
+
+            namedRanges[ctx->TK_IDENT(i)->getText()] = currRange;
+            indices[ctx->TK_IDENT(i)->getText()] = 0;
+        }
+
+        ArraySymbol * newList = Utils::createArrayParam("aux", listLocalScope, vector<int>{resultListSize}, SymbolTable::_integer);
+        int index = 0;
+
+        this->currentScope = listLocalScope;
+        while(true) {
+            auto itCustomAssignation = indices.begin();
+            while(itCustomAssignation != indices.end()){
+                IntValue * currAss = new IntValue(namedRanges[itCustomAssignation->first][indices[itCustomAssignation->first]]);
+                ((AssignableSymbol*)listLocalScope->resolve(itCustomAssignation->first))->setValue(currAss);
+                itCustomAssignation++;
+            }
+
+            bool condition = true;
+            if(ctx->condExpr){
+                Value * conditionVal = visit(ctx->condExpr);
+                condition = conditionVal->getRealValue();
+            }
+
+            if(condition){
+                if(ctx->varAcc){
+                    cout << "uita!" << endl;
+                    //index++;
+                }
+                else {
+                    Value * exprVal = visit(ctx->resExpr);
+                    ((AssignableSymbol*)newList->resolve(to_string(index)))->setValue(exprVal);
+                    index++;
+                }
+            }
+
+            auto indicesRev = indices.rbegin();
+            while(indicesRev != indices.rend() && indicesRev->second + 1 >= namedRanges[indicesRev->first].size()){
+                indicesRev++;
+            }
+
+            if(indicesRev == indices.rend()){
+                newList->setSize(index);
+                break;
+            }
+
+
+            indices[indicesRev->first] += 1;
+
+            auto indiceForward = indices.begin();
+            while(indiceForward->first != indicesRev->first)
+                indiceForward++;
+
+            indiceForward++;
+
+            while(indiceForward != indices.end()) {
+                indices[indiceForward->first] = 0;
+                indiceForward++;
+            }
+        }
+        this->currentScope = listLocalScope->getEnclosingScope();
+
+
+        map<string, Symbol*> a = newList->getScopeSymbols();
+        auto it = a.begin();
+
+        while(it != a.end()){
+            cout << ((AssignableSymbol*)it->second)->getValue()->getRealValue() << endl;
+            it++;
+        }
+        return 0;
     }
 };
 

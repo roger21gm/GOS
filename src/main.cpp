@@ -108,6 +108,8 @@ int main() {
     CSP2SATConstraintsVisitor * visitor3 = new CSP2SATConstraintsVisitor(symbolTable);
     visitor3->visit(tree3);
 
+    SMTFormula * a = SymbolTable::_f;
+
 
     //showAllDefinedVariables(symbolTable->gloabls);
 

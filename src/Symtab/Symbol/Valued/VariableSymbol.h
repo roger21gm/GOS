@@ -12,7 +12,7 @@
 
 class VariableSymbol: public ValueSymbol {
 public:
-    VariableSymbol(const string &name, boolvar varValue) : ValueSymbol(name, SymbolTable::_varbool) {
+    VariableSymbol(const string &name, literal varValue) : ValueSymbol(name, SymbolTable::_varbool) {
         this->var = varValue;
     }
 
@@ -20,12 +20,12 @@ public:
         return false;
     }
 
-    boolvar getVar() {
+    literal getVar() {
         return var;
     }
 
 private:
-    boolvar var;
+    literal var;
 };
 
 

@@ -1,7 +1,8 @@
 entities:
     A {
         var bool a[300][300];
-        param int ;
+        param int b;
+        var c;
     };
 
 viewpoint:
@@ -9,4 +10,4 @@ viewpoint:
     var a;
 
 constraints:
-    [ b[0].a[0][0] | i in 1..10];
+    a | !a | b[0].c;

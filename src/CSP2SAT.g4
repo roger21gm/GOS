@@ -114,7 +114,7 @@ paramDefinition: (
 
 arrayDefinition: (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)*;
 
-constraintDefinition: (forall | ifThenElse | expr | functionCall | list) TK_SEMICOLON;
+constraintDefinition: (forall | ifThenElse | functionCall | constraint)* TK_SEMICOLON;
 
 // CONSTRAINTS
 range: TK_IN min=expr TK_RANGE_DOTS max=expr;
@@ -171,7 +171,7 @@ constraint:
 |   constraint_or_implication
 |   constraint_and
 |   constraint_or
-|   constraint_literal;
+|   cLit=constraint_literal;
 
 constraint_double_implication:
         constraint_literal TK_OP_DOUBLE_IMPLIC constraint_and
@@ -183,11 +183,10 @@ constraint_and_implication: constraint_and TK_OP_IMPLIC_R constraint_or;
 constraint_or_implication: constraint_or TK_OP_IMPLIC_L constraint_and;
 
 constraint_and:
-        constraint_literal (TK_CONSTRAINT_AND constraint_literal)*
+        constraint_literal (TK_CONSTRAINT_AND constraint_literal)+
     |   TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN;
 constraint_or:
-        constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)*
+        constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)+
     |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN;
 
-constraint_literal: TK_CONSTRAINT_NOT? constraint_var;
-constraint_var: varAccess;
+constraint_literal: TK_CONSTRAINT_NOT? varAccess;

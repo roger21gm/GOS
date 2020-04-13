@@ -81,18 +81,27 @@ public:
 
 
     antlrcpp::Any visitRangeForall(CSP2SATParser::RangeForallContext *ctx) override {
-        LocalScope * forallScope = new LocalScope(this->currentScope);
-        map<string, vector<int>> namedRanges;
+        auto *forallLocalScope = new LocalScope(this->currentScope);
 
-        this->currentScope = forallScope;
+        map<string, pair<int, int>> ranges;
+        this->currentScope = forallLocalScope;
         for (int i = 0; i < ctx->range().size(); i++) {
-            vector<int> currRange = visit(ctx->range(i));
-            namedRanges[ctx->range(i)->TK_IDENT()->getText()] = currRange;
+            this->currentScope->define(new AssignableSymbol(ctx->range(i)->TK_IDENT()->getText(), SymbolTable::_integer));
+            pair<string, pair<int, int>> currRange = visit(ctx->range(i));
+            ranges.insert(currRange);
         }
 
-        this->currentScope = forallScope->getEnclosingScope();
-
-
+        vector<map<string, int>> possibleAssignations = Utils::getAllRangeCombinations(ranges);
+        for(map<string,int> currAssignation : possibleAssignations) {
+            auto itCurrAssignation = currAssignation.begin();
+            while (itCurrAssignation != currAssignation.end()) {
+                IntValue *currAss = new IntValue(itCurrAssignation->second);
+                ((AssignableSymbol *) this->currentScope->resolve(itCurrAssignation->first))->setValue(currAss);
+                itCurrAssignation++;
+            }
+            CSP2SATBaseVisitor::visitRangeForall(ctx);
+        }
+        this->currentScope = forallLocalScope->getEnclosingScope();
         return nullptr;
     }
 

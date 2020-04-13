@@ -114,7 +114,7 @@ paramDefinition: (
 
 arrayDefinition: (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)*;
 
-constraintDefinition: (forall | ifThenElse | functionCall | constraint)* TK_SEMICOLON;
+constraintDefinition: (forall | ifThenElse | functionCall | constraint | list)* TK_SEMICOLON;
 
 // CONSTRAINTS
 range: TK_IDENT TK_IN min=expr TK_RANGE_DOTS max=expr;

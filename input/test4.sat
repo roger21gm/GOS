@@ -14,4 +14,5 @@ viewpoint:
 constraints:
     a | !a | b[0].c;
 
-    ||( [ a | i in 1..5 ] );
+    forall( i in 1..10, j in 1..10, x in 1..10) {
+    };

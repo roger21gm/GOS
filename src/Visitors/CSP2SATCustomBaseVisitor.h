@@ -253,42 +253,36 @@ public:
         }
     }
 
-    antlrcpp::Any visitList(CSP2SATParser::ListContext *ctx) override {
-        int resultListSize = 1;
+    antlrcpp::Any visitRange(CSP2SATParser::RangeContext *ctx) override {
+        Value *minRange = visit(ctx->min);
+        Value *maxRange = visit(ctx->max);
+        pair<int,int> range(minRange->getRealValue(), maxRange->getRealValue());
+        pair<string, pair<int, int>> result (ctx->TK_IDENT()->getText(), range);
+        return result;
+    }
 
-        map<string, vector<int>> namedRanges;
-        map<string, int> indices;
+    antlrcpp::Any visitList(CSP2SATParser::ListContext *ctx) override {
+
         auto *listLocalScope = new LocalScope(this->currentScope);
 
-        auto *newScope = new LocalScope(this->currentScope);
-        for (int i = 0; i < ctx->TK_IDENT().size(); i++) {
-            listLocalScope->define(new AssignableSymbol(ctx->TK_IDENT(i)->getText(), (Type *) SymbolTable::_integer));
-
-            Value *minRange = visit(ctx->range(i)->min);
-            Value *maxRange = visit(ctx->range(i)->max);
-            int rangeDiff = maxRange->getRealValue() - minRange->getRealValue() + 1;
-            resultListSize *= rangeDiff;
-
-            vector<int> currRange;
-            int currNum = minRange->getRealValue();
-            for (int j = minRange->getRealValue(); j <= maxRange->getRealValue(); j++) {
-                currRange.push_back(currNum++);
-            }
-
-            namedRanges[ctx->TK_IDENT(i)->getText()] = currRange;
-            indices[ctx->TK_IDENT(i)->getText()] = 0;
+        map<string, pair<int, int>> ranges;
+        this->currentScope = listLocalScope;
+        for (int i = 0; i < ctx->range().size(); i++) {
+            this->currentScope->define(new AssignableSymbol(ctx->range(i)->TK_IDENT()->getText(), SymbolTable::_integer));
+            pair<string, pair<int, int>> currRange = visit(ctx->range(i));
+            ranges.insert(currRange);
         }
 
+        vector<map<string, int>> possibleAssignations = Utils::getAllRangeCombinations(ranges);
         ArraySymbol *newList = nullptr;
+
         int index = 0;
-        this->currentScope = listLocalScope;
-        while (true) {
-            auto itCustomAssignation = indices.begin();
-            while (itCustomAssignation != indices.end()) {
-                IntValue *currAss = new IntValue(
-                        namedRanges[itCustomAssignation->first][indices[itCustomAssignation->first]]);
-                ((AssignableSymbol *) listLocalScope->resolve(itCustomAssignation->first))->setValue(currAss);
-                itCustomAssignation++;
+        for(map<string,int> currAssignation : possibleAssignations) {
+            auto itCurrAssignation = currAssignation.begin();
+            while (itCurrAssignation != currAssignation.end()) {
+                IntValue *currAss = new IntValue(itCurrAssignation->second);
+                ((AssignableSymbol *) listLocalScope->resolve(itCurrAssignation->first))->setValue(currAss);
+                itCurrAssignation++;
             }
 
             bool condition = true;
@@ -299,11 +293,15 @@ public:
 
             if (condition) {
                 if (ctx->varAcc) {
-                    ValueSymbol *valueSymbol = visit(ctx->varAcc);
+                    ValueSymbol *valueSymbol = visit(ctx->varAcc->varAccess());
                     if (valueSymbol->isAssignable()) {
                         if (newList == nullptr)
-                            newList = Utils::defineNewArray("aux", listLocalScope, vector<int>{resultListSize},
-                                                            SymbolTable::_integer);
+                            newList = Utils::defineNewArray(
+                                        "aux",
+                                        listLocalScope,
+                                        vector<int>{(int)possibleAssignations.size()},
+                                        SymbolTable::_integer
+                                    );
 
                         ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(
                                 ((AssignableSymbol *) valueSymbol)->getValue());
@@ -313,48 +311,28 @@ public:
                                     "aux",
                                     listLocalScope,
                                     SymbolTable::_varbool,
-                                    resultListSize
+                                    possibleAssignations.size()
                             );
-                        newList->define((VariableSymbol *) valueSymbol);
+                        ValueSymbol * litSymbol = visit(ctx->varAcc);
+                        newList->define((VariableSymbol *) litSymbol);
                     }
                     index++;
                 } else {
                     if (newList == nullptr)
-                        newList = Utils::defineNewArray("aux", listLocalScope, vector<int>{resultListSize},
-                                                        SymbolTable::_integer);
+                        newList = Utils::defineNewArray(
+                                    "aux",
+                                    listLocalScope,
+                                    vector<int>{(int)possibleAssignations.size()},
+                                    SymbolTable::_integer
+                                );
 
                     Value *exprVal = visit(ctx->resExpr);
                     ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(exprVal);
                     index++;
                 }
             }
-
-            auto indicesRev = indices.rbegin();
-            while (indicesRev != indices.rend() && indicesRev->second + 1 >= namedRanges[indicesRev->first].size()) {
-                indicesRev++;
-            }
-
-            if (indicesRev == indices.rend()) {
-                newList->setSize(index);
-                break;
-            }
-
-
-            indices[indicesRev->first] += 1;
-
-            auto indiceForward = indices.begin();
-            while (indiceForward->first != indicesRev->first)
-                indiceForward++;
-
-            indiceForward++;
-
-            while (indiceForward != indices.end()) {
-                indices[indiceForward->first] = 0;
-                indiceForward++;
-            }
         }
         this->currentScope = listLocalScope->getEnclosingScope();
-
 
         map<string, Symbol *> a = newList->getScopeSymbols();
         auto it = a.begin();
@@ -368,7 +346,6 @@ public:
         }
         return newList;
     }
-
 
 };
 

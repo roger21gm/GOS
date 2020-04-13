@@ -15,6 +15,22 @@
 
 class Utils {
 
+private:
+
+    static void generateAllPermutations(vector<vector<int>> input, vector<int> current, int k, vector<map<string, int>> & result, vector<string> names){
+        if(k == input.size()){
+            result.emplace_back();
+            for (int i = 0; i < k; ++i) {
+                result.back()[names[i]] = (current[i]);
+            }
+        } else {
+            for (int j = 0; j < input[k].size(); ++j) {
+                current[k] = input[k][j];
+                generateAllPermutations(input, current, k+1, result, names);
+            }
+        }
+    }
+
 public:
     static StructSymbol *definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
 
@@ -97,6 +113,26 @@ public:
             }
             return newDimention;
         }
+    }
+
+
+    static vector<map<string, int>> getAllRangeCombinations(const map<string, pair<int, int>>& ranges){
+        vector<vector<int>> unnamedRanges;
+        vector<string> names;
+
+        int i = 0;
+        for(const auto& localParam : ranges){
+            names.push_back(localParam.first);
+            unnamedRanges.emplace_back();
+            for (int j = localParam.second.first; j < localParam.second.second; ++j) {
+                unnamedRanges[i].push_back(j);
+            }
+            i++;
+        }
+        vector<map<string, int>> result;
+        generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
+
+        return result;
     }
 
 

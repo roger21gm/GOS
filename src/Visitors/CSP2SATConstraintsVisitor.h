@@ -27,7 +27,6 @@ public:
         return nullptr;
     }
 
-
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
         ValueSymbol * firstValue = visit(ctx->constraint_literal(0));
         VariableSymbol * firstLiteral = (VariableSymbol*) firstValue;
@@ -80,6 +79,22 @@ public:
 
     }
 
+
+    antlrcpp::Any visitRangeForall(CSP2SATParser::RangeForallContext *ctx) override {
+        LocalScope * forallScope = new LocalScope(this->currentScope);
+        map<string, vector<int>> namedRanges;
+
+        this->currentScope = forallScope;
+        for (int i = 0; i < ctx->range().size(); i++) {
+            vector<int> currRange = visit(ctx->range(i));
+            namedRanges[ctx->range(i)->TK_IDENT()->getText()] = currRange;
+        }
+
+        this->currentScope = forallScope->getEnclosingScope();
+
+
+        return nullptr;
+    }
 
 
 };

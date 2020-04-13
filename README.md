@@ -171,11 +171,21 @@ It will be able possible to define constraints in the boolean decision variables
 
 - `forall` loops
 
-  ```pseudocode
-  𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <range|array|list>) {
-  	<constraint>*
-  }
-  ```
+  - Array iteration
+
+    ```
+    𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 in <arr_identifier | list>) {
+    	<constraint>*
+    }
+    ```
+
+  - Range
+
+    ```
+    𝐟𝐨𝐫𝐚𝐥𝐥(𝑣𝑎𝑟_𝑛𝑎𝑚𝑒 <range>) {
+    	<constraint>*
+    }
+    ```
 
 - `if-then-else` 
 

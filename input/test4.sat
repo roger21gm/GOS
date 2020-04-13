@@ -14,4 +14,4 @@ viewpoint:
 constraints:
     a | !a | b[0].c;
 
-    ||([ a | i in 1..2 ]);
+    ||( [ a | i in 1..5 ] );

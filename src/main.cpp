@@ -3,11 +3,6 @@
 
 // antlr4 runtime
 #include "antlr4-runtime.h"
-#include "Visitors/CSP2SATTypeVarDefinitionVisitor.h"
-#include "Visitors/Input/CSP2SATInputJSONVisitor.h"
-#include "Visitors/CSP2SATConstraintsVisitor.h"
-#include "smtformula.h"
-
 
 // generated lexer and parser
 #include <CSP2SATLexer.h>
@@ -16,7 +11,12 @@
 
 
 // custom listener
+#include "Visitors/CSP2SATTypeVarDefinitionVisitor.h"
+#include "Visitors/Input/CSP2SATInputJSONVisitor.h"
+#include "Visitors/CSP2SATConstraintsVisitor.h"
 
+// custom error
+#include "Errors/CSP2SATErrorListener.h"
 
 using namespace std;
 using namespace antlr4;
@@ -85,6 +85,8 @@ int main() {
     CSP2SATLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     CSP2SATParser parser(&tokens);
+    parser.removeErrorListeners();
+    parser.addErrorListener(new CSP2SATErrorListener());
     CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
     CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
     visitor->visit(tree);

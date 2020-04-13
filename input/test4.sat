@@ -1,7 +1,7 @@
 entities:
     A {
         var bool a[300][300];
-        param int b;
+        param int ;
     };
 
 viewpoint:

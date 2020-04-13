@@ -185,8 +185,9 @@ constraint_or_implication: constraint_or TK_OP_IMPLIC_L constraint_and;
 constraint_and:
         constraint_literal (TK_CONSTRAINT_AND constraint_literal)+
     |   TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN;
+
 constraint_or:
-        constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)+
-    |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN;
+        constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)+         #cOrExpression
+    |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN   #cOrList;
 
 constraint_literal: TK_CONSTRAINT_NOT? varAccess;

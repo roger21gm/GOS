@@ -366,7 +366,7 @@ public:
                 cout << ((VariableSymbol *) it->second)->getVar().v.id << "->" << ((VariableSymbol *) it->second)->getVar().sign << endl;
             it++;
         }
-        return 0;
+        return newList;
     }
 
 

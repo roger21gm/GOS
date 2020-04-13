@@ -27,7 +27,8 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitConstraint_or(CSP2SATParser::Constraint_orContext *ctx) override {
+
+    antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
         ValueSymbol * firstValue = visit(ctx->constraint_literal(0));
         VariableSymbol * firstLiteral = (VariableSymbol*) firstValue;
         clause orClause = firstLiteral->getVar();
@@ -38,7 +39,30 @@ public:
             orClause |= currLiteral->getVar();
         }
         SymbolTable::_f->addClause(orClause);
-        return CSP2SATBaseVisitor::visitConstraint_or(ctx);
+        return nullptr;
+    }
+
+    antlrcpp::Any visitCOrList(CSP2SATParser::COrListContext *ctx) override {
+        ArraySymbol * list = visit(ctx->list());
+        clause orClause;
+
+        if(list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool){
+            map<string, Symbol *> a = list->getScopeSymbols();
+            auto it = a.begin();
+            while (it != a.end()) {
+                orClause |= ((VariableSymbol *) it->second)->getVar();
+                it++;
+            }
+            SymbolTable::_f->addClause(orClause);
+        }
+        else {
+            cerr << "Constraint OR list elements must be literals" << endl;
+            throw;
+        }
+
+
+
+        return nullptr;
     }
 
     antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {

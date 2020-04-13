@@ -6,8 +6,12 @@ entities:
     };
 
 viewpoint:
-    A b[3];
     var a;
+    A b[3];
+    param int c;
+
 
 constraints:
     a | !a | b[0].c;
+
+    ||([ a | i in 1..2 ]);

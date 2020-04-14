@@ -265,10 +265,9 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitList(CSP2SATParser::ListContext *ctx) override {
 
+    antlrcpp::Any visitComprehensionList(CSP2SATParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);
-
         map<string, pair<int, int>> ranges;
         this->currentScope = listLocalScope;
         for (int i = 0; i < ctx->range().size(); i++) {
@@ -301,11 +300,11 @@ public:
                     if (valueSymbol->isAssignable()) {
                         if (newList == nullptr)
                             newList = Utils::defineNewArray(
-                                        "aux",
-                                        listLocalScope,
-                                        vector<int>{(int)possibleAssignations.size()},
-                                        SymbolTable::_integer
-                                    );
+                                    "aux",
+                                    listLocalScope,
+                                    vector<int>{(int)possibleAssignations.size()},
+                                    SymbolTable::_integer
+                            );
 
                         ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(
                                 ((AssignableSymbol *) valueSymbol)->getValue());
@@ -324,11 +323,11 @@ public:
                 } else {
                     if (newList == nullptr)
                         newList = Utils::defineNewArray(
-                                    "aux",
-                                    listLocalScope,
-                                    vector<int>{(int)possibleAssignations.size()},
-                                    SymbolTable::_integer
-                                );
+                                "aux",
+                                listLocalScope,
+                                vector<int>{(int)possibleAssignations.size()},
+                                SymbolTable::_integer
+                        );
 
                     Value *exprVal = visit(ctx->resExpr);
                     ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(exprVal);
@@ -349,6 +348,23 @@ public:
             it++;
         }
         return newList;
+    }
+
+    antlrcpp::Any visitVarAccessList(CSP2SATParser::VarAccessListContext *ctx) override {
+        ArraySymbol * array = nullptr;
+        this->accessingListArray = true;
+        array = visit(ctx->varAccess());
+        this->accessingListArray = false;
+
+        if(array && array->type && array->type->getTypeIndex() == SymbolTable::tArray){
+            return array;
+        }
+        else {
+            cerr << ctx->getText() << " is not an array" << endl;
+            throw;
+        }
+
+
     }
 
 };

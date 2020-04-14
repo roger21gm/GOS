@@ -83,15 +83,7 @@ public:
 
         auto *forallLocalScope = new LocalScope(this->currentScope);
         this->currentScope = forallLocalScope;
-        Symbol * array = nullptr;
-
-        if(ctx->arrId){
-            this->accessingListArray = true;
-            array = visit(ctx->arrId);
-            this->accessingListArray = false;
-        }
-        else
-            array = (ArraySymbol*) visit(ctx->list());
+        Symbol * array = (ArraySymbol*) visit(ctx->list());
 
         if(array && array->type && array->type->getTypeIndex() == SymbolTable::tArray){
             ArraySymbol * arraySymbol = (ArraySymbol*) array;
@@ -103,7 +95,7 @@ public:
             }
         }
         else{
-            cerr << ctx->arrId->getText() << " is not an array" << endl;
+            cerr << ctx->getText() << " is not an array" << endl;
             throw;
         }
         this->currentScope = forallLocalScope->getEnclosingScope();
@@ -135,6 +127,8 @@ public:
         this->currentScope = forallLocalScope->getEnclosingScope();
         return nullptr;
     }
+
+    
 
 
 };

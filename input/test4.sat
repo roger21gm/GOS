@@ -12,9 +12,9 @@ viewpoint:
 
 
 constraints:
-    forall(i in 0..5) {
-        forall(j in 0..5){
+    forall(i in 0..5, j in 0..5) {
+
             [ i | x in 1..2 ];
             [ j | x in 1..2 ];
-        };
+
     };

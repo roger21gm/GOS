@@ -88,7 +88,10 @@ TK_CONSTRAINT_OR_PIPE: '|';
 TK_CONSTRAINT_AND: '&';
 TK_CONSTRAINT_NOT: '!';
 
-
+TK_CONSTRAINT_AGG_AK : 'AK';
+TK_CONSTRAINT_AGG_AO : 'AO';
+TK_CONSTRAINT_AGG_ALO : 'ALO';
+TK_CONSTRAINT_AGG_AMO : 'AMO';
 
 TK_IDENT: ( ('a'..'z' | 'A'..'Z' | '_')('a'..'z' | 'A'..'Z' | '_' | '0'..'9')* );
 
@@ -104,8 +107,6 @@ viewpointBlock: TK_VIEWPOINT TK_COLON (varDefinition | paramDefinition)*;
 
 constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 
-
-
 varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL? name=TK_IDENT arrayDefinition TK_SEMICOLON;
 paramDefinition: (
         TK_PARAM type=(TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT)
@@ -114,27 +115,8 @@ paramDefinition: (
 
 arrayDefinition: (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)*;
 
-constraintDefinition: (forall | ifThenElse | functionCall | constraint | list)* TK_SEMICOLON;
 
-// CONSTRAINTS
-range: TK_IDENT TK_IN min=expr TK_RANGE_DOTS max=expr;
-
-forall:
-      TK_FORALL TK_LPAREN range (TK_COMMA range)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #rangeForall
-    | TK_FORALL TK_LPAREN auxName=TK_IDENT TK_IN (arrId=varAccess | list) TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #arrayForall;
-
-ifThenElse:
-    TK_IF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET
-    (TK_ELSEIF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)*
-    (TK_ELSE TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)?;
-
-functionCall: TK_IDENT TK_LPAREN (expr | list) TK_RPAREN;
-
-list: (TK_LCLAUDATOR (varAcc=constraint_literal | resExpr=expr ) TK_CONSTRAINT_OR_PIPE range (TK_COMMA range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR); // [a*b | a in 1..3, b in 1..3 where a < 2]
-//    | (TK_LCLAUDATOR expr TK_OP_LOGIC_OR_PIPE TK_IDENT TK_IN TK_IDENT (TK_WHERE expr)? TK_RCLAUDATOR) // [ point.x | point in points where point.y < 3 ]
-//    | (TK_IDENT TK_LCLAUDATOR expr TK_RCLAUDATOR TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR) // points[2][_]
-//    | (TK_IDENT TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR TK_LCLAUDATOR expr TK_RCLAUDATOR); // points[_][2]
-
+// EXPRESSIONS
 
 expr:
     exprAnd #exprTop
@@ -165,6 +147,30 @@ varAccessObjectOrArray: (TK_DOT attr=TK_IDENT | TK_LCLAUDATOR index=expr TK_RCLA
 valueBaseType: integer=TK_INT_VALUE | boolean=TK_BOOLEAN_VALUE;
 
 
+// CONSTRAINTS
+
+constraintDefinition: (forall | ifThenElse | functionCall | constraint | list)* TK_SEMICOLON;
+
+
+range: TK_IDENT TK_IN min=expr TK_RANGE_DOTS max=expr;
+
+forall:
+      TK_FORALL TK_LPAREN range (TK_COMMA range)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #rangeForall
+    | TK_FORALL TK_LPAREN auxName=TK_IDENT TK_IN list TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #arrayForall;
+
+ifThenElse:
+    TK_IF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET
+    (TK_ELSEIF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)*
+    (TK_ELSE TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)?;
+
+functionCall: TK_IDENT TK_LPAREN (expr | list) TK_RPAREN;
+
+list:
+    (TK_LCLAUDATOR (varAcc=constraint_literal | resExpr=expr ) TK_CONSTRAINT_OR_PIPE range (TK_COMMA range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR) #comprehensionList   // [a*b | a in 1..3, b in 1..3 where a < 2]
+    | varAccess #varAccessList;
+//    | (TK_IDENT TK_LCLAUDATOR expr TK_RCLAUDATOR TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR) // points[2][_]
+//    | (TK_IDENT TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR TK_LCLAUDATOR expr TK_RCLAUDATOR); // points[_][2]
+
 
 constraint:
     constraint_double_implication
@@ -192,3 +198,7 @@ constraint_or:
     |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN   #cOrList;
 
 constraint_literal: TK_CONSTRAINT_NOT? varAccess;
+
+
+aggregate_op: TK_CONSTRAINT_AGG_AK | TK_CONSTRAINT_AGG_ALO | TK_CONSTRAINT_AGG_AMO | TK_CONSTRAINT_AGG_AO;
+constraint_aggreggate_op: aggregate_op TK_LPAREN list TK_RPAREN;

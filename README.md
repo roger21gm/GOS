@@ -225,8 +225,8 @@ It will be able possible to define constraints in the boolean decision variables
       - EO( [ X[i] | i in 1..n ])
       - EO( [!X[i] | i in 1..n])
       - EO( varX )
-      - EO( varX[_] [0] )
-      - EO( varX[_] [0] )
+      - EO( varX[_] [0]  )
+      - EO( varX[_] [0]  )
       - EO( varX[_] [0] [0] )
       - EO( [x, y, !z] )
     - **AMO**

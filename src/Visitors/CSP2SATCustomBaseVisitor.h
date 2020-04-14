@@ -20,9 +20,10 @@ using namespace std;
 class CSP2SATCustomBaseVisitor : public CSP2SATBaseVisitor {
 
 protected:
-    bool accessingListArray = false;
+    bool accessingNotLeafVariable = false;
     SymbolTable *st;
     Scope *currentScope;
+    Scope *currentLocalScope = nullptr;
 
 public:
 
@@ -179,11 +180,10 @@ public:
         if (ctx->expr()) {
             return visit(ctx->expr());
         } else if (ctx->varAccess()) {
-            ValueSymbol *value = visit(ctx->varAccess());
+            Symbol *value = visit(ctx->varAccess());
             if (value->isAssignable()) {
                 return (Value *) ((AssignableSymbol *) value)->getValue();
-            }
-            else {
+            } else {
                 cerr << "Not allowed arithmetic expressions with variables: " << ctx->getText() << endl;
                 throw;
             }
@@ -191,62 +191,50 @@ public:
         return CSP2SATBaseVisitor::visitExpr_base(ctx);
     }
 
-    antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
-        Scope *iniScope = this->currentScope;
-        string a = ctx->id->getText();
-        Symbol *var = this->currentScope->resolve(ctx->id->getText());
-        if (!ctx->varAccessObjectOrArray().empty()) {
-            ValueSymbol *val = nullptr;
-            ScopedSymbol *nestedScope = (ScopedSymbol *) var;
-            if (nestedScope->getTypeIndex() == SymbolTable::tArray ||
-                nestedScope->getTypeIndex() == SymbolTable::tCustom) {
-                this->currentScope = nestedScope;
-                ScopedSymbol *prevScope = nestedScope;
-                for (int i = 0; i < ctx->varAccessObjectOrArray().size(); i++) {
-                    auto nestedElem = ctx->varAccessObjectOrArray()[i];
-                    string nestedElementToFind;
-                    if (nestedElem->index) {
-                        this->currentScope = iniScope;
-                        nestedElementToFind = to_string(((Value *) visit(nestedElem->index))->getRealValue());
-                        this->currentScope = prevScope;
-                    } else {
-                        nestedElementToFind = nestedElem->attr->getText();
-                    }
 
-                    if (i == ctx->varAccessObjectOrArray().size() - 1) {
-                        Symbol *valueSymbol = this->currentScope->resolve(nestedElementToFind);
-                        if (valueSymbol->isAssignable() ||
-                            (valueSymbol->type && valueSymbol->type->getTypeIndex() == SymbolTable::tVarBool)) {
-                            val = (ValueSymbol *) valueSymbol;
-                        } else throw runtime_error(ctx->getText() + " is not a variable/param");
-                    } else {
-                        Symbol * newScopedElement = (Symbol *) this->currentScope->resolve(nestedElementToFind);
-                        if (newScopedElement->isScoped()) {
-                            prevScope = (ScopedSymbol *) newScopedElement;
-                            this->currentScope = prevScope;
-                        } else {
-                            cerr << "BAD ACCESS: " << ctx->getText() << endl;
-                            throw;
-                        }
-                    }
-                }
-                this->currentScope = iniScope;
-                return val;
-            } else {
-                cerr << "BAD ACCESS: " << ctx->getText() << endl;
-                throw;
-            }
-        } else if (var->type->getTypeIndex() != SymbolTable::tCustom &&
-                   var->type->getTypeIndex() != SymbolTable::tArray) {
-            AssignableSymbol *a = (AssignableSymbol *) var;
-            return (ValueSymbol *) a;
-        } else if (accessingListArray){
-            return var;
+    antlrcpp::Any visitVarAccessObjectOrArray(CSP2SATParser::VarAccessObjectOrArrayContext *ctx) override {
+        if (ctx->attr) {
+            return (Symbol *) this->currentScope->resolve(ctx->attr->getText());
+        } else if (ctx->index) {
+            Scope * prev = this->currentScope;
+            this->currentScope = this->currentLocalScope;
+            Value *index = visit(ctx->index);
+            this->currentScope = prev;
+
+            return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
         }
-        else {
+        return nullptr;
+    }
+
+
+    antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
+        string a = ctx->getText();
+        Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
+
+        if(!var){
+            cerr << ctx->getText() << " don't exist" << endl;
+            throw;
+        }
+
+        if (!ctx->varAccessObjectOrArray().empty()) {
+            for (auto nestedScope : ctx->varAccessObjectOrArray()) {
+                string nest = nestedScope->getText();
+                if (var->isScoped()) {
+                    this->currentLocalScope = this->currentScope;
+                    this->currentScope = (ScopedSymbol *) var;
+                    var = visit(nestedScope);
+                    this->currentScope = this->currentLocalScope;
+                } else {
+                    cerr << "BAD ACCESS: " << ctx->TK_IDENT()->getText() << endl;
+                    throw;
+                }
+            }
+        }
+        if (!this->accessingNotLeafVariable && var->isScoped()) {
             cerr << "BAD ACCESS: " << ctx->getText() << endl;
             throw;
         }
+        return var;
     }
 
     antlrcpp::Any visitValueBaseType(CSP2SATParser::ValueBaseTypeContext *ctx) override {
@@ -257,114 +245,117 @@ public:
         }
     }
 
-    antlrcpp::Any visitRange(CSP2SATParser::RangeContext *ctx) override {
+    antlrcpp::Any visitRangList(CSP2SATParser::RangListContext *ctx) override {
+
         Value *minRange = visit(ctx->min);
         Value *maxRange = visit(ctx->max);
-        pair<int,int> range(minRange->getRealValue(), maxRange->getRealValue());
-        pair<string, pair<int, int>> result (ctx->TK_IDENT()->getText(), range);
-        return result;
+
+        int minValue = minRange->getRealValue();
+        int maxValue = maxRange->getRealValue();
+
+        if (minValue < maxValue) {
+            ArraySymbol *result = Utils::defineNewArray(
+                    "auxRangList",
+                    this->currentScope,
+                    vector<int>{maxValue - minValue},
+                    SymbolTable::_boolean
+            );
+            for (int i = 0; i < (maxValue - minValue); ++i) {
+                ((AssignableSymbol *) result->resolve(to_string(i)))->setValue(new IntValue(minValue + i));
+            }
+            return result;
+        } else {
+            cerr << "It must be an incremental range" << endl;
+            throw;
+        }
+    }
+
+    antlrcpp::Any visitAuxiliarListAssignation(CSP2SATParser::AuxiliarListAssignationContext *ctx) override {
+        ArraySymbol *arrayDefined = visit(ctx->list());
+        return pair<string, ArraySymbol *>(ctx->TK_IDENT()->getText(), arrayDefined);
     }
 
 
     antlrcpp::Any visitComprehensionList(CSP2SATParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);
-        map<string, pair<int, int>> ranges;
+        map<string, ArraySymbol *> ranges;
         this->currentScope = listLocalScope;
-        for (int i = 0; i < ctx->range().size(); i++) {
-            this->currentScope->define(new AssignableSymbol(ctx->range(i)->TK_IDENT()->getText(), SymbolTable::_integer));
-            pair<string, pair<int, int>> currRange = visit(ctx->range(i));
-            ranges.insert(currRange);
+        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
+            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
+            ranges.insert(currAuxVar);
         }
 
-        vector<map<string, int>> possibleAssignations = Utils::getAllRangeCombinations(ranges);
+        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
         ArraySymbol *newList = nullptr;
 
-        int index = 0;
-        for(map<string,int> currAssignation : possibleAssignations) {
-            auto itCurrAssignation = currAssignation.begin();
-            while (itCurrAssignation != currAssignation.end()) {
-                IntValue *currAss = new IntValue(itCurrAssignation->second);
-                ((AssignableSymbol *) listLocalScope->resolve(itCurrAssignation->first))->setValue(currAss);
-                itCurrAssignation++;
-            }
+        for (const auto &assignation: possibleAssignations) {
+            for (const auto &auxVarAssign : assignation)
+                listLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
 
             bool condition = true;
             if (ctx->condExpr) {
-                Value *conditionVal = visit(ctx->condExpr);
-                condition = conditionVal->getRealValue();
+                Value *cond = visit(ctx->condExpr);
+                condition = cond->getRealValue();
             }
 
             if (condition) {
+                Symbol *exprRes;
                 if (ctx->varAcc) {
-                    ValueSymbol *valueSymbol = visit(ctx->varAcc->varAccess());
-                    if (valueSymbol->isAssignable()) {
-                        if (newList == nullptr)
-                            newList = Utils::defineNewArray(
-                                    "aux",
-                                    listLocalScope,
-                                    vector<int>{(int)possibleAssignations.size()},
-                                    SymbolTable::_integer
-                            );
-
-                        ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(
-                                ((AssignableSymbol *) valueSymbol)->getValue());
-                    } else {
-                        if (newList == nullptr)
-                            newList = new ArraySymbol(
-                                    "aux",
-                                    listLocalScope,
-                                    SymbolTable::_varbool,
-                                    possibleAssignations.size()
-                            );
-                        ValueSymbol * litSymbol = visit(ctx->varAcc);
-                        newList->define((VariableSymbol *) litSymbol);
-                    }
-                    index++;
+                    this->accessingNotLeafVariable = true;
+                    exprRes = visit(ctx->varAcc);
+                    this->accessingNotLeafVariable = false;
                 } else {
-                    if (newList == nullptr)
-                        newList = Utils::defineNewArray(
-                                "aux",
-                                listLocalScope,
-                                vector<int>{(int)possibleAssignations.size()},
-                                SymbolTable::_integer
-                        );
-
-                    Value *exprVal = visit(ctx->resExpr);
-                    ((AssignableSymbol *) newList->resolve(to_string(index)))->setValue(exprVal);
-                    index++;
+                    Value *val = visit(ctx->resExpr);
+                    auto *valueResult = new AssignableSymbol(
+                            to_string(rand()),
+                            val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
+                    );
+                    valueResult->setValue(val);
+                    exprRes = valueResult;
                 }
+
+
+                if (newList == nullptr)
+                    newList = new ArraySymbol(
+                            "comprehensionListAux",
+                            listLocalScope,
+                            exprRes->type
+                    );
+                newList->add(exprRes);
             }
         }
-        this->currentScope = listLocalScope->getEnclosingScope();
+
 
         map<string, Symbol *> a = newList->getScopeSymbols();
-        auto it = a.begin();
 
-        while (it != a.end()) {
-            if (it->second->isAssignable())
-                cout << ((AssignableSymbol *) it->second)->getValue()->getRealValue() << endl;
+        for (auto curr : a) {
+            if (curr.second->isAssignable())
+                cout << ((AssignableSymbol *) curr.second)->getValue()->getRealValue() << endl;
+            else if (curr.second->type->getTypeIndex() == SymbolTable::tVarBool)
+                cout << ((VariableSymbol *) curr.second)->getVar().v.id << "->"
+                     << ((VariableSymbol *) curr.second)->getVar().sign << endl;
             else
-                cout << ((VariableSymbol *) it->second)->getVar().v.id << "->" << ((VariableSymbol *) it->second)->getVar().sign << endl;
-            it++;
+                cout << ctx->getText() << " " << curr.first << endl;
         }
+
+        this->currentScope = listLocalScope->getEnclosingScope();
+
+
         return newList;
     }
 
     antlrcpp::Any visitVarAccessList(CSP2SATParser::VarAccessListContext *ctx) override {
-        ArraySymbol * array = nullptr;
-        this->accessingListArray = true;
+        Symbol *array = nullptr;
+        this->accessingNotLeafVariable = true;
         array = visit(ctx->varAccess());
-        this->accessingListArray = false;
+        this->accessingNotLeafVariable = false;
 
-        if(array && array->type && array->type->getTypeIndex() == SymbolTable::tArray){
-            return array;
-        }
-        else {
+        if (array && array->type && array->type->getTypeIndex() == SymbolTable::tArray) {
+            return (ArraySymbol *) array;
+        } else {
             cerr << ctx->getText() << " is not an array" << endl;
             throw;
         }
-
-
     }
 
 };

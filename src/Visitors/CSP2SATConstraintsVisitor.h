@@ -17,24 +17,23 @@ public:
 
 
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
-        if(ctx->cLit){
-            ValueSymbol * val = visit(ctx->cLit);
-            SymbolTable::_f->addClause(((VariableSymbol*) val)->getVar());
-        }
-        else {
+        if (ctx->cLit) {
+            ValueSymbol *val = visit(ctx->cLit);
+            SymbolTable::_f->addClause(((VariableSymbol *) val)->getVar());
+        } else {
             CSP2SATBaseVisitor::visitConstraint(ctx);
         }
         return nullptr;
     }
 
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
-        ValueSymbol * firstValue = visit(ctx->constraint_literal(0));
-        VariableSymbol * firstLiteral = (VariableSymbol*) firstValue;
+        ValueSymbol *firstValue = visit(ctx->constraint_literal(0));
+        VariableSymbol *firstLiteral = (VariableSymbol *) firstValue;
         clause orClause = firstLiteral->getVar();
 
-        for(int i=1; i < ctx->constraint_literal().size(); i++){
-            ValueSymbol * currValue = visit(ctx->constraint_literal(i));
-            VariableSymbol * currLiteral = (VariableSymbol*) currValue;
+        for (int i = 1; i < ctx->constraint_literal().size(); i++) {
+            ValueSymbol *currValue = visit(ctx->constraint_literal(i));
+            VariableSymbol *currLiteral = (VariableSymbol *) currValue;
             orClause |= currLiteral->getVar();
         }
         SymbolTable::_f->addClause(orClause);
@@ -42,10 +41,10 @@ public:
     }
 
     antlrcpp::Any visitCOrList(CSP2SATParser::COrListContext *ctx) override {
-        ArraySymbol * list = visit(ctx->list());
+        ArraySymbol *list = visit(ctx->list());
         clause orClause;
 
-        if(list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool){
+        if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
             map<string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
@@ -53,48 +52,44 @@ public:
                 it++;
             }
             SymbolTable::_f->addClause(orClause);
-        }
-        else {
+        } else {
             cerr << "Constraint OR list elements must be literals" << endl;
             throw;
         }
 
 
-
         return nullptr;
     }
 
-    antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {
-        ValueSymbol * valSym = visit(ctx->varAccess());
-        if(!valSym->isAssignable()){
-            VariableSymbol * var = (VariableSymbol*) valSym;
-            if(ctx->TK_CONSTRAINT_NOT())
-                return (ValueSymbol*) new VariableSymbol("!" + var->name, !(var->getVar()));
-            return valSym;
-        }
-        else {
-            cerr << ctx->getText() << ": constraints only can be variables" << endl;
-            throw;
-        }
-
-    }
+//    antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {
+//        ValueSymbol *valSym = visit(ctx->varAccess());
+//        if (!valSym->isAssignable()) {
+//            VariableSymbol *var = (VariableSymbol *) valSym;
+//            if (ctx->TK_CONSTRAINT_NOT())
+//                return (ValueSymbol *) new VariableSymbol("!" + var->name, !(var->getVar()));
+//            return valSym;
+//        } else {
+//            cerr << ctx->getText() << ": constraints only can be variables" << endl;
+//            throw;
+//        }
+//
+//    }
 
     antlrcpp::Any visitArrayForall(CSP2SATParser::ArrayForallContext *ctx) override {
 
         auto *forallLocalScope = new LocalScope(this->currentScope);
         this->currentScope = forallLocalScope;
-        Symbol * array = (ArraySymbol*) visit(ctx->list());
+        Symbol *array = (ArraySymbol *) visit(ctx->list());
 
-        if(array && array->type && array->type->getTypeIndex() == SymbolTable::tArray){
-            ArraySymbol * arraySymbol = (ArraySymbol*) array;
-            for(auto currAssignation : arraySymbol->getScopeSymbols()) {
-                ((LocalScope*)this->currentScope)->defineAlias(ctx->auxName->getText(), currAssignation.second);
-                this->accessingListArray = true;
+        if (array && array->type && array->type->getTypeIndex() == SymbolTable::tArray) {
+            ArraySymbol *arraySymbol = (ArraySymbol *) array;
+            for (auto currAssignation : arraySymbol->getScopeSymbols()) {
+                ((LocalScope *) this->currentScope)->assign(ctx->auxName->getText(), currAssignation.second);
+                this->accessingNotLeafVariable = true;
                 CSP2SATBaseVisitor::visitArrayForall(ctx);
-                this->accessingListArray = false;
+                this->accessingNotLeafVariable = false;
             }
-        }
-        else{
+        } else {
             cerr << ctx->getText() << " is not an array" << endl;
             throw;
         }
@@ -103,32 +98,54 @@ public:
     }
 
 
-    antlrcpp::Any visitRangeForall(CSP2SATParser::RangeForallContext *ctx) override {
-        auto *forallLocalScope = new LocalScope(this->currentScope);
+//    antlrcpp::Any visitRangeForall(CSP2SATParser::RangeForallContext *ctx) override {
+//        auto *forallLocalScope = new LocalScope(this->currentScope);
+//
+//        map<string, pair<int, int>> ranges;
+//        this->currentScope = forallLocalScope;
+//        for (int i = 0; i < ctx->range().size(); i++) {
+//            this->currentScope->define(
+//                    new AssignableSymbol(ctx->range(i)->TK_IDENT()->getText(), SymbolTable::_integer));
+//            pair<string, pair<int, int>> currRange = visit(ctx->range(i));
+//            ranges.insert(currRange);
+//        }
+//
+//        vector<map<string, int>> possibleAssignations = Utils::getAllRangeCombinations(ranges);
+//        for (map<string, int> currAssignation : possibleAssignations) {
+//            auto itCurrAssignation = currAssignation.begin();
+//            while (itCurrAssignation != currAssignation.end()) {
+//                IntValue *currAss = new IntValue(itCurrAssignation->second);
+//                ((AssignableSymbol *) this->currentScope->resolve(itCurrAssignation->first))->setValue(currAss);
+//                itCurrAssignation++;
+//            }
+//            CSP2SATBaseVisitor::visitRangeForall(ctx);
+//        }
+//        this->currentScope = forallLocalScope->getEnclosingScope();
+//        return nullptr;
+//    }
 
-        map<string, pair<int, int>> ranges;
-        this->currentScope = forallLocalScope;
-        for (int i = 0; i < ctx->range().size(); i++) {
-            this->currentScope->define(new AssignableSymbol(ctx->range(i)->TK_IDENT()->getText(), SymbolTable::_integer));
-            pair<string, pair<int, int>> currRange = visit(ctx->range(i));
-            ranges.insert(currRange);
-        }
+    antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
+        ArraySymbol *variableArray = visit(ctx->list());
+        if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+            Value *param = visit(ctx->param);
+            if (ctx->aggregate_op()->getText() == "EK")
+                SymbolTable::_f->addEK(Utils::getLiteralVectorFromVariableArraySymbol(variableArray),
+                                       param->getRealValue());
 
-        vector<map<string, int>> possibleAssignations = Utils::getAllRangeCombinations(ranges);
-        for(map<string,int> currAssignation : possibleAssignations) {
-            auto itCurrAssignation = currAssignation.begin();
-            while (itCurrAssignation != currAssignation.end()) {
-                IntValue *currAss = new IntValue(itCurrAssignation->second);
-                ((AssignableSymbol *) this->currentScope->resolve(itCurrAssignation->first))->setValue(currAss);
-                itCurrAssignation++;
-            }
-            CSP2SATBaseVisitor::visitRangeForall(ctx);
+            else if (ctx->aggregate_op()->getText() == "ALK")
+                SymbolTable::_f->addALK(Utils::getLiteralVectorFromVariableArraySymbol(variableArray),
+                                        param->getRealValue());
+
+            else if (ctx->aggregate_op()->getText() == "AMK")
+                SymbolTable::_f->addAMK(Utils::getLiteralVectorFromVariableArraySymbol(variableArray),
+                                        param->getRealValue());
+
+        } else {
+            cerr << "Aggregate opperator " << ctx->aggregate_op()->getText() << " only allow variable list" << endl;
+            throw;
         }
-        this->currentScope = forallLocalScope->getEnclosingScope();
         return nullptr;
     }
-
-    
 
 
 };

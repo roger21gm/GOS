@@ -12,10 +12,9 @@ class LocalScope: public BaseScope {
 public:
     explicit LocalScope(Scope *parent) : BaseScope(parent) {}
 
-    void defineAlias(string name, Symbol *sym) {
+    void assign(string name, Symbol *sym) {
         symbols[name] = sym;
     }
-
 
     string getScopeName() override {
         return "local";

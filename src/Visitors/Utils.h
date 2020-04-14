@@ -17,11 +17,11 @@ class Utils {
 
 private:
 
-    static void generateAllPermutations(vector<vector<int>> input, vector<int> current, int k, vector<map<string, int>> & result, vector<string> names){
+    static void generateAllPermutations(vector<vector<Symbol*>> input, vector<Symbol*> current, int k, vector<map<string, Symbol*>> & result, vector<string> names){
         if(k == input.size()){
             result.emplace_back();
             for (int i = 0; i < k; ++i) {
-                result.back()[names[i]] = (current[i]);
+                result.back()[names[i]] = current[i];
             }
         } else {
             for (int j = 0; j < input[k].size(); ++j) {
@@ -116,26 +116,43 @@ public:
     }
 
 
-    static vector<map<string, int>> getAllRangeCombinations(const map<string, pair<int, int>>& ranges){
-        vector<vector<int>> unnamedRanges;
+    static vector<map<string, Symbol*>> getAllCombinations(const map<string, ArraySymbol*>& ranges){
+        vector<vector<Symbol*>> unnamedRanges;
         vector<string> names;
 
-        int i = 0;
         for(const auto& localParam : ranges){
             names.push_back(localParam.first);
-            unnamedRanges.emplace_back();
-            for (int j = localParam.second.first; j < localParam.second.second; ++j) {
-                unnamedRanges[i].push_back(j);
-            }
-            i++;
+
+            map<string, Symbol*> currAuxList = localParam.second->getScopeSymbols();
+
+            vector<Symbol*> curr;
+            curr.reserve(currAuxList.size());
+            for(auto const& currElem: currAuxList)
+                curr.push_back(currElem.second);
+
+            unnamedRanges.push_back(curr);
+
         }
-        vector<map<string, int>> result;
+        vector<map<string, Symbol*>> result;
         generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
 
         return result;
     }
 
-
+    static vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol * variableArray) {
+        vector<literal> result = vector<literal>();
+        map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
+        if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+            for (auto currElem : arrayElems) {
+                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+            }
+        } else {
+            cerr << "It must be a literal array" << endl;
+            throw;
+        }
+        return result;
+    }
+;
 
 };
 

@@ -16,6 +16,8 @@ public:
         this->var = varValue;
     }
 
+    VariableSymbol(const string &name) : ValueSymbol(name, SymbolTable::_varbool) {}
+
     bool isAssignable() override {
         return false;
     }

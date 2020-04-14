@@ -25,6 +25,12 @@ public:
         this->type = this;
     }
 
+    ArraySymbol(const string &name, Scope * enclosingScope, Type * arrayElementsType) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
+        this->size = 0;
+        this->elementsType = arrayElementsType;
+        this->type = this;
+    }
+
     void define(Symbol *sym) override {
         elements.push_back(sym);
     }
@@ -75,6 +81,13 @@ public:
     bool isAssignable() override {
         return false;
     }
+
+
+    void add(Symbol *sym) {
+        elements.push_back(sym);
+        size++;
+    }
+
 
 
 

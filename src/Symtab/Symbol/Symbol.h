@@ -24,7 +24,9 @@ public:
         return this->name;
     }
 
-    virtual bool isAssignable() = 0;
+    virtual bool isAssignable() {
+        return false;
+    };
     virtual bool isScoped() {
         return false;
     }

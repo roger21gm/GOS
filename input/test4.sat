@@ -9,12 +9,8 @@ viewpoint:
     var a[10];
     A b[3];
     param int c;
+    var variable;
 
 
 constraints:
-    forall(i in 0..5, j in 0..5) {
-
-            [ i | x in 1..2 ];
-            [ j | x in 1..2 ];
-
-    };
+    

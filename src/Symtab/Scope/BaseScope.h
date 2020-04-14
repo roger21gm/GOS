@@ -15,7 +15,6 @@ class BaseScope: public Scope {
 
 public:
     void define(Symbol *sym) override {
-
         symbols[sym->getName()] = sym;
     }
 
@@ -40,6 +39,7 @@ public:
 
 private:
     Scope * enclosingScope;
+protected:
     map<string, Symbol*> symbols;
 };
 

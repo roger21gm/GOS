@@ -25,6 +25,9 @@ public:
     }
 
     virtual bool isAssignable() = 0;
+    virtual bool isScoped() {
+        return false;
+    }
 
     string name;
     Type *type = nullptr;

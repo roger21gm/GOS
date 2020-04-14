@@ -32,6 +32,10 @@ public:
     virtual Symbol *resolve(const string& name) override = 0;
 
     virtual map<string, Symbol*> getScopeSymbols() override = 0;
+
+    bool isScoped() override {
+        return true;
+    }
 };
 
 

@@ -20,6 +20,7 @@ using namespace std;
 class CSP2SATCustomBaseVisitor : public CSP2SATBaseVisitor {
 
 protected:
+    bool accessingListArray = false;
     SymbolTable *st;
     Scope *currentScope;
 
@@ -219,9 +220,9 @@ public:
                             val = (ValueSymbol *) valueSymbol;
                         } else throw runtime_error(ctx->getText() + " is not a variable/param");
                     } else {
-                        if (prevScope->getTypeIndex() == SymbolTable::tArray ||
-                            prevScope->getTypeIndex() == SymbolTable::tCustom) {
-                            prevScope = (ScopedSymbol *) this->currentScope->resolve(nestedElementToFind);
+                        Symbol * newScopedElement = (Symbol *) this->currentScope->resolve(nestedElementToFind);
+                        if (newScopedElement->isScoped()) {
+                            prevScope = (ScopedSymbol *) newScopedElement;
                             this->currentScope = prevScope;
                         } else {
                             cerr << "BAD ACCESS: " << ctx->getText() << endl;
@@ -239,7 +240,10 @@ public:
                    var->type->getTypeIndex() != SymbolTable::tArray) {
             AssignableSymbol *a = (AssignableSymbol *) var;
             return (ValueSymbol *) a;
-        } else {
+        } else if (accessingListArray){
+            return var;
+        }
+        else {
             cerr << "BAD ACCESS: " << ctx->getText() << endl;
             throw;
         }

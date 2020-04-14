@@ -79,6 +79,37 @@ public:
 
     }
 
+    antlrcpp::Any visitArrayForall(CSP2SATParser::ArrayForallContext *ctx) override {
+
+        auto *forallLocalScope = new LocalScope(this->currentScope);
+        this->currentScope = forallLocalScope;
+        Symbol * array = nullptr;
+
+        if(ctx->arrId){
+            this->accessingListArray = true;
+            array = visit(ctx->arrId);
+            this->accessingListArray = false;
+        }
+        else
+            array = (ArraySymbol*) visit(ctx->list());
+
+        if(array && array->type && array->type->getTypeIndex() == SymbolTable::tArray){
+            ArraySymbol * arraySymbol = (ArraySymbol*) array;
+            for(auto currAssignation : arraySymbol->getScopeSymbols()) {
+                ((LocalScope*)this->currentScope)->defineAlias(ctx->auxName->getText(), currAssignation.second);
+                this->accessingListArray = true;
+                CSP2SATBaseVisitor::visitArrayForall(ctx);
+                this->accessingListArray = false;
+            }
+        }
+        else{
+            cerr << ctx->arrId->getText() << " is not an array" << endl;
+            throw;
+        }
+        this->currentScope = forallLocalScope->getEnclosingScope();
+        return nullptr;
+    }
+
 
     antlrcpp::Any visitRangeForall(CSP2SATParser::RangeForallContext *ctx) override {
         auto *forallLocalScope = new LocalScope(this->currentScope);

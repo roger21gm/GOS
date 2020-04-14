@@ -121,7 +121,7 @@ range: TK_IDENT TK_IN min=expr TK_RANGE_DOTS max=expr;
 
 forall:
       TK_FORALL TK_LPAREN range (TK_COMMA range)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #rangeForall
-    | TK_FORALL TK_LPAREN TK_IDENT TK_IN TK_IDENT  TK_LBRACKET constraintDefinition* TK_RBRACKET #arrayForall;
+    | TK_FORALL TK_LPAREN auxName=TK_IDENT TK_IN (arrId=varAccess | list) TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #arrayForall;
 
 ifThenElse:
     TK_IF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET

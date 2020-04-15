@@ -201,9 +201,10 @@ public:
             Value *index = visit(ctx->index);
             this->currentScope = prev;
 
+            Symbol * res = this->currentScope->resolve(to_string(index->getRealValue()));
+
             return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
         }
-        return nullptr;
     }
 
 
@@ -217,12 +218,34 @@ public:
         }
 
         if (!ctx->varAccessObjectOrArray().empty()) {
-            for (auto nestedScope : ctx->varAccessObjectOrArray()) {
+            for (int i = 0; i < ctx->varAccessObjectOrArray().size(); i++) {
+                auto nestedScope = ctx->varAccessObjectOrArray(i);
                 string nest = nestedScope->getText();
                 if (var->isScoped()) {
                     this->currentLocalScope = this->currentScope;
-                    this->currentScope = (ScopedSymbol *) var;
-                    var = visit(nestedScope);
+                    if (!nestedScope->underscore) {
+                        this->currentScope = (ScopedSymbol *) var;
+                        var = visit(nestedScope);
+                    }
+                    else {
+                        ScopedSymbol * result = (ScopedSymbol*) var;
+                        for (int j = i+1; j < ctx->varAccessObjectOrArray().size(); j++) {
+                            ArraySymbol *aux = new ArraySymbol(
+                                    "aux",
+                                    result,
+                                    ((ArraySymbol*)result)->getElementsType()
+                            );
+                            for(auto currDimElem : ((ScopedSymbol*)result)->getScopeSymbols()){
+                                this->currentScope = (ScopedSymbol*) currDimElem.second;
+                                Symbol * currDimSymElem = visit(ctx->varAccessObjectOrArray(j));
+                                aux->add(currDimSymElem);
+                            }
+                            result = aux;
+                        }
+                        var = result;
+                        this->currentScope = this->currentLocalScope;
+                        break;
+                    }
                     this->currentScope = this->currentLocalScope;
                 } else {
                     cerr << "BAD ACCESS: " << ctx->TK_IDENT()->getText() << endl;
@@ -368,7 +391,7 @@ public:
                 Value *exprVal = visit(currVal->resExpr);
                 curr = new AssignableSymbol(to_string(rand()),
                                             exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
-                ((AssignableSymbol*)curr)->setValue(exprVal);
+                ((AssignableSymbol *) curr)->setValue(exprVal);
             }
 
             if (resultList == nullptr) {
@@ -379,10 +402,9 @@ public:
                 );
             }
 
-            if(curr->type->getTypeIndex() == resultList->getElementsType()->getTypeIndex()){
+            if (curr->type->getTypeIndex() == resultList->getElementsType()->getTypeIndex()) {
                 resultList->add(curr);
-            }
-            else {
+            } else {
                 cerr << "All elements of explicit list must be same type" << endl;
                 throw;
             }

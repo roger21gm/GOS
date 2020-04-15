@@ -18,7 +18,7 @@ public:
 
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
         if (ctx->cLit) {
-            VariableSymbol *val = visit(ctx->cLit);
+            Symbol *val = visit(ctx->cLit);
             SymbolTable::_f->addClause(((VariableSymbol *) val)->getVar());
         } else {
             CSP2SATBaseVisitor::visitConstraint(ctx);
@@ -66,7 +66,7 @@ public:
         if (!valSym->isAssignable()) {
             VariableSymbol *var = (VariableSymbol*) valSym;
             if (ctx->TK_CONSTRAINT_NOT())
-                valSym = new VariableSymbol("!" + var->name, !(var->getVar()));
+                valSym = (Symbol*) new VariableSymbol("!" + var->name, !(var->getVar()));
         }
         return valSym;
     }

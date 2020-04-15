@@ -141,14 +141,18 @@ exprNot: op=TK_OP_LOGIC_NOT? expr_base;
 expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess;
 
 varAccess: id=TK_IDENT varAccessObjectOrArray*;
-varAccessObjectOrArray: (TK_DOT attr=TK_IDENT | TK_LCLAUDATOR index=expr TK_RCLAUDATOR);
+
+varAccessObjectOrArray:
+    TK_DOT attr=TK_IDENT
+    | TK_LCLAUDATOR index=expr TK_RCLAUDATOR
+    | TK_LCLAUDATOR underscore=TK_UNDERSCORE TK_RCLAUDATOR;
 
 valueBaseType: integer=TK_INT_VALUE | boolean=TK_BOOLEAN_VALUE;
 
 
 // CONSTRAINTS
 
-constraintDefinition: ( forall | ifThenElse | functionCall | constraint | list )* TK_SEMICOLON;
+constraintDefinition: ( list | constraint | forall | ifThenElse | functionCall   )* TK_SEMICOLON;
 
 
 auxiliarListAssignation: TK_IDENT TK_IN list;
@@ -176,7 +180,7 @@ list:
     | TK_LCLAUDATOR listResultExpr TK_CONSTRAINT_OR_PIPE auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR #comprehensionList
     | TK_LCLAUDATOR listResultExpr (TK_COMMA listResultExpr)* TK_RCLAUDATOR #explicitList
     | varAccess #varAccessList;
-    // TODO: [_][2]
+
 
 listResultExpr:
       varAcc=constraint_literal

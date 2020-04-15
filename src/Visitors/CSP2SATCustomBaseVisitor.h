@@ -205,6 +205,7 @@ public:
 
             return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
         }
+        return nullptr;
     }
 
 
@@ -230,15 +231,25 @@ public:
                     else {
                         ScopedSymbol * result = (ScopedSymbol*) var;
                         for (int j = i+1; j < ctx->varAccessObjectOrArray().size(); j++) {
+                            if(ctx->varAccessObjectOrArray(j)->underscore){
+                                cerr << ctx->getText() << " is not a list" << endl;
+                                throw;
+                            }
                             ArraySymbol *aux = new ArraySymbol(
                                     "aux",
                                     result,
                                     ((ArraySymbol*)result)->getElementsType()
                             );
                             for(auto currDimElem : ((ScopedSymbol*)result)->getScopeSymbols()){
-                                this->currentScope = (ScopedSymbol*) currDimElem.second;
-                                Symbol * currDimSymElem = visit(ctx->varAccessObjectOrArray(j));
-                                aux->add(currDimSymElem);
+                                if(currDimElem.second->type->getTypeIndex() == SymbolTable::tArray){
+                                    this->currentScope = (ScopedSymbol*) currDimElem.second;
+                                    Symbol * currDimSymElem = visit(ctx->varAccessObjectOrArray(j));
+                                    aux->add(currDimSymElem);
+                                }
+                                else {
+                                    cerr << "BAD VAR ACCESS: " << ctx->getText() << endl;
+                                    throw;
+                                }
                             }
                             result = aux;
                         }

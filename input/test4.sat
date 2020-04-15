@@ -6,6 +6,7 @@ entities:
     };
 
 viewpoint:
+    var varX[3];
     var a[10][10];
     A b[3];
     param int c;
@@ -15,4 +16,4 @@ viewpoint:
 
 
 constraints:
-    [ i | i in a[_][0] ];
+    [ i.c | i in b[1] ];

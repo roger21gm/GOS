@@ -152,28 +152,17 @@ valueBaseType: integer=TK_INT_VALUE | boolean=TK_BOOLEAN_VALUE;
 
 // CONSTRAINTS
 
-constraintDefinition: ( list | constraint | forall | ifThenElse | functionCall   )* TK_SEMICOLON;
+constraintDefinition: ( forall | ifThenElse | constraint )* TK_SEMICOLON;
 
 
 auxiliarListAssignation: TK_IDENT TK_IN list;
 
-forall:
-      TK_FORALL TK_LPAREN auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #rangeForall
-    | TK_FORALL TK_LPAREN auxName=TK_IDENT TK_IN list TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET #arrayForall;
+forall: TK_FORALL TK_LPAREN auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET;
 
 ifThenElse:
     TK_IF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET
     (TK_ELSEIF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)*
     (TK_ELSE TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)?;
-
-functionCall: TK_IDENT TK_LPAREN (expr | list) TK_RPAREN;
-
-//list:
-//    (TK_LCLAUDATOR (varAcc=constraint_literal | resExpr=expr ) TK_CONSTRAINT_OR_PIPE range (TK_COMMA range)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR) #comprehensionList   // [a*b | a in 1..3, b in 1..3 where a < 2]
-//    | varAccess #varAccessList
-//    | min=expr TK_RANGE_DOTS max=expr #rangList;
-////    | (TK_IDENT TK_LCLAUDATOR expr TK_RCLAUDATOR TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR) // points[2][_]
-////    | (TK_IDENT TK_LCLAUDATOR TK_UNDERSCORE TK_RCLAUDATOR TK_LCLAUDATOR expr TK_RCLAUDATOR); // points[_][2]
 
 list:
       min=expr TK_RANGE_DOTS max=expr #rangList

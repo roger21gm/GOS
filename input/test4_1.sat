@@ -1,0 +1,21 @@
+entities:
+    A {
+        var bool a[300][300];
+        param int b;
+        var c;
+    };
+
+viewpoint:
+    var varX[3];
+    var a[10][10];
+    A b[3];
+    param int c;
+    var variable;
+    param int matrix[3][3][3];
+    param int index;
+
+
+constraints:
+    forall(i in [j | j in b]){
+        i.c;
+    };

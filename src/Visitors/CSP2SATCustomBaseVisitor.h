@@ -288,14 +288,15 @@ public:
         int maxValue = maxRange->getRealValue();
 
         if (minValue < maxValue) {
-            ArraySymbol *result = Utils::defineNewArray(
+            ArraySymbol *result = new ArraySymbol(
                     "auxRangList",
                     this->currentScope,
-                    vector<int>{maxValue - minValue},
-                    SymbolTable::_boolean
+                    SymbolTable::_integer
             );
             for (int i = 0; i < (maxValue - minValue); ++i) {
-                ((AssignableSymbol *) result->resolve(to_string(i)))->setValue(new IntValue(minValue + i));
+                AssignableSymbol * newValue = new AssignableSymbol(to_string(i), SymbolTable::_integer);
+                newValue->setValue(new IntValue(minValue + i));
+                result->add(newValue);
             }
             return result;
         } else {

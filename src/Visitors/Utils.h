@@ -32,6 +32,8 @@ private:
     }
 
 public:
+
+
     static StructSymbol *definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
@@ -49,10 +51,10 @@ public:
                 ArraySymbol * newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
                 newCustomTypeConst->define(newArrayConst);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
-                newCustomTypeConst->define(new VariableSymbol(
-                            sym.first,
-                            SymbolTable::_f->newBoolVar()
-                        ));
+                Symbol * varSym = new VariableSymbol(sym.first);
+
+                newCustomTypeConst->define(varSym);
+
             }
             else{
                 newCustomTypeConst->define(new AssignableSymbol(sym.first, sym.second->type));
@@ -88,10 +90,7 @@ public:
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
                     element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
                 else if (elementsType->getTypeIndex() == SymbolTable::tVarBool){
-                    element = new VariableSymbol(
-                            to_string(i),
-                            SymbolTable::_f->newBoolVar()
-                    );
+                    element =new VariableSymbol(to_string(i));
                 }
                 else {
                     element = new AssignableSymbol(to_string(i), elementsType);
@@ -144,7 +143,10 @@ public:
         map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
         if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
             for (auto currElem : arrayElems) {
-                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+                VariableSymbol * currVar = (VariableSymbol *) currElem.second;
+
+                cout << "e" << endl;
+//                result.push_back(((VariableSymbol *) currElem.second)->getVar());
             }
         } else {
             cerr << "It must be a literal array" << endl;

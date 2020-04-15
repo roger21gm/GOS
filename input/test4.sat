@@ -6,14 +6,9 @@ entities:
     };
 
 viewpoint:
-    var varX[3];
-    var a[10][10];
-    A b[3];
-    param int c;
-    var variable;
-    param int matrix[3][3][3];
-    param int index;
+    var x;
+    A a;
 
 
 constraints:
-    [ i.c | i in b[1] ];
+    x;

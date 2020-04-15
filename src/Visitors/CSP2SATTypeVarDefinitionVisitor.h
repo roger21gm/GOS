@@ -21,6 +21,12 @@ class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 public:
     explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
 
+    antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
+        SymbolTable::entityDefinitionBlock = true;
+        CSP2SATBaseVisitor::visitEntityDefinitionBlock(ctx);
+        SymbolTable::entityDefinitionBlock = false;
+        return nullptr;
+    }
 
 
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
@@ -38,10 +44,7 @@ public:
             newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool);
         }
         else {
-            newVar = new VariableSymbol(
-                    ctx->name->getText(),
-                    SymbolTable::_f->newBoolVar()
-            );
+            newVar = new VariableSymbol(ctx->name->getText());
         }
         currentScope->define(newVar);
 

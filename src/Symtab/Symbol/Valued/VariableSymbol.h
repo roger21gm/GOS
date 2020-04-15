@@ -12,11 +12,15 @@
 
 class VariableSymbol: public ValueSymbol {
 public:
-    VariableSymbol(const string &name, literal varValue) : ValueSymbol(name, SymbolTable::_varbool) {
-        this->var = varValue;
+    VariableSymbol(const string &name) : ValueSymbol(name, SymbolTable::_varbool) {
+        if(!SymbolTable::entityDefinitionBlock)
+            var = SymbolTable::_f->newBoolVar();
     }
 
-    VariableSymbol(const string &name) : ValueSymbol(name, SymbolTable::_varbool) {}
+    VariableSymbol(const string &name, literal lit) : ValueSymbol(name, SymbolTable::_varbool) {
+        var = lit;
+    }
+
 
     bool isAssignable() override {
         return false;

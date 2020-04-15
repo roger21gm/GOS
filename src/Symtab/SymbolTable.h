@@ -14,6 +14,10 @@
 class SymbolTable {
 
 public:
+
+    //Flag to indicate if the flow is defining entities.
+    static bool entityDefinitionBlock;
+
     static const int tCustom = 0;
     static const int tArray = 1;
     static const int tInt = 2;
@@ -39,5 +43,6 @@ BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolT
 BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 BuiltInTypeSymbol * SymbolTable::_varbool = new BuiltInTypeSymbol("varbool", SymbolTable::tVarBool);
 SMTFormula * SymbolTable::_f = new SMTFormula();
+bool SymbolTable::entityDefinitionBlock = false;
 
 #endif //CSP2SAT_SYMBOLTABLE_H

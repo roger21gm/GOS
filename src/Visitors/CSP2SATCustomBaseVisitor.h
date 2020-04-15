@@ -196,7 +196,7 @@ public:
         if (ctx->attr) {
             return (Symbol *) this->currentScope->resolve(ctx->attr->getText());
         } else if (ctx->index) {
-            Scope * prev = this->currentScope;
+            Scope *prev = this->currentScope;
             this->currentScope = this->currentLocalScope;
             Value *index = visit(ctx->index);
             this->currentScope = prev;
@@ -211,7 +211,7 @@ public:
         string a = ctx->getText();
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
-        if(!var){
+        if (!var) {
             cerr << ctx->getText() << " don't exist" << endl;
             throw;
         }
@@ -300,12 +300,12 @@ public:
 
             if (condition) {
                 Symbol *exprRes;
-                if (ctx->varAcc) {
+                if (ctx->listResultExpr()->varAcc) {
                     this->accessingNotLeafVariable = true;
-                    exprRes = visit(ctx->varAcc);
+                    exprRes = visit(ctx->listResultExpr()->varAcc);
                     this->accessingNotLeafVariable = false;
                 } else {
-                    Value *val = visit(ctx->resExpr);
+                    Value *val = visit(ctx->listResultExpr()->resExpr);
                     auto *valueResult = new AssignableSymbol(
                             to_string(rand()),
                             val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
@@ -313,7 +313,6 @@ public:
                     valueResult->setValue(val);
                     exprRes = valueResult;
                 }
-
 
                 if (newList == nullptr)
                     newList = new ArraySymbol(
@@ -356,6 +355,40 @@ public:
             cerr << ctx->getText() << " is not an array" << endl;
             throw;
         }
+    }
+
+    antlrcpp::Any visitExplicitList(CSP2SATParser::ExplicitListContext *ctx) override {
+        ArraySymbol *resultList = nullptr;
+
+        for (auto currVal : ctx->listResultExpr()) {
+            Symbol *curr = nullptr;
+            if (currVal->varAcc) {
+                curr = visit(currVal->varAcc);
+            } else {
+                Value *exprVal = visit(currVal->resExpr);
+                curr = new AssignableSymbol(to_string(rand()),
+                                            exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
+                ((AssignableSymbol*)curr)->setValue(exprVal);
+            }
+
+            if (resultList == nullptr) {
+                resultList = new ArraySymbol(
+                        to_string(rand()),
+                        this->currentScope,
+                        curr->type
+                );
+            }
+
+            if(curr->type->getTypeIndex() == resultList->getElementsType()->getTypeIndex()){
+                resultList->add(curr);
+            }
+            else {
+                cerr << "All elements of explicit list must be same type" << endl;
+                throw;
+            }
+        }
+
+        return resultList;
     }
 
 };

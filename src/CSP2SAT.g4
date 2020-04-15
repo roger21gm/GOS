@@ -173,10 +173,14 @@ functionCall: TK_IDENT TK_LPAREN (expr | list) TK_RPAREN;
 
 list:
       min=expr TK_RANGE_DOTS max=expr #rangList
-    | TK_LCLAUDATOR ( varAcc=constraint_literal | resExpr=expr ) TK_CONSTRAINT_OR_PIPE auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR #comprehensionList
-    | TK_LCLAUDATOR expr (TK_COMMA expr) TK_RCLAUDATOR #explicitList
+    | TK_LCLAUDATOR listResultExpr TK_CONSTRAINT_OR_PIPE auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR #comprehensionList
+    | TK_LCLAUDATOR listResultExpr (TK_COMMA listResultExpr)* TK_RCLAUDATOR #explicitList
     | varAccess #varAccessList;
     // TODO: [_][2]
+
+listResultExpr:
+      varAcc=constraint_literal
+    | resExpr=expr;
 
 constraint:
     constraint_double_implication

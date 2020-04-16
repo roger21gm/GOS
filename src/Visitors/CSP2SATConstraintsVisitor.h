@@ -10,11 +10,12 @@
 #include "smtformula.h"
 
 
-struct clauseReturn {
-    clauseReturn(clause claus){
-        this->clause =claus;
+struct clausesReturn {
+    clausesReturn(){}
+    void addClause (clause claus) {
+        clauses.push_back(claus);
     }
-    clause clause;
+    vector<clause> clauses;
 };
 
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
@@ -35,19 +36,51 @@ public:
                 cerr << "Unitary clause " << ctx->getText() << " must be a variable" << endl;
                 throw;
             }
-
         }
         else if (ctx->constraint_aggreggate_op()) {
             visit(ctx->constraint_aggreggate_op());
         }
         else {
-            cout << ctx->getText() << endl;
-            clauseReturn * a = CSP2SATBaseVisitor::visitConstraint(ctx);
-            clause newClause = a->clause;
-            SymbolTable::_f->addClause(newClause);
+            clausesReturn * clauses = CSP2SATBaseVisitor::visitConstraint(ctx);
+            for(clause clause : clauses->clauses){
+                SymbolTable::_f->addClause(clause);
+            }
         }
         return nullptr;
     }
+
+    antlrcpp::Any visitCAndExpression(CSP2SATParser::CAndExpressionContext *ctx) override {
+        clausesReturn * newClauses = new clausesReturn();
+
+        for (int i = 0; i < ctx->constraint_literal().size(); i++) {
+            Symbol *currValue = visit(ctx->constraint_literal(i));
+            VariableSymbol *currLiteral = (VariableSymbol *) currValue;
+            newClauses->addClause(currLiteral->getVar());
+        }
+        cout << "added AND list constraint " << ctx->getText() << endl;
+
+        return newClauses;
+    }
+
+    antlrcpp::Any visitCAndList(CSP2SATParser::CAndListContext *ctx) override {
+        ArraySymbol *list = visit(ctx->list());
+        clausesReturn * newClauses = new clausesReturn();
+
+        if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+            map<string, Symbol *> a = list->getScopeSymbols();
+            auto it = a.begin();
+            while (it != a.end()) {
+                newClauses->addClause(((VariableSymbol *) it->second)->getVar());
+                it++;
+            }
+        } else {
+            cerr << "Constraint OR list elements must be literals" << endl;
+            throw;
+        }
+
+        return newClauses;
+    }
+
 
 
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
@@ -61,7 +94,11 @@ public:
             orClause |= currLiteral->getVar();
         }
         cout << "added or list constraint " << ctx->getText() << endl;
-        return new clauseReturn(orClause);
+
+        clausesReturn * newClauses = new clausesReturn();
+        newClauses->addClause(orClause);
+
+        return newClauses;
     }
 
     antlrcpp::Any visitCOrList(CSP2SATParser::COrListContext *ctx) override {
@@ -78,7 +115,11 @@ public:
             cerr << "Constraint OR list elements must be literals" << endl;
             throw;
         }
-        return new clauseReturn(orClause);
+
+        clausesReturn * newClauses = new clausesReturn();
+        newClauses->addClause(orClause);
+
+        return newClauses;
     }
 
 
@@ -150,12 +191,11 @@ public:
                 throw;
             }
         }
-
         if(ctx->TK_ELSE())
             visit(ctx->localConstraintDefinitionBlock().back());
-
         return nullptr;
     }
+
 
 
 };

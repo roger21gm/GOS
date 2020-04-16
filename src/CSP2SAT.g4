@@ -154,7 +154,6 @@ valueBaseType: integer=TK_INT_VALUE | boolean=TK_BOOLEAN_VALUE;
 
 constraintDefinition: ( forall | ifThenElse | constraint )* TK_SEMICOLON;
 
-
 auxiliarListAssignation: TK_IDENT TK_IN list;
 
 localConstraintDefinitionBlock: constraintDefinition*;

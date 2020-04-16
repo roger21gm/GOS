@@ -69,14 +69,14 @@ int main() {
     SymbolTable * symbolTable = new SymbolTable();
 
     ifstream inFile;
-    inFile.open("../input/i4_1.json"); //open the input file
+    inFile.open("../input/sudoku.json"); //open the input file
     stringstream inputStream;
     inputStream << inFile.rdbuf(); //read the file
     string inputStr = inputStream.str(); //str holds the content of the file
 
 
     ifstream modelFile;
-    modelFile.open("../input/test4_1.sat"); //open the input file
+    modelFile.open("../input/sudoku.sat"); //open the input file
     stringstream modelStream;
     modelStream << modelFile.rdbuf(); //read the file
     string modelStr = modelStream.str(); //str holds the content of the file
@@ -113,7 +113,8 @@ int main() {
 
     //showAllDefinedVariables(symbolTable->gloabls);
 
-    cout << a->getNBoolVars() << endl;
+    cout << "vars: " << a->getNBoolVars() << endl;
+    cout << "clauses: " << a->getNClauses() << endl;
 
     return 0;
 }

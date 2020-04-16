@@ -49,16 +49,58 @@ public:
         return nullptr;
     }
 
+    antlrcpp::Any visitConstraint_implication(CSP2SATParser::Constraint_implicationContext *ctx) override {
+        clausesReturn * result = visit(ctx->constraint_or());
+        clausesReturn * andClauses = visit(ctx->constraint_and());
+        for(clause lit : andClauses->clauses){
+            result->addClause(lit.v.front());
+        }
+        return result;
+    }
+
+    antlrcpp::Any visitCDoubleImplicationOR(CSP2SATParser::CDoubleImplicationORContext *ctx) override {
+        clausesReturn * result = new clausesReturn();
+
+        Symbol *currValue = visit(ctx->constraint_literal());
+        VariableSymbol *currLiteral = (VariableSymbol *) currValue;
+        literal implLit = currLiteral->getVar();
+
+        clausesReturn * orClauseReturn = visit(ctx->constraint_or());
+        clause orClause = orClauseReturn->clauses.front();
+
+        clause aux = !implLit | orClause;
+        result->addClause(aux);
+
+        for(literal orLit : orClause.v){
+            result->addClause( implLit | !orLit );
+        }
+        return result;
+    }
+
+    antlrcpp::Any visitCDoubleImplicationAND(CSP2SATParser::CDoubleImplicationANDContext *ctx) override {
+        clausesReturn * result = new clausesReturn();
+
+        Symbol *currValue = visit(ctx->constraint_literal());
+        VariableSymbol *currLiteral = (VariableSymbol *) currValue;
+        literal implLit = currLiteral->getVar();
+
+        clause aux = implLit;
+        clausesReturn * andClauses = visit(ctx->constraint_and());
+        for(clause lit : andClauses->clauses){
+            result->addClause(lit.v.front() | !implLit);
+            aux |= !lit.v.front();
+        }
+        result->addClause(aux);
+        return result;
+    }
+
     antlrcpp::Any visitCAndExpression(CSP2SATParser::CAndExpressionContext *ctx) override {
         clausesReturn * newClauses = new clausesReturn();
-
         for (int i = 0; i < ctx->constraint_literal().size(); i++) {
             Symbol *currValue = visit(ctx->constraint_literal(i));
             VariableSymbol *currLiteral = (VariableSymbol *) currValue;
             newClauses->addClause(currLiteral->getVar());
         }
-        cout << "added AND list constraint " << ctx->getText() << endl;
-
         return newClauses;
     }
 
@@ -87,14 +129,11 @@ public:
         Symbol *firstValue = visit(ctx->constraint_literal(0));
         VariableSymbol *firstLiteral = (VariableSymbol *) firstValue;
         clause orClause =  firstLiteral->getVar();
-
         for (int i = 1; i < ctx->constraint_literal().size(); i++) {
             Symbol *currValue = visit(ctx->constraint_literal(i));
             VariableSymbol *currLiteral = (VariableSymbol *) currValue;
             orClause |= currLiteral->getVar();
         }
-        cout << "added or list constraint " << ctx->getText() << endl;
-
         clausesReturn * newClauses = new clausesReturn();
         newClauses->addClause(orClause);
 

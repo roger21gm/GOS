@@ -21,7 +21,7 @@ constraints:
         ||(varX);
     }
     else if (c == 10) {
-        &&(a[_][0]);
+        varX[0]| varX[1] <-> variable;
     }
     else if (c == 11) {
         variable;

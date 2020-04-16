@@ -178,21 +178,19 @@ listResultExpr:
 
 constraint:
     constraint_double_implication
-|   constraint_and_implication
-|   constraint_or_implication
+|   constraint_implication
 |   constraint_and
 |   constraint_or
 |   cLit=constraint_literal
 |   constraint_aggreggate_op;
 
 constraint_double_implication:
-        constraint_literal TK_OP_DOUBLE_IMPLIC constraint_and
-    |   constraint_and TK_OP_DOUBLE_IMPLIC constraint_literal
-    |   constraint_literal TK_OP_DOUBLE_IMPLIC constraint_or
-    |   constraint_or TK_OP_DOUBLE_IMPLIC constraint_literal;
+          (constraint_literal TK_OP_DOUBLE_IMPLIC constraint_and | constraint_and TK_OP_DOUBLE_IMPLIC constraint_literal) #cDoubleImplicationAND
+        | (constraint_literal TK_OP_DOUBLE_IMPLIC constraint_or | constraint_or TK_OP_DOUBLE_IMPLIC constraint_literal)   #cDoubleImplicationOR;
 
-constraint_and_implication: constraint_and TK_OP_IMPLIC_R constraint_or;
-constraint_or_implication: constraint_or TK_OP_IMPLIC_L constraint_and;
+constraint_implication:
+      constraint_and TK_OP_IMPLIC_R constraint_or
+    | constraint_or TK_OP_IMPLIC_L constraint_and;
 
 constraint_and:
         constraint_literal (TK_CONSTRAINT_AND constraint_literal)+            #cAndExpression

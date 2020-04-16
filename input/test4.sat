@@ -6,9 +6,9 @@ entities:
     };
 
 viewpoint:
-    var x;
+    var x[10];
     A a;
 
 
 constraints:
-    x;
+    &&(x);

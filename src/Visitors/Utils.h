@@ -144,9 +144,7 @@ public:
         if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
             for (auto currElem : arrayElems) {
                 VariableSymbol * currVar = (VariableSymbol *) currElem.second;
-
-                cout << "e" << endl;
-//                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+                result.push_back(((VariableSymbol *) currElem.second)->getVar());
             }
         } else {
             cerr << "It must be a literal array" << endl;

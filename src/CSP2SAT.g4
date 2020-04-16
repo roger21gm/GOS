@@ -157,12 +157,14 @@ constraintDefinition: ( forall | ifThenElse | constraint )* TK_SEMICOLON;
 
 auxiliarListAssignation: TK_IDENT TK_IN list;
 
-forall: TK_FORALL TK_LPAREN auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET;
+localConstraintDefinitionBlock: constraintDefinition*;
+
+forall: TK_FORALL TK_LPAREN auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* TK_RPAREN TK_LBRACKET localConstraintDefinitionBlock TK_RBRACKET;
 
 ifThenElse:
-    TK_IF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET
-    (TK_ELSEIF TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)*
-    (TK_ELSE TK_LPAREN expr TK_RPAREN TK_LBRACKET constraintDefinition* TK_RBRACKET)?;
+    TK_IF TK_LPAREN expr TK_RPAREN TK_LBRACKET localConstraintDefinitionBlock TK_RBRACKET
+    (TK_ELSEIF TK_LPAREN expr TK_RPAREN TK_LBRACKET localConstraintDefinitionBlock TK_RBRACKET)*
+    (TK_ELSE TK_LBRACKET localConstraintDefinitionBlock TK_RBRACKET)?;
 
 list:
       min=expr TK_RANGE_DOTS max=expr #rangList
@@ -194,10 +196,10 @@ constraint_and_implication: constraint_and TK_OP_IMPLIC_R constraint_or;
 constraint_or_implication: constraint_or TK_OP_IMPLIC_L constraint_and;
 
 constraint_and:
-        constraint_literal (TK_CONSTRAINT_AND constraint_literal)+
-    |   TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN;
+        constraint_literal (TK_CONSTRAINT_AND constraint_literal)+            #cAndExpression
+    |   TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN          #cAndList;
 
-constraint_or:
+constraint_or: //OK
         constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)+         #cOrExpression
     |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN   #cOrList;
 

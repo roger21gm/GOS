@@ -10,11 +10,17 @@
 #include "smtformula.h"
 
 
+struct clauseReturn {
+    clauseReturn(clause claus){
+        this->clause =claus;
+    }
+    clause clause;
+};
+
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
     explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
-
 
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
         if (ctx->cLit) {
@@ -22,38 +28,45 @@ public:
             if(!val->isAssignable()){
                 cout << "added unitary constraint " << ctx->getText() << " -> " << ((VariableSymbol *) val)->getVar().v.id << endl;
                 VariableSymbol * currVar = (VariableSymbol *) val;
-                SymbolTable::_f->addClause(currVar->getVar());
+                clause newClause = currVar->getVar();
+                SymbolTable::_f->addClause(newClause);
             }
             else {
                 cerr << "Unitary clause " << ctx->getText() << " must be a variable" << endl;
                 throw;
             }
 
-        } else {
-            CSP2SATBaseVisitor::visitConstraint(ctx);
+        }
+        else if (ctx->constraint_aggreggate_op()) {
+            visit(ctx->constraint_aggreggate_op());
+        }
+        else {
+            cout << ctx->getText() << endl;
+            clauseReturn * a = CSP2SATBaseVisitor::visitConstraint(ctx);
+            clause newClause = a->clause;
+            SymbolTable::_f->addClause(newClause);
         }
         return nullptr;
     }
 
+
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
-        ValueSymbol *firstValue = visit(ctx->constraint_literal(0));
+        Symbol *firstValue = visit(ctx->constraint_literal(0));
         VariableSymbol *firstLiteral = (VariableSymbol *) firstValue;
         clause orClause =  firstLiteral->getVar();
 
         for (int i = 1; i < ctx->constraint_literal().size(); i++) {
-            ValueSymbol *currValue = visit(ctx->constraint_literal(i));
+            Symbol *currValue = visit(ctx->constraint_literal(i));
             VariableSymbol *currLiteral = (VariableSymbol *) currValue;
             orClause |= currLiteral->getVar();
         }
         cout << "added or list constraint " << ctx->getText() << endl;
-        SymbolTable::_f->addClause(orClause);
-        return nullptr;
+        return new clauseReturn(orClause);
     }
 
     antlrcpp::Any visitCOrList(CSP2SATParser::COrListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
         clause orClause;
-
         if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
             map<string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
@@ -61,16 +74,14 @@ public:
                 orClause |= ((VariableSymbol *) it->second)->getVar();
                 it++;
             }
-            cout << "added or list constraint " << ctx->getText() << endl;
-            SymbolTable::_f->addClause(orClause);
         } else {
             cerr << "Constraint OR list elements must be literals" << endl;
             throw;
         }
-
-
-        return nullptr;
+        return new clauseReturn(orClause);
     }
+
+
 
     antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {
         Symbol *valSym = visit(ctx->varAccess());
@@ -80,27 +91,6 @@ public:
                 valSym = (Symbol*) new VariableSymbol("!" + var->name, !(var->getVar()));
         }
         return valSym;
-    }
-
-
-    antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
-        auto *forallLocalScope = new LocalScope(this->currentScope);
-
-        map<string, ArraySymbol *> ranges;
-        this->currentScope = forallLocalScope;
-        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
-            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
-            ranges.insert(currAuxVar);
-        }
-
-        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
-        for (const auto &assignation: possibleAssignations) {
-            for (const auto &auxVarAssign : assignation)
-                forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
-            CSP2SATBaseVisitor::visitForall(ctx);
-        }
-        this->currentScope = forallLocalScope->getEnclosingScope();
-        return nullptr;
     }
 
     antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
@@ -123,6 +113,47 @@ public:
             cerr << "Aggregate opperator " << ctx->aggregate_op()->getText() << " only allow variable list" << endl;
             throw;
         }
+        return nullptr;
+    }
+
+    antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
+        auto *forallLocalScope = new LocalScope(this->currentScope);
+
+        map<string, ArraySymbol *> ranges;
+        this->currentScope = forallLocalScope;
+        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
+            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
+            ranges.insert(currAuxVar);
+        }
+
+        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
+        for (const auto &assignation: possibleAssignations) {
+            for (const auto &auxVarAssign : assignation)
+                forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
+            visit(ctx->localConstraintDefinitionBlock());
+        }
+        this->currentScope = forallLocalScope->getEnclosingScope();
+        return nullptr;
+    }
+
+    antlrcpp::Any visitIfThenElse(CSP2SATParser::IfThenElseContext *ctx) override {
+        for (int i = 0; i < ctx->expr().size(); ++i) {
+            Value * condVal = visit(ctx->expr(i));
+            if(condVal->isBoolean()){
+                if(condVal->getRealValue() == 1){
+                    visit(ctx->localConstraintDefinitionBlock(i));
+                    return nullptr;
+                }
+            }
+            else{
+                cerr << "Conditions of conditionals must be boolean expressions" << endl;
+                throw;
+            }
+        }
+
+        if(ctx->TK_ELSE())
+            visit(ctx->localConstraintDefinitionBlock().back());
+
         return nullptr;
     }
 

@@ -290,7 +290,11 @@ A comprehension list will define an anonymous list. It is possible to generate c
 
 
 
+### Problemes
 
+- Accés a variables des del viewpoint: p.e. per definir arrays  `var varX[n][n]` on `param int n`.
+  - Fer una lectura prèvia del fitxer d'entrada i quedar-se amb els valors enters?
+    - Petarà en els enters dins entitats noves: entity.attribute
 
 
 

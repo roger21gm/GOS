@@ -13,9 +13,19 @@ viewpoint:
     var variable;
     param int matrix[3][3][3];
     param int index;
+    var x;
 
 
 constraints:
-    forall(i in [j | j in b]){
-        i.c;
+    if(c < 10){
+        ||(varX);
+    }
+    else if (c == 10) {
+        ||(a[_][0]);
+    }
+    else if (c == 11) {
+        variable;
+    }
+    else {
+        ||(a[0][_]);
     };

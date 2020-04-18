@@ -69,14 +69,14 @@ int main() {
     SymbolTable * symbolTable = new SymbolTable();
 
     ifstream inFile;
-    inFile.open("../input/sudoku.json"); //open the input file
+    inFile.open("../input/i1.json"); //open the input file
     stringstream inputStream;
     inputStream << inFile.rdbuf(); //read the file
     string inputStr = inputStream.str(); //str holds the content of the file
 
 
     ifstream modelFile;
-    modelFile.open("../input/sudoku.sat"); //open the input file
+    modelFile.open("../input/t1.sat"); //open the input file
     stringstream modelStream;
     modelStream << modelFile.rdbuf(); //read the file
     string modelStr = modelStream.str(); //str holds the content of the file
@@ -90,6 +90,8 @@ int main() {
     CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
     CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable);
     visitor->visit(tree);
+
+
 
     ANTLRInputStream input2(inputStr);
     JSONLexer lexer2(&input2);
@@ -115,6 +117,9 @@ int main() {
 
     cout << "vars: " << a->getNBoolVars() << endl;
     cout << "clauses: " << a->getNClauses() << endl;
+
+
+
 
     return 0;
 }

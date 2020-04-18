@@ -248,6 +248,41 @@ CLÀSUSULES:
 
 
 
+**ALLOWED FORMULAS**
+
+- **NOT**
+  - !AND_LITERALS  ======> OR_LITERALS
+    - !a =====> !a
+    - !(a & b & c) =====> !a | !b | !c
+- **AND**
+  - OR_LITERALS & OR_LITERALS   =======> AND_CLAUSES 
+    - (a | b) & (c | d)  =====> C1: (a | b), C2: (c | d)
+  - OR_LITERALS & AND_LITERALS =======> AND_CLAUSES
+    - (a | b) & (b & c & e) ======> C1: (a | b), C2: b, C3: c, C4: e
+  - AND_LITERALS & OR_LITERALS =======> AND_CLAUSES
+    - (a & b) & (c | d)  =====> C1: a, C2: b, C3: (c | d)
+  - AND_LITERALS & AND_LITERALS ======> AND_LITERALS
+    - (a & b) & (c & d)  ======> C1: a, C2: b, C3: c, C4: d
+- **OR**
+  - OR_LITERALS | OR_LITERALS ======> OR_LITERALS
+    - (a |b) | (c |d) ====> a | b | c | d
+  - //TODO: OR_LITERALS | AND_LITERALS ======> AND_CLAUSES
+    - (a | b) | (c & d) =====> C1: a | b | c, C2: a | b | d
+- **IMPLICATION**
+  - AND_LITERALS => OR_LITERALS  // OR_LITERALS => AND_LITERALS ======> OR_LITERALS
+    - (a & b) => (c | d) ======> !a | !b | c | d
+    - a => (c | d) =====> !a | c | d
+  - //TODO : LITERAL => AND_LITERALS =====> AND_CLAUSES
+    - a => (c & d) =====> C1: !a | c,  C2: !a | d 
+  - No permetem AND_LITERALS => OR_LITERALS 
+- **DOUBLE IMPLICATION**
+  - LITERAL <-> AND_LITERALS ====> AND_CLAUSES
+    - a <-> (b & c). =======> C1: !a | b, C2: !a | c, C3: a | !b | !c
+  - LITERAL <-> OR_LITERALS ====> AND_CLAUSES
+    - a <-> (b | c). =======> C1: a | !b, C2: a | !c, C3: !a | b | c
+
+
+
 
 ## Generator structures 
 
@@ -294,9 +329,11 @@ A comprehension list will define an anonymous list. It is possible to generate c
 
 - Accés a variables des del viewpoint: p.e. per definir arrays  `var varX[n][n]` on `param int n`.
   - Fer una lectura prèvia del fitxer d'entrada i quedar-se amb els valors enters?
-    - Petarà en els enters dins entitats noves: entity.attribute
+- Arrays comencen per 0 o per 1?
+- Què genera 1..3?
+  - 1, 2, 3
 
-
+- Permetre triar la implementació de AK, ALK (lineal, log,...)
 
 
 

@@ -17,15 +17,4 @@ viewpoint:
 
 
 constraints:
-    if(c < 10){
-        ||(varX);
-    }
-    else if (c == 10) {
-        varX[0]| varX[1] <-> variable;
-    }
-    else if (c == 11) {
-        variable;
-    }
-    else {
-        ||(a[0][_]);
-    };
+    varX[0] <-> varX[1]

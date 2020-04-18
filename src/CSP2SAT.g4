@@ -173,34 +173,33 @@ list:
 
 
 listResultExpr:
-      varAcc=constraint_literal
+      varAcc=constraint_literal //TODO: fix this
     | resExpr=expr;
 
-constraint:
-    constraint_double_implication
-|   constraint_implication
-|   constraint_and
-|   constraint_or
-|   cLit=constraint_literal
-|   constraint_aggreggate_op;
+constraint: constraint_expression | constraint_aggreggate_op;
 
-constraint_double_implication:
-          (constraint_literal TK_OP_DOUBLE_IMPLIC constraint_and | constraint_and TK_OP_DOUBLE_IMPLIC constraint_literal) #cDoubleImplicationAND
-        | (constraint_literal TK_OP_DOUBLE_IMPLIC constraint_or | constraint_or TK_OP_DOUBLE_IMPLIC constraint_literal)   #cDoubleImplicationOR;
+constraint_expression: constraint_double_implication;
 
-constraint_implication:
-      constraint_and TK_OP_IMPLIC_R constraint_or
-    | constraint_or TK_OP_IMPLIC_L constraint_and;
+constraint_double_implication: constraint_implication (TK_OP_DOUBLE_IMPLIC constraint_implication)*;
+
+
+implication_operator: (TK_OP_IMPLIC_L | TK_OP_IMPLIC_R);
+constraint_implication: constraint_or (implication_operator constraint_or)*;
+
+constraint_or:
+    constraint_and (TK_CONSTRAINT_OR_PIPE constraint_and)*                   #cOrExpression
+    | TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN   #cOrList;
 
 constraint_and:
-        constraint_literal (TK_CONSTRAINT_AND constraint_literal)+            #cAndExpression
-    |   TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN          #cAndList;
+      constraint_literal (TK_CONSTRAINT_AND  constraint_literal)*    #cAndExpression
+    | TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN   #cAndList;
 
-constraint_or: //OK
-        constraint_literal (TK_CONSTRAINT_OR_PIPE constraint_literal)+         #cOrExpression
-    |   TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN   #cOrList;
+constraint_literal: TK_CONSTRAINT_NOT? constraint_base;
 
-constraint_literal: TK_CONSTRAINT_NOT? varAccess;
+constraint_base:
+    varAccess
+    | TK_BOOLEAN_VALUE
+    | TK_LPAREN constraint_expression TK_RPAREN;
 
 
 aggregate_op: TK_CONSTRAINT_AGG_EK | TK_CONSTRAINT_AGG_AMK | TK_CONSTRAINT_AGG_ALK;

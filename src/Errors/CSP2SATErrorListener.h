@@ -20,6 +20,7 @@ public:
 
     void syntaxError(Recognizer *recognizer, Token *offendingSymbol, size_t line, size_t charPositionInLine,
                      const std::string &msg, std::exception_ptr e) override {
+
     }
 
     void reportAmbiguity(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact,

@@ -6,9 +6,15 @@ entities:
     };
 
 viewpoint:
-    var x[10];
-    A a;
+    var varX[3];
+    var a[10][10];
+    A b[3];
+    param int c;
+    var variable;
+    param int matrix[3][3][3];
+    param int index;
+    var x;
 
 
 constraints:
-    &&(x);
+    ||(varX)

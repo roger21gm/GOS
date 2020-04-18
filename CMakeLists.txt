@@ -51,6 +51,6 @@ add_executable(
             src/api/smtapi/src/MDD/amopbbddbuilder.cpp
             src/api/smtapi/src/MDD/amopbmddbuilder.cpp
             src/api/smtapi/src/MDD/mdd.cpp
-            src/api/smtapi/src/util/util.cpp src/Symtab/Symbol/Valued/ValueSymbol.h src/Errors/CSP2SATErrorListener.h)
+            src/api/smtapi/src/util/util.cpp src/Symtab/Symbol/Valued/ValueSymbol.h src/Errors/CSP2SATErrorListener.h src/CSP2SATEncoding.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

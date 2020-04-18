@@ -9,10 +9,12 @@ constraints:
         AMK(p[_][i][j], 1); // Cada valor apareix una vegada per columna.
     };
 
+
     //Cada valor apareix una vagada als subquadrats de 3x3.
-    forall(i in [0,2,6], j in [0,2,6], k in 0..9){
+    forall(i in [0,3,6], j in [0,3,6], k in 0..9){
         AMK([p[i+l][j+g][k] | l in 0..3, g in 0..3], 1);
     };
+
 
     //Inicialitzem els valors fixats del sudoku.
     forall(i in 0..9, j in 0..9){

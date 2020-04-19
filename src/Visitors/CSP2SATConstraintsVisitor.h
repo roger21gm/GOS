@@ -8,6 +8,7 @@
 
 #include "CSP2SATCustomBaseVisitor.h"
 #include "smtformula.h"
+#include "../Errors/CSP2SATException.h"
 
 
 struct clausesReturn {
@@ -34,6 +35,17 @@ class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
 public:
     explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
 
+    antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
+        try {
+            return CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+        }
+        catch (CSP2SATException &e) {
+            cerr << e.getErrorMessage() << endl;
+            return 0;
+        }
+
+    }
+
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
         if (ctx->constraint_expression()) {
             clausesReturn *result = visit(ctx->constraint_expression());
@@ -50,8 +62,13 @@ public:
             if (valSym->type && valSym->type->getTypeIndex() == SymbolTable::tVarBool) {
                 clause->addClause(((VariableSymbol *) valSym)->getVar());
             } else {
-                cerr << "Accessing a non-variable symbol: " << ctx->getText() << endl;
-                throw;
+                throw CSP2SATInvalidExpressionTypeException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        ctx->getText(),
+                        Utils::getTypeName(valSym->type->getTypeIndex()),
+                        Utils::getTypeName(SymbolTable::tVarBool)
+                );
             }
         } else if (ctx->TK_BOOLEAN_VALUE()) {
             if (ctx->TK_BOOLEAN_VALUE()->getText() == "true")
@@ -73,8 +90,12 @@ public:
                 if (currClause.v.size() == 1)
                     result |= !currClause.v.front();
                 else {
-                    cerr << "You can only negate literals or AND lists" << endl;
-                    throw;
+                    throw CSP2SATInvalidFormulaException(
+                            ctx->start->getLine(),
+                            ctx->start->getCharPositionInLine(),
+                            ctx->getText(),
+                            "You can only negate literals or AND lists"
+                    );
                 }
             }
             clauses = new clausesReturn(result);
@@ -189,34 +210,32 @@ public:
     visitConstraint_double_implication(CSP2SATParser::Constraint_double_implicationContext *ctx) override {
         clausesReturn *res = visit(ctx->constraint_implication(0));
 
-
         if (ctx->constraint_implication().size() == 2) {
             clausesReturn *lExp = res;
             clausesReturn *rExp = visit(ctx->constraint_implication(1));
 
 
             if (!(lExp->clauses.size() == 1 && lExp->clauses.front().v.size() == 1)) {
-                clausesReturn * aux = rExp;
+                clausesReturn *aux = rExp;
                 rExp = lExp;
                 lExp = aux;
             }
 
-            if(lExp->clauses.size() == 1 && lExp->clauses.front().v.size() == 1){
+            if (lExp->clauses.size() == 1 && lExp->clauses.front().v.size() == 1) {
 
                 literal lLit = lExp->clauses.front().v.front();
 
-                clausesReturn * result = new clausesReturn();
+                clausesReturn *result = new clausesReturn();
 
-                if(rExp->clauses.size() == 1) { // OR left side
-                    for(auto currLit : rExp->clauses.front().v){
+                if (rExp->clauses.size() == 1) { // OR left side
+                    for (auto currLit : rExp->clauses.front().v) {
                         clause newClause = !currLit | lLit;
                         result->addClause(newClause);
                     }
                     result->addClause(!lLit | rExp->clauses.front());
-                }
-                else { // AND left side
+                } else { // AND left side
                     clause aux = lLit;
-                    for(auto unitClause : rExp->clauses){
+                    for (auto unitClause : rExp->clauses) {
                         clause newClause = !lLit | unitClause.v.front();
                         aux |= !unitClause.v.front();
                         result->addClause(newClause);
@@ -225,8 +244,7 @@ public:
                 }
 
                 res = result;
-            }
-            else {
+            } else {
                 cerr << ctx->getText() << " not valid" << endl;
                 throw;
             }
@@ -267,16 +285,19 @@ public:
                     return nullptr;
                 }
             } else {
-                cerr << "Conditions of conditionals must be boolean expressions" << endl;
-                throw;
+                throw CSP2SATInvalidExpressionTypeException(
+                        ctx->expr(i)->start->getLine(),
+                        ctx->expr(i)->start->getCharPositionInLine(),
+                        ctx->expr(i)->getText(),
+                        Utils::getTypeName(SymbolTable::tInt),
+                        Utils::getTypeName(SymbolTable::tBool)
+                );
             }
         }
         if (ctx->TK_ELSE())
             visit(ctx->localConstraintDefinitionBlock().back());
         return nullptr;
     }
-
-
 };
 
 

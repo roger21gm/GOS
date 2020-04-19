@@ -12,13 +12,15 @@
 #include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../Symtab/Value/IntValue.h"
+#include "../Errors/CSP2SATExceptionsRepository.h"
 
 class Utils {
 
 private:
 
-    static void generateAllPermutations(vector<vector<Symbol*>> input, vector<Symbol*> current, int k, vector<map<string, Symbol*>> & result, vector<string> names){
-        if(k == input.size()){
+    static void generateAllPermutations(vector<vector<Symbol *>> input, vector<Symbol *> current, int k,
+                                        vector<map<string, Symbol *>> &result, vector<string> names) {
+        if (k == input.size()) {
             result.emplace_back();
             for (int i = 0; i < k; ++i) {
                 result.back()[names[i]] = current[i];
@@ -26,7 +28,7 @@ private:
         } else {
             for (int j = 0; j < input[k].size(); ++j) {
                 current[k] = input[k][j];
-                generateAllPermutations(input, current, k+1, result, names);
+                generateAllPermutations(input, current, k + 1, result, names);
             }
         }
     }
@@ -34,7 +36,8 @@ private:
 public:
 
 
-    static StructSymbol *definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
+    static StructSymbol *
+    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
                 name,
@@ -48,15 +51,14 @@ public:
                 newCustomTypeConst->define(newVar);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                 ArraySymbol *aSy = (ArraySymbol *) sym.second;
-                ArraySymbol * newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
+                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
                 newCustomTypeConst->define(newArrayConst);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
-                Symbol * varSym = new VariableSymbol(sym.first);
+                Symbol *varSym = new VariableSymbol(sym.first);
 
                 newCustomTypeConst->define(varSym);
 
-            }
-            else{
+            } else {
                 newCustomTypeConst->define(new AssignableSymbol(sym.first, sym.second->type));
             }
         }
@@ -66,9 +68,9 @@ public:
 
     static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType) {
         vector<int> dimensions;
-        Symbol * currType = arrayType;
-        while(currType->type && currType->type->getTypeIndex() == SymbolTable::tArray){
-            ArraySymbol * currDimension = (ArraySymbol*) currType;
+        Symbol *currType = arrayType;
+        while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
+            ArraySymbol *currDimension = (ArraySymbol *) currType;
             dimensions.push_back(currDimension->getSize());
             currType = currDimension->resolve("0");
         }
@@ -89,10 +91,9 @@ public:
                 Symbol *element;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
                     element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
-                else if (elementsType->getTypeIndex() == SymbolTable::tVarBool){
-                    element =new VariableSymbol(to_string(i));
-                }
-                else {
+                else if (elementsType->getTypeIndex() == SymbolTable::tVarBool) {
+                    element = new VariableSymbol(to_string(i));
+                } else {
                     element = new AssignableSymbol(to_string(i), elementsType);
                 }
                 newArray->define(element);
@@ -115,45 +116,45 @@ public:
     }
 
 
-    static vector<map<string, Symbol*>> getAllCombinations(const map<string, ArraySymbol*>& ranges){
-        vector<vector<Symbol*>> unnamedRanges;
+    static vector<map<string, Symbol *>> getAllCombinations(const map<string, ArraySymbol *> &ranges) {
+        vector<vector<Symbol *>> unnamedRanges;
         vector<string> names;
 
-        for(const auto& localParam : ranges){
+        for (const auto &localParam : ranges) {
             names.push_back(localParam.first);
 
-            map<string, Symbol*> currAuxList = localParam.second->getScopeSymbols();
+            map<string, Symbol *> currAuxList = localParam.second->getScopeSymbols();
 
-            vector<Symbol*> curr;
+            vector<Symbol *> curr;
             curr.reserve(currAuxList.size());
-            for(auto const& currElem: currAuxList)
+            for (auto const &currElem: currAuxList)
                 curr.push_back(currElem.second);
 
             unnamedRanges.push_back(curr);
 
         }
-        vector<map<string, Symbol*>> result;
+        vector<map<string, Symbol *>> result;
         generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
 
         return result;
     }
 
-    static vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol * variableArray) {
-        vector<literal> result = vector<literal>();
-        map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
-        if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
-            for (auto currElem : arrayElems) {
-                VariableSymbol * currVar = (VariableSymbol *) currElem.second;
-                result.push_back(((VariableSymbol *) currElem.second)->getVar());
-            }
-        } else {
-            cerr << "It must be a literal array" << endl;
-            throw;
-        }
-        return result;
-    }
-;
 
+
+    static string getTypeName(const int tType) {
+        switch (tType) {
+            case SymbolTable::tBool:
+                return "bool";
+            case SymbolTable::tInt:
+                return "int";
+            case SymbolTable::tVarBool:
+                return "variable";
+            case SymbolTable::tArray:
+                return "array";
+            default:
+                return "custom type";
+        }
+    }
 };
 
 

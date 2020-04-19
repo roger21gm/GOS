@@ -13,6 +13,7 @@
 #include "../Symtab/Value/IntValue.h"
 #include "../Symtab/Value/BoolValue.h"
 #include "../Symtab/Scope/LocalScope.h"
+#include "../Errors/CSP2SATExceptionsRepository.h"
 
 using namespace CSP2SAT;
 using namespace std;
@@ -30,6 +31,15 @@ public:
     explicit CSP2SATCustomBaseVisitor(SymbolTable *symbolTable) {
         this->st = symbolTable;
         this->currentScope = this->st->gloabls;
+    }
+
+    antlrcpp::Any visitExprTop(CSP2SATParser::ExprTopContext *ctx) override {
+        try {
+            return CSP2SATBaseVisitor::visitExprTop(ctx);
+        } catch (CSP2SATException &e) {
+            cerr << e.getErrorMessage() << endl;
+            return nullptr;
+        }
     }
 
     antlrcpp::Any visitExprTernary(CSP2SATParser::ExprTernaryContext *ctx) override {
@@ -62,8 +72,13 @@ public:
                 if (currValue->isBoolean())
                     res->setRealValue(res->getRealValue() || currValue->getRealValue());
                 else {
-                    cerr << ctx->exprEq(i)->getText() << " is not a boolean value" << endl;
-                    throw;
+                    throw CSP2SATInvalidExpressionTypeException(
+                            ctx->exprEq(i)->getStart()->getLine(),
+                            ctx->exprEq(i)->getStart()->getCharPositionInLine(),
+                            ctx->getText(),
+                            Utils::getTypeName(SymbolTable::tInt),
+                            Utils::getTypeName(SymbolTable::tBool)
+                    );
                 }
             }
             return (Value *) res;
@@ -75,6 +90,7 @@ public:
         Value *lVal = visit(ctx->exprRel(0));
         if (ctx->exprRel().size() == 2) {
             Value *rVal = visit(ctx->exprRel(1));
+
             if (lVal->isBoolean() == rVal->isBoolean()) {
                 BoolValue *res = new BoolValue();
                 if (ctx->opEquality(0)->getText() == "==")
@@ -83,12 +99,18 @@ public:
                     res->setRealValue(lVal->getRealValue() != rVal->getRealValue());
                 return (Value *) res;
             } else {
-                cerr << "Equality operation types don't match" << endl;
-                throw;
+                throw CSP2SATTypeNotMatchException(
+                        ctx->opEquality(0)->start->getLine(),
+                        ctx->opEquality(0)->start->getCharPositionInLine(),
+                        ctx->getText()
+                );
             }
         } else if (ctx->exprRel().size() > 2) {
-            cerr << "Invalid equality operation int vs bool" << endl;
-            throw;
+            throw CSP2SATInvalidOperationException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText()
+            );
         }
         return lVal;
     }
@@ -97,24 +119,43 @@ public:
         Value *lVal = visit(ctx->exprSumDiff(0));
         if (ctx->exprSumDiff().size() == 2) {
             Value *rVal = visit(ctx->exprSumDiff(1));
-            if (lVal->isBoolean() == rVal->isBoolean()) {
-                BoolValue *res = new BoolValue();
-                if (ctx->opRelational(0)->getText() == "<")
-                    res->setRealValue(lVal->getRealValue() < rVal->getRealValue());
-                else if (ctx->opRelational(0)->getText() == ">")
-                    res->setRealValue(lVal->getRealValue() > rVal->getRealValue());
-                else if (ctx->opRelational(0)->getText() == "<=")
-                    res->setRealValue(lVal->getRealValue() <= rVal->getRealValue());
-                else
-                    res->setRealValue(lVal->getRealValue() >= rVal->getRealValue());
-                return (Value *) res;
-            } else {
-                cerr << "Relational operation types don't match" << endl;
-                throw;
+
+            if (lVal->isBoolean()) {
+                throw CSP2SATInvalidExpressionTypeException(
+                        ctx->exprSumDiff(0)->start->getLine(),
+                        ctx->exprSumDiff(0)->start->getCharPositionInLine(),
+                        ctx->exprSumDiff(0)->getText(),
+                        Utils::getTypeName(SymbolTable::tBool),
+                        Utils::getTypeName(SymbolTable::tInt)
+                );
             }
+            if (rVal->isBoolean()) {
+                throw CSP2SATInvalidExpressionTypeException(
+                        ctx->exprSumDiff(1)->start->getLine(),
+                        ctx->exprSumDiff(1)->start->getCharPositionInLine(),
+                        ctx->exprSumDiff(1)->getText(),
+                        Utils::getTypeName(SymbolTable::tBool),
+                        Utils::getTypeName(SymbolTable::tInt)
+                );
+            };
+
+            BoolValue *res = new BoolValue();
+            if (ctx->opRelational(0)->getText() == "<")
+                res->setRealValue(lVal->getRealValue() < rVal->getRealValue());
+            else if (ctx->opRelational(0)->getText() == ">")
+                res->setRealValue(lVal->getRealValue() > rVal->getRealValue());
+            else if (ctx->opRelational(0)->getText() == "<=")
+                res->setRealValue(lVal->getRealValue() <= rVal->getRealValue());
+            else
+                res->setRealValue(lVal->getRealValue() >= rVal->getRealValue());
+            return (Value *) res;
+
         } else if (ctx->exprSumDiff().size() > 2) {
-            cerr << "Invalid relational operation int vs bool" << endl;
-            throw;
+            throw CSP2SATInvalidOperationException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText()
+            );
         }
         return lVal;
     }
@@ -131,8 +172,13 @@ public:
                     else
                         res->setRealValue(res->getRealValue() - currValue->getRealValue());
                 } else {
-                    cerr << ctx->exprMulDivMod(i + 1)->getText() << " is not an int value" << endl;
-                    throw;
+                    throw CSP2SATInvalidExpressionTypeException(
+                            ctx->exprMulDivMod(1)->start->getLine(),
+                            ctx->exprMulDivMod(1)->start->getCharPositionInLine(),
+                            ctx->exprMulDivMod(1)->getText(),
+                            Utils::getTypeName(SymbolTable::tBool),
+                            Utils::getTypeName(SymbolTable::tInt)
+                    );
                 }
 
             }
@@ -169,8 +215,13 @@ public:
             if (result->isBoolean()) {
                 return (Value *) new BoolValue(!result->getRealValue());
             } else {
-                cerr << ctx->getText() << ": can't negate a non-boolean value" << endl;
-                throw;
+                throw CSP2SATInvalidExpressionTypeException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        ctx->getText(),
+                        Utils::getTypeName(SymbolTable::tInt),
+                        Utils::getTypeName(SymbolTable::tBool)
+                );
             }
         }
         return result;
@@ -184,8 +235,13 @@ public:
             if (value->isAssignable()) {
                 return (Value *) ((AssignableSymbol *) value)->getValue();
             } else {
-                cerr << "Not allowed arithmetic expressions with variables: " << ctx->getText() << endl;
-                throw;
+                throw CSP2SATInvalidExpressionTypeException(
+                        ctx->getStart()->getLine(),
+                        ctx->getStart()->getCharPositionInLine(),
+                        ctx->getText(),
+                        Utils::getTypeName(SymbolTable::tInt),
+                        Utils::getTypeName(value->type->getTypeIndex())
+                );
             }
         }
         return CSP2SATBaseVisitor::visitExpr_base(ctx);
@@ -201,7 +257,7 @@ public:
             Value *index = visit(ctx->index);
             this->currentScope = prev;
 
-            Symbol * res = this->currentScope->resolve(to_string(index->getRealValue()));
+            Symbol *res = this->currentScope->resolve(to_string(index->getRealValue()));
 
             return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
         }
@@ -214,8 +270,11 @@ public:
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
         if (!var) {
-            cerr << ctx->getText() << " don't exist" << endl;
-            throw;
+            throw CSP2SATNotExistsException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText()
+            );
         }
 
         if (!ctx->varAccessObjectOrArray().empty()) {
@@ -227,28 +286,34 @@ public:
                     if (!nestedScope->underscore) {
                         this->currentScope = (ScopedSymbol *) var;
                         var = visit(nestedScope);
-                    }
-                    else {
-                        ScopedSymbol * result = (ScopedSymbol*) var;
-                        for (int j = i+1; j < ctx->varAccessObjectOrArray().size(); j++) {
-                            if(ctx->varAccessObjectOrArray(j)->underscore){
-                                cerr << ctx->getText() << " is not a list" << endl;
-                                throw;
+                    } else {
+                        ScopedSymbol *result = (ScopedSymbol *) var;
+                        for (int j = i + 1; j < ctx->varAccessObjectOrArray().size(); j++) {
+                            if (ctx->varAccessObjectOrArray(j)->underscore) {
+                                throw CSP2SATInvalidExpressionTypeException(
+                                        ctx->start->getLine(),
+                                        ctx->start->getCharPositionInLine(),
+                                        ctx->getText(),
+                                        "matrix",
+                                        "list"
+                                );
                             }
                             ArraySymbol *aux = new ArraySymbol(
                                     "aux",
                                     result,
-                                    ((ArraySymbol*)result)->getElementsType()
+                                    ((ArraySymbol *) result)->getElementsType()
                             );
-                            for(auto currDimElem : ((ScopedSymbol*)result)->getScopeSymbols()){
-                                if(currDimElem.second->type->getTypeIndex() == SymbolTable::tArray){
-                                    this->currentScope = (ScopedSymbol*) currDimElem.second;
-                                    Symbol * currDimSymElem = visit(ctx->varAccessObjectOrArray(j));
+                            for (auto currDimElem : ((ScopedSymbol *) result)->getScopeSymbols()) {
+                                if (currDimElem.second->type->getTypeIndex() == SymbolTable::tArray) {
+                                    this->currentScope = (ScopedSymbol *) currDimElem.second;
+                                    Symbol *currDimSymElem = visit(ctx->varAccessObjectOrArray(j));
                                     aux->add(currDimSymElem);
-                                }
-                                else {
-                                    cerr << "BAD VAR ACCESS: " << ctx->getText() << endl;
-                                    throw;
+                                } else {
+                                    throw CSP2SATBadAccessException(
+                                            ctx->start->getLine(),
+                                            ctx->start->getCharPositionInLine(),
+                                            ctx->getText()
+                                    );
                                 }
                             }
                             result = aux;
@@ -259,17 +324,25 @@ public:
                     }
                     this->currentScope = this->currentLocalScope;
                 } else {
-                    cerr << "BAD ACCESS: " << ctx->TK_IDENT()->getText() << endl;
-                    throw;
+                    throw CSP2SATBadAccessException(
+                            ctx->start->getLine(),
+                            ctx->start->getCharPositionInLine(),
+                            ctx->getText()
+                    );
                 }
             }
         }
         if (!this->accessingNotLeafVariable && var->isScoped()) {
-            cerr << "BAD ACCESS: " << ctx->getText() << endl;
-            throw;
+            throw CSP2SATBadAccessException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText()
+            );
         }
         return var;
     }
+
+
 
     antlrcpp::Any visitValueBaseType(CSP2SATParser::ValueBaseTypeContext *ctx) override {
         if (ctx->integer) {
@@ -277,6 +350,22 @@ public:
         } else {
             return (Value *) new BoolValue(ctx->boolean->getText() == "true");
         }
+    }
+
+    antlrcpp::Any visitListResultExpr(CSP2SATParser::ListResultExprContext *ctx) override {
+        Symbol * result = nullptr;
+        if(ctx->varAcc && ctx->varAcc->constraint_base()->varAccess()){
+            result = visit(ctx->varAcc->constraint_base()->varAccess());
+            if(ctx->varAcc->TK_CONSTRAINT_NOT()){
+                if(result->type->getTypeIndex() == SymbolTable::tVarBool){
+                    result = new VariableSymbol("!" + result->name, !((VariableSymbol*)result)->getVar());
+                }
+            }
+        }
+        else {
+            throw;
+        }
+        return result;
     }
 
     antlrcpp::Any visitRangList(CSP2SATParser::RangListContext *ctx) override {
@@ -294,7 +383,7 @@ public:
                     SymbolTable::_integer
             );
             for (int i = 0; i < (maxValue - minValue); ++i) {
-                AssignableSymbol * newValue = new AssignableSymbol(to_string(i), SymbolTable::_integer);
+                AssignableSymbol *newValue = new AssignableSymbol(to_string(i), SymbolTable::_integer);
                 newValue->setValue(new IntValue(minValue + i));
                 result->add(newValue);
             }
@@ -337,7 +426,7 @@ public:
                 Symbol *exprRes;
                 if (ctx->listResultExpr()->varAcc) {
                     this->accessingNotLeafVariable = true;
-                    exprRes = visit(ctx->listResultExpr()->varAcc);
+                    exprRes = visit(ctx->listResultExpr());
                     this->accessingNotLeafVariable = false;
                 } else {
                     Value *val = visit(ctx->listResultExpr()->resExpr);
@@ -398,7 +487,7 @@ public:
         for (auto currVal : ctx->listResultExpr()) {
             Symbol *curr = nullptr;
             if (currVal->varAcc) {
-                curr = visit(currVal->varAcc);
+                curr = visit(currVal);
             } else {
                 Value *exprVal = visit(currVal->resExpr);
                 curr = new AssignableSymbol(to_string(rand()),
@@ -417,8 +506,13 @@ public:
             if (curr->type->getTypeIndex() == resultList->getElementsType()->getTypeIndex()) {
                 resultList->add(curr);
             } else {
-                cerr << "All elements of explicit list must be same type" << endl;
-                throw;
+                throw CSP2SATInvalidExpressionTypeException(
+                        currVal->start->getLine(),
+                        currVal->start->getCharPositionInLine(),
+                        currVal->getText(),
+                        Utils::getTypeName(curr->type->getTypeIndex()),
+                        Utils::getTypeName(resultList->getElementsType()->getTypeIndex())
+                );
             }
         }
 

@@ -263,6 +263,8 @@ CLÀSUSULES:
     - (a & b) & (c | d)  =====> C1: a, C2: b, C3: (c | d)
   - AND_LITERALS & AND_LITERALS ======> AND_LITERALS
     - (a & b) & (c & d)  ======> C1: a, C2: b, C3: c, C4: d
+  - AND_CLAUSES & AND_CLAUSES =====> AND_CLAUSES
+    - ((a & b) & (a & c)) & (d & e) ======> C1: a, C2: b,  C3: a, C4: c, C5: d, C6: e
 - **OR**
   - OR_LITERALS | OR_LITERALS ======> OR_LITERALS
     - (a |b) | (c |d) ====> a | b | c | d

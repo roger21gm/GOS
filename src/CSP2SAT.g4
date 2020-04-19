@@ -173,7 +173,7 @@ list:
 
 
 listResultExpr:
-      varAcc=constraint_literal //TODO: fix this
+      varAcc=constraint_literal
     | resExpr=expr;
 
 constraint: constraint_expression | constraint_aggreggate_op;

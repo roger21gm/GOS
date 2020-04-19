@@ -3,9 +3,12 @@ viewpoint:
     var b;
     var c;
     var d;
-    var e;
+    var e[10][10][10];
+    param bool p1;
+    param int p2;
 
 
 constraints:
-    //a | (b & c & e);
-    a | b & (c & d);
+    forall(i in [1, p1, 5]){
+
+    };

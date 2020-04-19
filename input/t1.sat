@@ -9,6 +9,6 @@ viewpoint:
 
 
 constraints:
-    forall(i in [1, p1, 5]){
-
+    forall(i in [1, p2, 5]){
+        ||( [1, 2, 3] );
     };

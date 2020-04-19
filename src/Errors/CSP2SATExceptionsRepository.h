@@ -63,7 +63,7 @@ public:
 
 class CSP2SATInvalidFormulaException : public CSP2SATException {
 public:
-    CSP2SATInvalidFormulaException(int line, int pos, string formula, string message) :
+    CSP2SATInvalidFormulaException(int line, int pos, string formula, string message = "") :
             CSP2SATException(
                     line,
                     pos,

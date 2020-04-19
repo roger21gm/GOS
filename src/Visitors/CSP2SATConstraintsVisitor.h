@@ -35,6 +35,18 @@ class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
 public:
     explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
 
+
+    antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
+        try{
+            CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+        }
+        catch (CSP2SATException & e) {
+            cerr << e.getErrorMessage() << endl;
+            return nullptr;
+        }
+        return nullptr;
+    }
+
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
         if (ctx->constraint_expression()) {
             clausesReturn *result = visit(ctx->constraint_expression());
@@ -112,8 +124,12 @@ public:
                 it++;
             }
         } else {
-            cerr << "Constraint AND list elements must be literals" << endl;
-            throw;
+            throw CSP2SATInvalidFormulaException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText(),
+                    "Constraint AND list elements must be literals"
+            );
         }
         return newClauses;
     }
@@ -184,13 +200,21 @@ public:
                         if (currLeft.v.size() == 1) {
                             result |= !currLeft.v.front();
                         } else {
-                            cerr << ctx->getText() << " not valid" << endl;
-                            throw;
+                            throw CSP2SATInvalidFormulaException(
+                                    ctx->start->getLine(),
+                                    ctx->start->getCharPositionInLine(),
+                                    ctx->getText(),
+                                    "Only allowed AND_LITERALS => OR_LITERALS"
+                            );
                         }
                     }
                 } else {
-                    cerr << ctx->getText() << " not valid" << endl;
-                    throw;
+                    throw CSP2SATInvalidFormulaException(
+                            ctx->start->getLine(),
+                            ctx->start->getCharPositionInLine(),
+                            ctx->getText(),
+                            "Only allowed AND_LITERALS => OR_LITERALS"
+                    );
                 }
                 leftExpr = new clausesReturn(result);
             }
@@ -238,12 +262,20 @@ public:
 
                 res = result;
             } else {
-                cerr << ctx->getText() << " not valid" << endl;
-                throw;
+                throw CSP2SATInvalidFormulaException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        ctx->getText(),
+                        "Only allowed LITERAL <=> OR_LITERALS and LITERAL <=> AND_LITERALS"
+                );
             }
         } else if (ctx->constraint_implication().size() != 1) {
-            cerr << ctx->getText() << " not valid" << endl;
-            throw;
+            throw CSP2SATInvalidFormulaException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText(),
+                    "Only allowed LITERAL <=> OR_LITERALS and LITERAL <=> AND_LITERALS"
+            );
         }
 
         return res;
@@ -263,14 +295,12 @@ public:
         for (const auto &assignation: possibleAssignations) {
             for (const auto &auxVarAssign : assignation)
                 forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
-
-            try{
+            try {
                 visit(ctx->localConstraintDefinitionBlock());
-            }catch (CSP2SATException &e) {
+            } catch (CSP2SATException &e) {
                 cerr << e.getErrorMessage() << endl;
                 return nullptr;
             }
-
         }
         this->currentScope = forallLocalScope->getEnclosingScope();
         return nullptr;

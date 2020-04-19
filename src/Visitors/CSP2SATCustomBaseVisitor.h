@@ -343,7 +343,6 @@ public:
     }
 
 
-
     antlrcpp::Any visitValueBaseType(CSP2SATParser::ValueBaseTypeContext *ctx) override {
         if (ctx->integer) {
             return (Value *) new IntValue(stoi(ctx->integer->getText()));
@@ -353,16 +352,15 @@ public:
     }
 
     antlrcpp::Any visitListResultExpr(CSP2SATParser::ListResultExprContext *ctx) override {
-        Symbol * result = nullptr;
-        if(ctx->varAcc && ctx->varAcc->constraint_base()->varAccess()){
+        Symbol *result = nullptr;
+        if (ctx->varAcc && ctx->varAcc->constraint_base()->varAccess()) {
             result = visit(ctx->varAcc->constraint_base()->varAccess());
-            if(ctx->varAcc->TK_CONSTRAINT_NOT()){
-                if(result->type->getTypeIndex() == SymbolTable::tVarBool){
-                    result = new VariableSymbol("!" + result->name, !((VariableSymbol*)result)->getVar());
+            if (ctx->varAcc->TK_CONSTRAINT_NOT()) {
+                if (result->type->getTypeIndex() == SymbolTable::tVarBool) {
+                    result = new VariableSymbol("!" + result->name, !((VariableSymbol *) result)->getVar());
                 }
             }
-        }
-        else {
+        } else {
             throw;
         }
         return result;
@@ -389,8 +387,11 @@ public:
             }
             return result;
         } else {
-            cerr << "It must be an incremental range" << endl;
-            throw;
+            throw CSP2SATException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    "Range must be ascendant"
+            );
         }
     }
 
@@ -477,7 +478,13 @@ public:
             return (ArraySymbol *) array;
         } else {
             cerr << ctx->getText() << " is not an array" << endl;
-            throw;
+            throw CSP2SATInvalidExpressionTypeException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText(),
+                    Utils::getTypeName(array->type->getTypeIndex()),
+                    "array"
+            );
         }
     }
 

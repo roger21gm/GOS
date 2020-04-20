@@ -7,6 +7,7 @@
 
 
 #include "CSP2SATCustomBaseVisitor.h"
+#include "Input/ParamsPredeclare/Param.h"
 
 using namespace CSP2SAT;
 using namespace std;
@@ -14,7 +15,7 @@ using namespace std;
 class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f, ParamJSON * params) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
 
     antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
         SymbolTable::entityDefinitionBlock = true;

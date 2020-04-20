@@ -10,7 +10,6 @@ string readFile(string name){
     stringstream inputStream;
     inputStream << inFile.rdbuf(); //read the file
     string inputStr = inputStream.str(); //str holds the content of the file
-
     return inputStr;
 }
 
@@ -24,23 +23,13 @@ int main(int argc, char **argv) {
             },
             2, {}, "Solve CSP to SAT"
     );
-
     SolvingArguments * sargs = SolvingArguments::readArguments(argc,argv,pargs);
 
     string inputStr = readFile(pargs->getArgument(1));
     string modelStr = readFile(pargs->getArgument(0));
 
     CSP2SATCompiler * compiler = new CSP2SATCompiler(inputStr, modelStr, sargs);
-
     compiler->run();
-
-    //showAllDefinedVariables(symbolTable->gloabls);
-
-//    cout << "vars: " << a->getNBoolVars() << endl;
-//    cout << "clauses: " << a->getNClauses() << endl;
-
-
-
 
     return 0;
 }

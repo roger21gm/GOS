@@ -73,6 +73,6 @@ add_executable(
         src/api/smtapi/src/solvers/minisat/simp/SimpSolver.cc
         src/api/smtapi/src/solvers/minisat/core/Solver.cc
         src/api/smtapi/src/util/util.cpp
-        src/api/smtapi/src/util/errors.cpp src/CSP2SATCompiler.h src/CSP2SATCompiler.h)
+        src/api/smtapi/src/util/errors.cpp src/CSP2SATCompiler.h src/CSP2SATCompiler.h src/Visitors/Input/CSP2SATInputPredeclaredParamsVisitor.h src/Visitors/Input/ParamsPredeclare/Param.h src/Visitors/Input/ParamsPredeclare/ParamArray.h src/Visitors/Input/ParamsPredeclare/ParamStruct.h src/Visitors/Input/ParamsPredeclare/ParamInt.h src/Visitors/Input/ParamsPredeclare/ParamBool.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

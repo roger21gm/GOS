@@ -14,7 +14,6 @@ public:
     bool isAssignable() override {
         return false;
     }
-
 };
 
 

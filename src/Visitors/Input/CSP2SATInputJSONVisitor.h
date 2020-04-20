@@ -5,10 +5,8 @@
 #ifndef CSP2SAT_CSP2SATINPUTJSONVISITOR_H
 #define CSP2SAT_CSP2SATINPUTJSONVISITOR_H
 
-#include "JSONBaseVisitor.h"
-#include "../../Symtab/SymbolTable.h"
-#include "../../Symtab/Value/IntValue.h"
-#include "../../Symtab/Symbol/Scoped/StructSymbol.h"
+
+#include <JSONBaseVisitor.h>
 
 using namespace CSP2SAT;
 using namespace std;

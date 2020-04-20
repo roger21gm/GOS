@@ -3,12 +3,8 @@ viewpoint:
     var b;
     var c;
     var d;
-    var e[10][10][10];
-    param bool p1;
-    param int p2;
+    var X[10];
 
 
 constraints:
-    forall(i in 1..10){
-        a <-> b & c;
-    };
+

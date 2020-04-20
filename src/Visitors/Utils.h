@@ -6,13 +6,12 @@
 #define CSP2SAT_UTILS_H
 
 
+#include "../Symtab/Symbol/Symbol.h"
 #include "../Symtab/Symbol/Scoped/StructSymbol.h"
-#include "../Symtab/Scope/Scope.h"
 #include "../Symtab/SymbolTable.h"
-#include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
-#include "../Symtab/Value/IntValue.h"
-#include "../Errors/CSP2SATExceptionsRepository.h"
+#include "../Symtab/Symbol/Valued/AssignableSymbol.h"
+#include "../Symtab/Symbol/Valued/VariableSymbol.h"
 
 class Utils {
 
@@ -37,7 +36,7 @@ public:
 
 
     static StructSymbol *
-    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope) {
+    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula * formula) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
                 name,
@@ -47,14 +46,14 @@ public:
         for (pair<string, Symbol *> sym : customType->getScopeSymbols()) {
             if (sym.second->type->getTypeIndex() == SymbolTable::tCustom) {
                 StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
-                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst);
+                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst, formula);
                 newCustomTypeConst->define(newVar);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                 ArraySymbol *aSy = (ArraySymbol *) sym.second;
-                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy);
+                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula);
                 newCustomTypeConst->define(newArrayConst);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
-                Symbol *varSym = new VariableSymbol(sym.first);
+                Symbol *varSym = new VariableSymbol(sym.first, formula);
 
                 newCustomTypeConst->define(varSym);
 
@@ -66,7 +65,7 @@ public:
         return newCustomTypeConst;
     }
 
-    static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType) {
+    static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula * formula) {
         vector<int> dimensions;
         Symbol *currType = arrayType;
         while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
@@ -74,11 +73,11 @@ public:
             dimensions.push_back(currDimension->getSize());
             currType = currDimension->resolve("0");
         }
-        return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType());
+        return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType(), formula);
     }
 
     static ArraySymbol *
-    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType) {
+    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType, SMTFormula * formula) {
 
         if (dimentions.size() == 1) {
             ArraySymbol *newArray = new ArraySymbol(
@@ -90,9 +89,9 @@ public:
             for (int i = 0; i < dimentions[0]; ++i) {
                 Symbol *element;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray);
+                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray, formula);
                 else if (elementsType->getTypeIndex() == SymbolTable::tVarBool) {
-                    element = new VariableSymbol(to_string(i));
+                    element = new VariableSymbol(to_string(i), formula);
                 } else {
                     element = new AssignableSymbol(to_string(i), elementsType);
                 }
@@ -108,7 +107,7 @@ public:
                     dimentions[0]
             );
             for (int i = 0; i < dimentions[0]; i++) {
-                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType);
+                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType, formula);
                 newDimention->define(constElement);
             }
             return newDimention;
@@ -154,6 +153,21 @@ public:
             default:
                 return "custom type";
         }
+    }
+
+    static vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol * variableArray) {
+        vector<literal> result = vector<literal>();
+        map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
+        if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+            for (auto currElem : arrayElems) {
+                VariableSymbol * currVar = (VariableSymbol *) currElem.second;
+                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+            }
+        } else {
+            cerr << "It must be a literal array" << endl;
+            throw;
+        }
+        return result;
     }
 };
 

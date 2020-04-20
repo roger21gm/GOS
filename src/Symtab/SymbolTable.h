@@ -25,8 +25,6 @@ public:
     static const int tVarBool = 4;
     GlobalScope * gloabls;
 
-    static SMTFormula * _f;
-
     static BuiltInTypeSymbol *_integer;
     static BuiltInTypeSymbol *_boolean;
     static BuiltInTypeSymbol *_varbool;
@@ -42,7 +40,6 @@ public:
 BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolTable::tInt);
 BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 BuiltInTypeSymbol * SymbolTable::_varbool = new BuiltInTypeSymbol("varbool", SymbolTable::tVarBool);
-SMTFormula * SymbolTable::_f = new SMTFormula();
 bool SymbolTable::entityDefinitionBlock = false;
 
 #endif //CSP2SAT_SYMBOLTABLE_H

@@ -34,23 +34,45 @@ include_directories(${ANTLR_CSP2SAT_OUTPUT_DIR})
 include_directories(${ANTLR_JSON_OUTPUT_DIR})
 
 
-# build CSP2SAT
+# build CSP2SATCompiler
 file(GLOB CSP2SAT_SRC "src/*.cpp")
 include_directories(${PROJECT_SOURCE_DIR}/src/api/smtapi/src)
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/antlr4cpp_generated_src)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
 
 add_executable(
-            CSP2SAT
-            src/main.cpp
-            ${ANTLR_CSP2SAT_CXX_OUTPUTS}
-            ${ANTLR_JSON_CXX_OUTPUTS}
-            src/api/smtapi/src/smtformula.cpp
-            src/api/smtapi/src/smtapi.cpp
-            src/api/smtapi/src/MDD/mddbuilder.cpp
-            src/api/smtapi/src/MDD/amopbbddbuilder.cpp
-            src/api/smtapi/src/MDD/amopbmddbuilder.cpp
-            src/api/smtapi/src/MDD/mdd.cpp
-            src/api/smtapi/src/util/util.cpp src/Symtab/Symbol/Valued/ValueSymbol.h src/Errors/CSP2SATErrorListener.h src/CSP2SATEncoding.h src/Errors/CSP2SATException.h src/Errors/CSP2SATExceptionsRepository.h)
+        CSP2SAT
+        src/main.cpp
+        ${ANTLR_CSP2SAT_CXX_OUTPUTS}
+        ${ANTLR_JSON_CXX_OUTPUTS}
+        src/api/smtapi/src/smtformula.cpp
+        src/api/smtapi/src/smtapi.cpp
+        src/api/smtapi/src/encoding.cpp
+        src/api/smtapi/src/MDD/mddbuilder.cpp
+        src/api/smtapi/src/MDD/amopbbddbuilder.cpp
+        src/api/smtapi/src/MDD/amopbmddbuilder.cpp
+        src/api/smtapi/src/MDD/mdd.cpp
+        src/api/smtapi/src/controllers/basiccontroller.cpp
+        src/api/smtapi/src/controllers/solvingarguments.cpp
+        src/api/smtapi/src/controllers/arguments.cpp
+        src/api/smtapi/src/optimizers/buoptimizer.cpp
+        src/api/smtapi/src/optimizers/singlecheck.cpp
+        src/api/smtapi/src/optimizers/uboptimizer.cpp
+        src/api/smtapi/src/optimizers/dicooptimizer.cpp
+        src/api/smtapi/src/optimizers/nativeoptimizer.cpp
+        src/api/smtapi/src/optimizers/optimizer.cpp
+        src/api/smtapi/src/encoders/fileencoder.cpp
+        src/api/smtapi/src/encoders/encoder.cpp
+        src/api/smtapi/src/encoders/apiencoder.cpp
+        src/api/smtapi/src/encoders/smtlib2fileencoder.cpp
+        src/api/smtapi/src/encoders/dimacsfileencoder.cpp
+        src/api/smtapi/src/encoders/glucoseapiencoder.cpp
+        src/api/smtapi/src/encoders/minisatapiencoder.cpp
+        src/api/smtapi/src/solvers/glucose/simp/SimpSolver.cc
+        src/api/smtapi/src/solvers/glucose/core/Solver.cc
+        src/api/smtapi/src/solvers/minisat/simp/SimpSolver.cc
+        src/api/smtapi/src/solvers/minisat/core/Solver.cc
+        src/api/smtapi/src/util/util.cpp
+        src/api/smtapi/src/util/errors.cpp src/CSP2SATCompiler.h src/CSP2SATCompiler.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

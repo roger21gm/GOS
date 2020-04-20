@@ -5,10 +5,7 @@
 #ifndef CSP2SAT_SYMBOL_H
 #define CSP2SAT_SYMBOL_H
 
-#include <string>
-#include <utility>
-#include "../Scope/Scope.h"
-#include "../Value/Value.h"
+
 
 using namespace std;
 

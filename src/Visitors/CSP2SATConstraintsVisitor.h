@@ -6,10 +6,6 @@
 #define CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
 
 
-#include "CSP2SATCustomBaseVisitor.h"
-#include "smtformula.h"
-#include "../Errors/CSP2SATException.h"
-
 
 struct clausesReturn {
     clausesReturn() {}
@@ -33,7 +29,7 @@ struct clausesReturn {
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
+    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable, SMTFormula * f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
 
 
     antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
@@ -51,8 +47,9 @@ public:
         if (ctx->constraint_expression()) {
             clausesReturn *result = visit(ctx->constraint_expression());
             for (clause clause : result->clauses)
-                SymbolTable::_f->addClause(clause);
+                this->_f->addClause(clause);
         }
+        else visit(ctx->constraint_aggreggate_op());
         return nullptr;
     }
 
@@ -73,9 +70,9 @@ public:
             }
         } else if (ctx->TK_BOOLEAN_VALUE()) {
             if (ctx->TK_BOOLEAN_VALUE()->getText() == "true")
-                clause->addClause(SymbolTable::_f->trueVar());
+                clause->addClause(this->_f->trueVar());
             else
-                clause->addClause(SymbolTable::_f->falseVar());
+                clause->addClause(this->_f->falseVar());
         } else {
             clausesReturn *innerParenClauses = visit(ctx->constraint_expression());
             clause->addClauses(innerParenClauses->clauses);
@@ -326,6 +323,24 @@ public:
         }
         if (ctx->TK_ELSE())
             visit(ctx->localConstraintDefinitionBlock().back());
+        return nullptr;
+    }
+
+    antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
+        Value * k = visit(ctx->param);
+        ArraySymbol * list = visit(ctx->list());
+
+        vector<literal> literalList = Utils::getLiteralVectorFromVariableArraySymbol(list);
+
+        if(ctx->aggregate_op()->getText() == "EK"){
+            this->_f->addEK(literalList, k->getRealValue());
+        }
+        else if(ctx->aggregate_op()->getText() == "ALK"){
+            this->_f->addALK(literalList, k->getRealValue());
+        }
+        else {
+            this->_f->addAMK(literalList, k->getRealValue());
+        }
         return nullptr;
     }
 };

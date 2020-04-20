@@ -6,10 +6,7 @@
 #define CSP2SAT_ARRAYSYMBOL_H
 
 
-#include "ScopedSymbol.h"
 #include "../../../Helpers.h"
-#include <list>
-#include <vector>
 
 class ArraySymbol : public ScopedSymbol {
 
@@ -36,13 +33,6 @@ public:
     }
 
     Symbol *resolve(const string& name) override {
-
-//        if ( fields.find(name) != fields.end() )
-//            return fields.find(name)->second;
-//        if ( enclosingScope != nullptr )
-//            return enclosingScope->resolve(name);
-
-
         bool isNumber = Helpers::check_number(name);
 
         if(isNumber){

@@ -5,8 +5,6 @@
 #ifndef CSP2SAT_BUILTINTYPESYMBOL_H
 #define CSP2SAT_BUILTINTYPESYMBOL_H
 
-
-#include "Symbol.h"
 #include "../Type.h"
 
 class BuiltInTypeSymbol: public Type {

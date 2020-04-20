@@ -250,6 +250,14 @@ CLÀSUSULES:
 
 **ALLOWED FORMULAS**
 
+LITERAL és "a"
+
+AND_LITERALS pot ser un LITERAL o bé "a & b & c"
+
+OR_LITERALS pot ser un LITERAL o bé "a | b | c"
+
+AND_CLAUSES pot ser un AND_LITERALS si "a & b & c" o bé pot ser "(a | b) & a & (c | d | e)"
+
 - **NOT**
   - !AND_LITERALS  ======> OR_LITERALS
     - !a =====> !a

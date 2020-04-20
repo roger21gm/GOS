@@ -5,22 +5,19 @@
 #ifndef CSP2SAT_VARIABLESYMBOL_H
 #define CSP2SAT_VARIABLESYMBOL_H
 
-
-#include "../../../api/smtapi/src/smtformula.h"
 #include "ValueSymbol.h"
 
 
 class VariableSymbol: public ValueSymbol {
 public:
-    VariableSymbol(const string &name) : ValueSymbol(name, SymbolTable::_varbool) {
+    VariableSymbol(const string &name, SMTFormula *f) : ValueSymbol(name, SymbolTable::_varbool) {
         if(!SymbolTable::entityDefinitionBlock)
-            var = SymbolTable::_f->newBoolVar();
+            var = f->newBoolVar();
     }
 
     VariableSymbol(const string &name, literal lit) : ValueSymbol(name, SymbolTable::_varbool) {
         var = lit;
     }
-
 
     bool isAssignable() override {
         return false;
@@ -30,8 +27,18 @@ public:
         return var;
     }
 
+    bool getModelValue() const {
+        return modelValue;
+    }
+
+    void setModelValue(bool modelValue) {
+        VariableSymbol::modelValue = modelValue;
+    }
+
+
 private:
     literal var;
+    bool modelValue;
 };
 
 

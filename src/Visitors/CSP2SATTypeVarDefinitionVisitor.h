@@ -5,13 +5,8 @@
 #ifndef CSP2SAT_CSP2SATTYPEVARDEFINITIONVISITOR_H
 #define CSP2SAT_CSP2SATTYPEVARDEFINITIONVISITOR_H
 
-#include "CSP2SATBaseVisitor.h"
-#include "../Symtab/SymbolTable.h"
-#include "../Symtab/Symbol/Valued/VariableSymbol.h"
-#include "../Symtab/Symbol/Valued/AssignableSymbol.h"
-#include "../Symtab/Symbol/Scoped/StructSymbol.h"
+
 #include "CSP2SATCustomBaseVisitor.h"
-#include "Utils.h"
 
 using namespace CSP2SAT;
 using namespace std;
@@ -19,7 +14,7 @@ using namespace std;
 class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable) : CSP2SATCustomBaseVisitor(symbolTable) {}
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
 
     antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
         SymbolTable::entityDefinitionBlock = true;
@@ -41,10 +36,10 @@ public:
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool);
+            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool, this->_f);
         }
         else {
-            newVar = new VariableSymbol(ctx->name->getText());
+            newVar = new VariableSymbol(ctx->name->getText(), this->_f);
         }
         currentScope->define(newVar);
 
@@ -66,10 +61,10 @@ public:
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type);
+            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f);
         }
         else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope);
+            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope, this->_f);
         }
         else {
             newConst = new AssignableSymbol(

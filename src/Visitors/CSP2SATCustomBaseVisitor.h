@@ -5,15 +5,16 @@
 #ifndef CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
 #define CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
 
-#include <CSP2SATLexer.h>
+#include <CSP2SATBaseVisitor.h>
 #include "../Symtab/SymbolTable.h"
-#include "../Symtab/Symbol/Scoped/ArraySymbol.h"
-#include "Utils.h"
-#include "CSP2SATBaseVisitor.h"
-#include "../Symtab/Value/IntValue.h"
+#include "../Symtab/Value/Value.h"
 #include "../Symtab/Value/BoolValue.h"
-#include "../Symtab/Scope/LocalScope.h"
+#include "../Symtab/Value/IntValue.h"
+#include "../Visitors/Utils.h"
+#include "../Errors/CSP2SATException.h"
 #include "../Errors/CSP2SATExceptionsRepository.h"
+#include "../Symtab/Scope/LocalScope.h"
+
 
 using namespace CSP2SAT;
 using namespace std;
@@ -23,13 +24,15 @@ class CSP2SATCustomBaseVisitor : public CSP2SATBaseVisitor {
 protected:
     bool accessingNotLeafVariable = false;
     SymbolTable *st;
+    SMTFormula * _f;
     Scope *currentScope;
     Scope *currentLocalScope = nullptr;
 
 public:
 
-    explicit CSP2SATCustomBaseVisitor(SymbolTable *symbolTable) {
+    explicit CSP2SATCustomBaseVisitor(SymbolTable *symbolTable, SMTFormula * f) {
         this->st = symbolTable;
+        this->_f = f;
         this->currentScope = this->st->gloabls;
     }
 
@@ -448,23 +451,7 @@ public:
                 newList->add(exprRes);
             }
         }
-
-
-        map<string, Symbol *> a = newList->getScopeSymbols();
-
-        for (auto curr : a) {
-            if (curr.second->isAssignable())
-                cout << ((AssignableSymbol *) curr.second)->getValue()->getRealValue() << endl;
-            else if (curr.second->type->getTypeIndex() == SymbolTable::tVarBool)
-                cout << ((VariableSymbol *) curr.second)->getVar().v.id << "->"
-                     << ((VariableSymbol *) curr.second)->getVar().sign << endl;
-            else
-                cout << ctx->getText() << " " << curr.first << endl;
-        }
-
         this->currentScope = listLocalScope->getEnclosingScope();
-
-
         return newList;
     }
 

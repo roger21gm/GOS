@@ -169,6 +169,24 @@ public:
         }
         return result;
     }
+
+    static vector<string> splitVarAccessNested(string a){
+        vector<string> result;
+        size_t pos = 0;
+        size_t newpos;
+        while(pos != string::npos) {
+            newpos = a.find_first_of(".[", pos);
+            if(newpos != string::npos){
+                result.push_back(a.substr(pos, newpos-pos));
+                if(pos != string::npos)
+                    pos = newpos + 1;
+            }else {
+                result.push_back(a.substr(pos));
+                break;
+            }
+        }
+        return result;
+    }
 };
 
 

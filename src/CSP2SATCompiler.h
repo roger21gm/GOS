@@ -65,25 +65,22 @@ public:
         CSP2SATInputPredeclaredParamsVisitor * inputPreJsonVisitor = new CSP2SATInputPredeclaredParamsVisitor();
         ParamJSON * readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
-
         CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
-//
-//        CSP2SATInputJSONVisitor * inputJsonVisitor = new CSP2SATInputJSONVisitor(symbolTable);
-//        runInputVisitor(inputJsonVisitor, inStr);
-//
-//        CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
-//        runVisitor(constraintsVisitor, modelStr);
-//
-//        CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
-//        BasicController c(sargs, encoding,false, 0, 0);
-//        c.run();
+
+        CSP2SATInputJSONVisitor * inputJsonVisitor = new CSP2SATInputJSONVisitor(symbolTable);
+        runInputVisitor(inputJsonVisitor, inStr);
+
+        CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
+        runVisitor(constraintsVisitor, modelStr);
+
+        CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
+        BasicController c(sargs, encoding,false, 0, 0);
+        c.run();
     }
-
-
-
-    SMTFormula *_f;
+    
 private:
+    SMTFormula *_f;
     string inStr;
     string modelStr;
     SymbolTable *symbolTable;

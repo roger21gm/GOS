@@ -1,5 +1,6 @@
 viewpoint:
-    var p[9][9][9];
+    param int n;
+    var p[n][n][n];
     param int iniSudoku[9][9];
 
 constraints:

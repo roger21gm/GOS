@@ -13,9 +13,13 @@ using namespace CSP2SAT;
 using namespace std;
 
 class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
+private:
+    ParamJSON * params;
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f, ParamJSON * params) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f, ParamJSON * params) : CSP2SATCustomBaseVisitor(symbolTable, f) {
+        this->params = params;
+    }
 
     antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
         SymbolTable::entityDefinitionBlock = true;
@@ -86,6 +90,13 @@ public:
         CSP2SATBaseVisitor::visitEntityDefinition(ctx);
         currentScope = currentScope->getEnclosingScope();
         return nullptr;
+    }
+
+    antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
+        int value = this->params->resolve(ctx->getText());
+        AssignableSymbol * access = new AssignableSymbol(ctx->getText(), SymbolTable::_integer);
+        access->setValue(new IntValue(value));
+        return (Symbol *) access;
     }
 
     antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {

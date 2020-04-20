@@ -87,9 +87,7 @@ public:
 
 
     antlrcpp::Any visitJson(JSONParser::JsonContext *ctx) override {
-        cout << 1 << endl;
         JSONBaseVisitor::visitJson(ctx);
-        cout << 2 << endl;
         return base;
     }
 };

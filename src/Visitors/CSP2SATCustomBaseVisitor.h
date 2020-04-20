@@ -261,7 +261,6 @@ public:
             this->currentScope = prev;
 
             Symbol *res = this->currentScope->resolve(to_string(index->getRealValue()));
-
             return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
         }
         return nullptr;

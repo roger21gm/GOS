@@ -72,17 +72,18 @@ public:
             newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope, this->_f, this->params);
         }
         else {
-
             AssignableSymbol * element = new AssignableSymbol(
                     ctx->name->getText(),
                     type
             );
-            int value = this->params->resolve(ctx->name->getText());
-            if(type->getTypeIndex() == SymbolTable::tInt)
-                element->setValue(new IntValue(value));
-            else
-                element->setValue(new BoolValue(value));
-
+            if(!SymbolTable::entityDefinitionBlock){
+                string paramFullName = this->currentScope->getFullName() + ctx->name->getText();
+                int value = this->params->resolve(paramFullName);
+                if(type->getTypeIndex() == SymbolTable::tInt)
+                    element->setValue(new IntValue(value));
+                else
+                    element->setValue(new BoolValue(value));
+            }
             newConst = element;
         }
         currentScope->define(newConst);

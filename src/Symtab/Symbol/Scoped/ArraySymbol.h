@@ -28,11 +28,6 @@ public:
         this->type = this;
     }
 
-    string getFullName() override {
-        if(this->getEnclosingScope()->getScopeName() != "global")
-            return  this->enclosingScope->getFullName() + "[" + this->getScopeName() + "]";
-        return this->getScopeName();
-    }
 
     void define(Symbol *sym) override {
         elements.push_back(sym);

@@ -7,7 +7,8 @@
 
 
 #include "../../Type.h"
-#include "../../Scope/Scope.h"
+
+
 
 class ScopedSymbol : public Scope, public Type  {
 
@@ -26,6 +27,15 @@ public:
     Scope *getEnclosingScope() override {
         return this->enclosingScope;
     }
+
+    string getFullName() override {
+        if(isdigit(this->getScopeName()[0]))
+            return  this->enclosingScope->getFullName() + "[" + this->getScopeName() + "]";
+        else if(this->enclosingScope->getScopeName() != "global")
+            return  this->enclosingScope->getFullName() + "." + this->getScopeName();
+        return this->enclosingScope->getFullName() + this->getScopeName();
+    }
+
 
     virtual void define(Symbol *sym) override = 0;
 

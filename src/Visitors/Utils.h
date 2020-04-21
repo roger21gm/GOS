@@ -60,9 +60,6 @@ public:
 
                 AssignableSymbol * newParam = new AssignableSymbol(sym.first, sym.second->type);
                 string fullScopedName = newCustomTypeConst->getFullName() + "." + sym.first;
-
-                cout << fullScopedName << endl;
-
                 int value = inParams->resolve(fullScopedName);
                 if(sym.second->type->getTypeIndex() == SymbolTable::tInt)
                     newParam->setValue(new IntValue(value));

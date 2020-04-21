@@ -1,13 +1,14 @@
 entities:
     A {
-        param int b1;
+        param int b1[5];
         var x;
     };
 
 viewpoint:
-    A a;
+    A a[3];
+    A b[3];
     param int n;
-    var p[n][n][n];
+    var p[a[0].b1[0]][n][n];
     param int iniSudoku[9][9];
 
 constraints:

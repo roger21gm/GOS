@@ -10,6 +10,9 @@
 #include "Scope/GlobalScope.h"
 #include "Symbol/BuiltInTypeSymbol.h"
 #include "../api/smtapi/src/smtformula.h"
+#include "Symbol/Scoped/ScopedSymbol.h"
+#include "Value/Value.h"
+#include "Symbol/Valued/AssignableSymbol.h"
 
 class SymbolTable {
 
@@ -35,6 +38,54 @@ public:
         this->gloabls->define(_boolean);
         this->gloabls->define(_varbool);
     }
+
+
+
+    void showAllDefinedVariables(){
+        iShowAllDefinedVariable(this->gloabls);
+    }
+
+private:
+    static void iShowAllDefinedVariable(Scope * currentScope, const string& prefix = ""){
+        map<string, Symbol*> currentScopeSymbols = currentScope->getScopeSymbols();
+
+        for(pair<string, Symbol *> sym : currentScopeSymbols){
+            if(sym.second->type){
+                if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray)
+                    if(!isdigit(sym.first[0]))
+                        iShowAllDefinedVariable( (ScopedSymbol*) sym.second, prefix + "." + sym.first );
+                    else
+                        iShowAllDefinedVariable( (ScopedSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
+                else{
+                    string output = sym.second->type->getTypeIndex() != SymbolTable::tVarBool ?  "param -> " : "var -> ";
+                    if(!prefix.empty() && prefix[0] == '.')
+                        output += prefix.substr(1, prefix.length()-1);
+                    else
+                        output += prefix;
+
+                    if(isdigit(sym.first[0])){
+                        output += "[" + sym.first + "]";
+                    }
+                    else {
+                        output += "." + sym.first ;
+                    }
+
+                    if(sym.second->type->getTypeIndex() != SymbolTable::tVarBool){
+                        Value * val = ((AssignableSymbol*)sym.second)->getValue();
+                        cout << output  << " -> " << (val ? to_string(val->getRealValue()) : "_") << endl;
+                    }
+                    else {
+                        cout << output  << endl;
+                    }
+
+                }
+            }
+            else {
+                cout << "defined type -> " << prefix +  sym.first << endl;
+            }
+        }
+    }
+
 };
 
 BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolTable::tInt);

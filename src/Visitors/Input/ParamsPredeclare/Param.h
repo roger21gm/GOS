@@ -10,7 +10,6 @@
 #include <map>
 #include <regex>
 #include <iostream>
-#include "../../Utils.h"
 
 using namespace std;
 
@@ -87,6 +86,7 @@ public:
     vector<Param*> elements;
 };
 
+
 class ParamJSON : public ParamScoped {
 public:
     ParamJSON(const string &name) : ParamScoped(name) {
@@ -104,7 +104,7 @@ public:
     map<string, Param*> elements;
 
     int resolve(string attrAccess) {
-        vector<string> splitted = Utils::splitVarAccessNested(attrAccess);
+        vector<string> splitted = Helpers::splitVarAccessNested(attrAccess);
 
         ParamScoped * currentScope = this;
         for(string attr : splitted){
@@ -124,6 +124,8 @@ public:
         return -1;
     }
 };
+
+
 
 
 

@@ -93,7 +93,6 @@ public:
         Value *lVal = visit(ctx->exprRel(0));
         if (ctx->exprRel().size() == 2) {
             Value *rVal = visit(ctx->exprRel(1));
-
             if (lVal->isBoolean() == rVal->isBoolean()) {
                 BoolValue *res = new BoolValue();
                 if (ctx->opEquality(0)->getText() == "==")

@@ -12,6 +12,7 @@
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
+#include "../Visitors/Input/ParamsPredeclare/Param.h"
 
 class Utils {
 
@@ -36,7 +37,7 @@ public:
 
 
     static StructSymbol *
-    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula * formula) {
+    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula * formula, ParamJSON * inParams) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
                 name,
@@ -46,26 +47,37 @@ public:
         for (pair<string, Symbol *> sym : customType->getScopeSymbols()) {
             if (sym.second->type->getTypeIndex() == SymbolTable::tCustom) {
                 StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
-                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst, formula);
+                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst, formula, inParams);
                 newCustomTypeConst->define(newVar);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                 ArraySymbol *aSy = (ArraySymbol *) sym.second;
-                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula);
+                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula, inParams);
                 newCustomTypeConst->define(newArrayConst);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
                 Symbol *varSym = new VariableSymbol(sym.first, formula);
-
                 newCustomTypeConst->define(varSym);
-
             } else {
-                newCustomTypeConst->define(new AssignableSymbol(sym.first, sym.second->type));
+
+                AssignableSymbol * newParam = new AssignableSymbol(sym.first, sym.second->type);
+                string fullScopedName = newCustomTypeConst->getFullName() + "." + sym.first;
+
+                cout << fullScopedName << endl;
+
+                int value = inParams->resolve(fullScopedName);
+                if(sym.second->type->getTypeIndex() == SymbolTable::tInt)
+                    newParam->setValue(new IntValue(value));
+                else
+                    newParam->setValue(new BoolValue(value));
+
+
+                newCustomTypeConst->define(newParam);
             }
         }
 
         return newCustomTypeConst;
     }
 
-    static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula * formula) {
+    static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula * formula, ParamJSON * inParams) {
         vector<int> dimensions;
         Symbol *currType = arrayType;
         while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
@@ -73,11 +85,11 @@ public:
             dimensions.push_back(currDimension->getSize());
             currType = currDimension->resolve("0");
         }
-        return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType(), formula);
+        return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType(), formula, inParams);
     }
 
     static ArraySymbol *
-    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType, SMTFormula * formula) {
+    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType, SMTFormula * formula, ParamJSON * inParams) {
 
         if (dimentions.size() == 1) {
             ArraySymbol *newArray = new ArraySymbol(
@@ -89,11 +101,18 @@ public:
             for (int i = 0; i < dimentions[0]; ++i) {
                 Symbol *element;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray, formula);
+                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray, formula, inParams);
                 else if (elementsType->getTypeIndex() == SymbolTable::tVarBool) {
                     element = new VariableSymbol(to_string(i), formula);
                 } else {
-                    element = new AssignableSymbol(to_string(i), elementsType);
+                    AssignableSymbol * newParam = new AssignableSymbol(to_string(i), elementsType);
+                    string fullScopedName = newArray->getFullName() + "[" + to_string(i) + "]";
+                    int value = inParams->resolve(fullScopedName);
+                    if(elementsType->getTypeIndex() == SymbolTable::tInt)
+                        newParam->setValue(new IntValue(value));
+                    else
+                        newParam->setValue(new BoolValue(value));
+                    element = newParam;
                 }
                 newArray->define(element);
             }
@@ -107,7 +126,7 @@ public:
                     dimentions[0]
             );
             for (int i = 0; i < dimentions[0]; i++) {
-                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType, formula);
+                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType, formula, inParams);
                 newDimention->define(constElement);
             }
             return newDimention;
@@ -166,24 +185,6 @@ public:
         } else {
             cerr << "It must be a literal array" << endl;
             throw;
-        }
-        return result;
-    }
-
-    static vector<string> splitVarAccessNested(string a){
-        vector<string> result;
-        size_t pos = 0;
-        size_t newpos;
-        while(pos != string::npos) {
-            newpos = a.find_first_of(".[", pos);
-            if(newpos != string::npos){
-                result.push_back(a.substr(pos, newpos-pos));
-                if(pos != string::npos)
-                    pos = newpos + 1;
-            }else {
-                result.push_back(a.substr(pos));
-                break;
-            }
         }
         return result;
     }

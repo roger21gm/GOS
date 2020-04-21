@@ -15,6 +15,11 @@ public:
     string getScopeName() override {
         return "global";
     }
+
+    string getFullName() override {
+        return "";
+    }
+
 };
 
 

@@ -68,9 +68,6 @@ public:
         CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
 
-        CSP2SATInputJSONVisitor * inputJsonVisitor = new CSP2SATInputJSONVisitor(symbolTable);
-        runInputVisitor(inputJsonVisitor, inStr);
-
         CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
         runVisitor(constraintsVisitor, modelStr);
 
@@ -78,7 +75,7 @@ public:
         BasicController c(sargs, encoding,false, 0, 0);
         c.run();
     }
-    
+
 private:
     SMTFormula *_f;
     string inStr;

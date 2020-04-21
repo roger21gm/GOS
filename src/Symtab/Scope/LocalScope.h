@@ -19,6 +19,10 @@ public:
     string getScopeName() override {
         return "local";
     }
+
+    string getFullName() override {
+        return "";
+    }
 };
 
 

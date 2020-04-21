@@ -23,6 +23,12 @@ public:
     //Constructor for creating the definition of the custom type.
     StructSymbol(const string& name, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {}
 
+    string getFullName() override {
+        if(this->getEnclosingScope()->getScopeName() != "global")
+            return  this->enclosingScope->getFullName() + "." + this->getScopeName();
+        return this->getScopeName();
+    }
+
     void define(Symbol *sym) override {
         fields.insert(pair<string, Symbol*>(sym->getName(), sym));
     }

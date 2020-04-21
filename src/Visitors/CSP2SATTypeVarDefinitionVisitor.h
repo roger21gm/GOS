@@ -41,7 +41,7 @@ public:
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool, this->_f);
+            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool, this->_f, this->params);
         }
         else {
             newVar = new VariableSymbol(ctx->name->getText(), this->_f);
@@ -66,16 +66,24 @@ public:
                 Value * a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f);
+            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f, this->params);
         }
         else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope, this->_f);
+            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope, this->_f, this->params);
         }
         else {
-            newConst = new AssignableSymbol(
+
+            AssignableSymbol * element = new AssignableSymbol(
                     ctx->name->getText(),
                     type
             );
+            int value = this->params->resolve(ctx->name->getText());
+            if(type->getTypeIndex() == SymbolTable::tInt)
+                element->setValue(new IntValue(value));
+            else
+                element->setValue(new BoolValue(value));
+
+            newConst = element;
         }
         currentScope->define(newConst);
         return nullptr;

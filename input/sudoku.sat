@@ -1,4 +1,11 @@
+entities:
+    A {
+        param int b1;
+        var x;
+    };
+
 viewpoint:
+    A a;
     param int n;
     var p[n][n][n];
     param int iniSudoku[9][9];

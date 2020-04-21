@@ -7,6 +7,8 @@
 
 #include <JSONBaseVisitor.h>
 #include "ParamsPredeclare/Param.h"
+#include "../../Errors/CSP2SATInputExceptionsRepository.h"
+
 
 using namespace CSP2SAT;
 using namespace std;
@@ -24,39 +26,61 @@ public:
         current = base;
     }
 
+
+
     antlrcpp::Any visitPair(JSONParser::PairContext *ctx) override {
         string varName = ctx->STRING()->getText();
         varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
 
-        ParamScoped * curr = current;
-        if (ctx->value()->NUMBER()) {
-            current->add(
-                    new ParamInt(
-                            varName,
-                            stoi(ctx->value()->NUMBER()->getText())
-                    )
-            );
-        } else if (ctx->value()->arr()) {
-            ParamArray * array = new ParamArray(varName);
-            current->add(array);
-            current = array;
-            visit(ctx->value()->arr());
-            current = curr;
+        try{
+            ParamScoped *curr = current;
+            if (ctx->value()->NUMBER()) {
+                current->add(
+                        new ParamInt(
+                                varName,
+                                stoi(ctx->value()->NUMBER()->getText())
+                        )
+                );
+            } else if (ctx->value()->getText() == "true" || ctx->value()->getText() == "false") {
+                current->add(
+                        new ParamBool(
+                                varName,
+                                stoi(ctx->value()->NUMBER()->getText())
+                        )
+                );
+            } else if (ctx->value()->arr()) {
+                ParamArray *array = new ParamArray(varName);
+                current->add(array);
+                current = array;
+                visit(ctx->value()->arr());
+                current = curr;
 
-        } else if (ctx->value()->obj()){
-            ParamJSON * strct = new ParamJSON(varName);
-            current->add(strct);
-            current = strct;
-            visit(ctx->value()->obj());
-            current = curr;
+            } else if (ctx->value()->obj()) {
+                ParamJSON *strct = new ParamJSON(varName);
+                current->add(strct);
+                current = strct;
+                visit(ctx->value()->obj());
+                current = curr;
+            } else {
+                throw CSP2SATBadInputTypeException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        varName
+                );
+            }
         }
+        catch (CSP2SATException & e) {
+            cerr << e.getErrorMessage() << endl;
+            return 0;
+        }
+
         return nullptr;
     }
 
     antlrcpp::Any visitArr(JSONParser::ArrContext *ctx) override {
         int index = 0;
-        ParamScoped * curr = current;
-        for(auto currVal : ctx->value()){
+        ParamScoped *curr = current;
+        for (auto currVal : ctx->value()) {
             if (currVal->NUMBER()) {
                 current->add(
                         new ParamInt(
@@ -65,26 +89,39 @@ public:
                         )
                 );
                 index++;
+            } else if (currVal->getText() == "true" || currVal->getText() == "false") {
+                current->add(
+                        new ParamBool(
+                                to_string(index),
+                                stoi(currVal->NUMBER()->getText())
+                        )
+                );
             } else if (currVal->arr()) {
-                ParamArray * array = new ParamArray(to_string(index));
+                ParamArray *array = new ParamArray(to_string(index));
                 current->add(array);
                 current = array;
                 visit(currVal->arr());
                 current = curr;
                 index++;
 
-            } else if (currVal->obj()){
-                ParamJSON * strct = new ParamJSON(to_string(index));
+            } else if (currVal->obj()) {
+                ParamJSON *strct = new ParamJSON(to_string(index));
                 current->add(strct);
                 current = strct;
                 visit(currVal->obj());
                 current = curr;
                 index++;
+            } else {
+                throw CSP2SATBadInputTypeException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        to_string(index)
+                );
+
             }
         }
         return nullptr;
     }
-
 
     antlrcpp::Any visitJson(JSONParser::JsonContext *ctx) override {
         JSONBaseVisitor::visitJson(ctx);

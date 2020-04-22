@@ -10,6 +10,8 @@
 #include <map>
 #include <regex>
 #include <iostream>
+#include "../../Errors/CSP2SATException.h"
+#include "../../Errors/CSP2SATInputExceptionsRepository.h"
 
 using namespace std;
 
@@ -80,7 +82,12 @@ public:
     }
 
     Param *get(string name) override {
-        return elements[stoi(name)];
+
+        int index = stoi(name);
+        if(index < elements.size()){
+            return elements[index];
+        }
+        return nullptr;
     }
 
     vector<Param*> elements;
@@ -98,7 +105,9 @@ public:
     }
 
     Param *get(string name) override {
-        return elements[name];
+        if(elements.find(name) != elements.end())
+            return elements[name];
+        return nullptr;
     }
 
     map<string, Param*> elements;
@@ -106,20 +115,29 @@ public:
     int resolve(string attrAccess) {
         vector<string> splitted = Helpers::splitVarAccessNested(attrAccess);
 
+        string currAccess = "";
+
+        bool first = true;
+
         ParamScoped * currentScope = this;
         for(string attr : splitted){
             Param * currentParam = nullptr;
             if(attr.back() == ']'){
                 currentParam = currentScope->get(attr.substr(0, attr.size()-1));
+                currAccess += "[" + attr.substr(0, attr.size()-1) + "]";
             }
             else {
                 currentParam = currentScope->get(attr);
+                currAccess += (first ? "" : ".") + attr;
             }
-            if(!currentParam) break;
+            if(currentParam == nullptr) {
+                throw CSP2SATInputNotFoundValue(currAccess);
+            };
             if(currentParam->isValuable())
                 return ((ParamValuable*) currentParam)->getValue();
 
             currentScope = (ParamScoped*) currentParam;
+            first = false;
         }
         return -1;
     }

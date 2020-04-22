@@ -6,7 +6,6 @@
 #define CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
 
 
-
 struct clausesReturn {
     clausesReturn() {}
 
@@ -27,44 +26,55 @@ struct clausesReturn {
 };
 
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
+private:
+    bool inForall = false;
 
 public:
-    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable, SMTFormula * f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
+    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable, SMTFormula *f) : CSP2SATCustomBaseVisitor(symbolTable,
+                                                                                                           f) {}
 
 
     antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
-        try{
-            CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+        if(ctx->forall()){
+            inForall = true;
+            visit(ctx->forall());
+            inForall = false;
         }
-        catch (CSP2SATException & e) {
-            cerr << e.getErrorMessage() << endl;
-            return nullptr;
+        else {
+            try {
+                CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+            }
+            catch (CSP2SATException & e) {
+                if(inForall) throw;
+                cerr << e.getErrorMessage() << endl;
+            }
         }
         return nullptr;
     }
+
 
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
         if (ctx->constraint_expression()) {
             clausesReturn *result = visit(ctx->constraint_expression());
             for (clause clause : result->clauses)
                 this->_f->addClause(clause);
-        }
-        else visit(ctx->constraint_aggreggate_op());
+        } else visit(ctx->constraint_aggreggate_op());
         return nullptr;
+
     }
 
     antlrcpp::Any visitConstraint_base(CSP2SATParser::Constraint_baseContext *ctx) override {
         clausesReturn *clause = new clausesReturn();
         if (ctx->varAccess()) {
             Symbol *valSym = visit(ctx->varAccess());
-            if (valSym->type && valSym->type->getTypeIndex() == SymbolTable::tVarBool) {
+            if (valSym != nullptr && valSym->type && valSym->type->getTypeIndex() == SymbolTable::tVarBool) {
                 clause->addClause(((VariableSymbol *) valSym)->getVar());
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
                         ctx->start->getLine(),
                         ctx->start->getCharPositionInLine(),
                         ctx->getText(),
-                        Utils::getTypeName(valSym->type->getTypeIndex()),
+                        valSym != nullptr ? Utils::getTypeName(valSym->type->getTypeIndex()) : "undefined",
                         Utils::getTypeName(SymbolTable::tVarBool)
                 );
             }
@@ -292,14 +302,18 @@ public:
         for (const auto &assignation: possibleAssignations) {
             for (const auto &auxVarAssign : assignation)
                 forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
+
             try {
                 visit(ctx->localConstraintDefinitionBlock());
-            } catch (CSP2SATException &e) {
+            }
+            catch (CSP2SATException &e) {
                 cerr << e.getErrorMessage() << endl;
                 return nullptr;
             }
         }
         this->currentScope = forallLocalScope->getEnclosingScope();
+
+
         return nullptr;
     }
 
@@ -327,21 +341,31 @@ public:
     }
 
     antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
-        Value * k = visit(ctx->param);
-        ArraySymbol * list = visit(ctx->list());
+        Value *k = visit(ctx->param);
+        ArraySymbol *list = visit(ctx->list());
 
-        vector<literal> literalList = Utils::getLiteralVectorFromVariableArraySymbol(list);
+        try {
+            vector<literal> literalList = Utils::getLiteralVectorFromVariableArraySymbol(list);
+            if (ctx->aggregate_op()->getText() == "EK") {
+                this->_f->addEK(literalList, k->getRealValue());
+            } else if (ctx->aggregate_op()->getText() == "ALK") {
+                this->_f->addALK(literalList, k->getRealValue());
+            } else {
+                this->_f->addAMK(literalList, k->getRealValue());
+            }
+            return nullptr;
+        }
+        catch (CSP2SATException &e) {
+            throw CSP2SATInvalidExpressionTypeException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->list()->getText(),
+                    "list<int>",
+                    "list<literal>"
+            );
+        }
 
-        if(ctx->aggregate_op()->getText() == "EK"){
-            this->_f->addEK(literalList, k->getRealValue());
-        }
-        else if(ctx->aggregate_op()->getText() == "ALK"){
-            this->_f->addALK(literalList, k->getRealValue());
-        }
-        else {
-            this->_f->addAMK(literalList, k->getRealValue());
-        }
-        return nullptr;
+
     }
 };
 

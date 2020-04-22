@@ -7,17 +7,18 @@
 
 
 #include "CSP2SATCustomBaseVisitor.h"
-#include "Input/ParamsPredeclare/Param.h"
+#include "Input/Param.h"
 
 using namespace CSP2SAT;
 using namespace std;
 
 class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
 private:
-    ParamJSON * params;
+    ParamJSON *params;
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula * f, ParamJSON * params) : CSP2SATCustomBaseVisitor(symbolTable, f) {
+    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula *f, ParamJSON *params)
+            : CSP2SATCustomBaseVisitor(symbolTable, f) {
         this->params = params;
     }
 
@@ -28,6 +29,16 @@ public:
         return nullptr;
     }
 
+    antlrcpp::Any visitDefinition(CSP2SATParser::DefinitionContext *ctx) override {
+        try {
+            return CSP2SATBaseVisitor::visitDefinition(ctx);
+        }
+        catch (CSP2SATException &e) {
+            cerr << e.getErrorMessage() << endl;
+            return nullptr;
+        }
+    }
+
 
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
 
@@ -35,15 +46,21 @@ public:
 
         Symbol *newVar;
         string name = ctx->name->getText();
-        if(ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             vector<int> dimentions;
-            for( auto expr : ctx->arrayDefinition()->expr()) {
-                Value * a = visit(expr);
-                dimentions.push_back(a->getRealValue());
+            for (auto expr : ctx->arrayDefinition()->expr()) {
+                try{
+                    Value *a = visit(expr);
+                    dimentions.push_back(a->getRealValue());
+                }
+                catch (CSP2SATException & e) {
+                    cout << "aaaa ninuut" << endl;
+                }
+
             }
-            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool, this->_f, this->params);
-        }
-        else {
+            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
+                                           this->_f, this->params);
+        } else {
             newVar = new VariableSymbol(ctx->name->getText(), this->_f);
         }
         currentScope->define(newVar);
@@ -60,26 +77,27 @@ public:
 
         string name = ctx->name->getText();
 
-        if(ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             vector<int> dimentions;
-            for( auto expr : ctx->arrayDefinition()->expr()) {
-                Value * a = visit(expr);
+            for (auto expr : ctx->arrayDefinition()->expr()) {
+                Value *a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f, this->params);
-        }
-        else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope, this->_f, this->params);
-        }
-        else {
-            AssignableSymbol * element = new AssignableSymbol(
+
+            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f,
+                                             this->params);
+        } else if (type->getTypeIndex() == SymbolTable::tCustom) {
+            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope,
+                                                        this->_f, this->params);
+        } else {
+            AssignableSymbol *element = new AssignableSymbol(
                     ctx->name->getText(),
                     type
             );
-            if(!SymbolTable::entityDefinitionBlock){
+            if (!SymbolTable::entityDefinitionBlock) {
                 string paramFullName = this->currentScope->getFullName() + ctx->name->getText();
                 int value = this->params->resolve(paramFullName);
-                if(type->getTypeIndex() == SymbolTable::tInt)
+                if (type->getTypeIndex() == SymbolTable::tInt)
                     element->setValue(new IntValue(value));
                 else
                     element->setValue(new BoolValue(value));
@@ -102,10 +120,19 @@ public:
     }
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
-        int value = this->params->resolve(ctx->getText());
-        AssignableSymbol * access = new AssignableSymbol(ctx->getText(), SymbolTable::_integer);
-        access->setValue(new IntValue(value));
-        return (Symbol *) access;
+        try {
+            int value = this->params->resolve(ctx->getText());
+            AssignableSymbol *access = new AssignableSymbol(ctx->getText(), SymbolTable::_integer);
+            access->setValue(new IntValue(value));
+            return (Symbol *) access;
+        }
+        catch (CSP2SATException &e) {
+            throw CSP2SATNotExistsException (
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText()
+            );
+        }
     }
 
     antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {

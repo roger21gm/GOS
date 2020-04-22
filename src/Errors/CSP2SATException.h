@@ -17,7 +17,9 @@ private:
     string message;
 
 public:
-    CSP2SATException(int line, int pos, const string &message) : line(line), column(pos), message(message) {}
+    CSP2SATException(int line, int pos, const string &message) : line(line), column(pos), message(message) {
+        SymbolTable::errors = true;
+    }
 
     string getErrorMessage(){
         string error =  string("ERROR on line ") + to_string(line) + ":" + to_string(column) + "\n\t" + message;

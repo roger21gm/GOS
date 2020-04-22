@@ -1,33 +1,20 @@
 entities:
+    B {
+        param int c1;
+    };
     A {
         param int b1[5];
         var x;
+        B a;
     };
 
 viewpoint:
+    A c;
     A a[3];
-    A b[3];
     param int n;
-    var p[a[0].b1[0]][n][n];
+    var p[n][n][n];
     param int iniSudoku[9][9];
 
 constraints:
-    forall(i in 0..9, j in 0..9){
-        EK(p[i][j][_], 1); // Un únic valor per cel·la
-        AMK(p[i][_][j], 1); // Cada valor apareix una vegada per fila
-        AMK(p[_][i][j], 1); // Cada valor apareix una vegada per columna.
-    };
 
-
-    //Cada valor apareix una vagada als subquadrats de 3x3.
-    forall(i in [0,3,6], j in [0,3,6], k in 0..9){
-        AMK([p[i+l][j+g][k] | l in 0..3, g in 0..3], 1);
-    };
-
-
-    //Inicialitzem els valors fixats del sudoku.
-    forall(i in 0..9, j in 0..9){
-        if(iniSudoku[i][j] != 0){
-            p[i][j][iniSudoku[i][j]-1];
-        };
-    };
+    a[1].a.b;

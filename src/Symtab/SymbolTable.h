@@ -39,11 +39,11 @@ public:
         this->gloabls->define(_varbool);
     }
 
-
-
     void showAllDefinedVariables(){
         iShowAllDefinedVariable(this->gloabls);
     }
+
+    static bool errors;
 
 private:
     static void iShowAllDefinedVariable(Scope * currentScope, const string& prefix = ""){
@@ -92,5 +92,8 @@ BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolT
 BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 BuiltInTypeSymbol * SymbolTable::_varbool = new BuiltInTypeSymbol("varbool", SymbolTable::tVarBool);
 bool SymbolTable::entityDefinitionBlock = false;
+bool SymbolTable::errors = false;
+
+
 
 #endif //CSP2SAT_SYMBOLTABLE_H

@@ -40,8 +40,7 @@ public:
         try {
             return CSP2SATBaseVisitor::visitExprTop(ctx);
         } catch (CSP2SATException &e) {
-            cerr << e.getErrorMessage() << endl;
-            return nullptr;
+            throw;
         }
     }
 
@@ -267,10 +266,12 @@ public:
 
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
-        string a = ctx->getText();
+        string a = ctx->TK_IDENT()->getText();
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
-        if (!var) {
+        if (var == nullptr) {
+            cout << a << endl;
+            cout << ctx->getText() << endl;
             throw CSP2SATNotExistsException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
@@ -282,7 +283,7 @@ public:
             for (int i = 0; i < ctx->varAccessObjectOrArray().size(); i++) {
                 auto nestedScope = ctx->varAccessObjectOrArray(i);
                 string nest = nestedScope->getText();
-                if (var->isScoped()) {
+                if (var != nullptr && var->isScoped()) {
                     this->currentLocalScope = this->currentScope;
                     if (!nestedScope->underscore) {
                         this->currentScope = (ScopedSymbol *) var;
@@ -333,7 +334,7 @@ public:
                 }
             }
         }
-        if (!this->accessingNotLeafVariable && var->isScoped()) {
+        if (var == nullptr || !this->accessingNotLeafVariable && var->isScoped()) {
             throw CSP2SATBadAccessException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
@@ -462,7 +463,6 @@ public:
         if (array && array->type && array->type->getTypeIndex() == SymbolTable::tArray) {
             return (ArraySymbol *) array;
         } else {
-            cerr << ctx->getText() << " is not an array" << endl;
             throw CSP2SATInvalidExpressionTypeException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),

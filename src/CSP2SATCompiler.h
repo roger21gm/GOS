@@ -23,13 +23,12 @@
 
 // custom listener
 #include "Visitors/CSP2SATTypeVarDefinitionVisitor.h"
-#include "Visitors/Input/CSP2SATInputJSONVisitor.h"
 #include "Visitors/CSP2SATConstraintsVisitor.h"
 
 // custom error
 #include "Errors/CSP2SATErrorListener.h"
 #include "CSP2SATEncoding.h"
-#include "Visitors/Input/CSP2SATInputPredeclaredParamsVisitor.h"
+#include "Visitors/Input/CSP2SATJSONInputVisitor.h"
 
 using namespace antlr4;
 using namespace CSP2SAT;
@@ -62,20 +61,30 @@ public:
 
     void run(){
 
-        CSP2SATInputPredeclaredParamsVisitor * inputPreJsonVisitor = new CSP2SATInputPredeclaredParamsVisitor();
+        CSP2SATJSONInputVisitor * inputPreJsonVisitor = new CSP2SATJSONInputVisitor();
         ParamJSON * readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
         CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
 
-        CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
-        runVisitor(constraintsVisitor, modelStr);
+        if(!symbolTable->errors){
+            CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
+            runVisitor(constraintsVisitor, modelStr);
 
-        CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
-        BasicController c(sargs, encoding,false, 0, 0);
-        //c.run();
+            if(!symbolTable->errors){
+                CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
+                BasicController c(sargs, encoding,false, 0, 0);
+                c.run();
+                //symbolTable->showAllDefinedVariables();
+            }
+            else {
+                cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;
+            }
+        }
+        else {
+            cerr << "Execution stopped due to errors in input" << endl;
+        }
 
-        symbolTable->showAllDefinedVariables();
     }
 
 private:

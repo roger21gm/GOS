@@ -2,18 +2,18 @@
 // Created by Roger Generoso Masós on 20/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATINPUTPREDECLAREDPARAMSVISITOR_H
-#define CSP2SAT_CSP2SATINPUTPREDECLAREDPARAMSVISITOR_H
+#ifndef CSP2SAT_CSP2SATJSONINPUTVISITOR_H
+#define CSP2SAT_CSP2SATJSONINPUTVISITOR_H
 
 #include <JSONBaseVisitor.h>
-#include "ParamsPredeclare/Param.h"
+#include "Param.h"
 #include "../../Errors/CSP2SATInputExceptionsRepository.h"
 
 
 using namespace CSP2SAT;
 using namespace std;
 
-class CSP2SATInputPredeclaredParamsVisitor : public JSONBaseVisitor {
+class CSP2SATJSONInputVisitor : public JSONBaseVisitor {
 
 private:
     ParamJSON *base;
@@ -21,58 +21,52 @@ private:
 
 public:
 
-    CSP2SATInputPredeclaredParamsVisitor() {
+    CSP2SATJSONInputVisitor() {
         base = new ParamJSON("base");
         current = base;
     }
-
 
 
     antlrcpp::Any visitPair(JSONParser::PairContext *ctx) override {
         string varName = ctx->STRING()->getText();
         varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
 
-        try{
-            ParamScoped *curr = current;
-            if (ctx->value()->NUMBER()) {
-                current->add(
-                        new ParamInt(
-                                varName,
-                                stoi(ctx->value()->NUMBER()->getText())
-                        )
-                );
-            } else if (ctx->value()->getText() == "true" || ctx->value()->getText() == "false") {
-                current->add(
-                        new ParamBool(
-                                varName,
-                                stoi(ctx->value()->NUMBER()->getText())
-                        )
-                );
-            } else if (ctx->value()->arr()) {
-                ParamArray *array = new ParamArray(varName);
-                current->add(array);
-                current = array;
-                visit(ctx->value()->arr());
-                current = curr;
+        ParamScoped *curr = current;
+        if (ctx->value()->NUMBER()) {
+            current->add(
+                    new ParamInt(
+                            varName,
+                            stoi(ctx->value()->NUMBER()->getText())
+                    )
+            );
+        } else if (ctx->value()->getText() == "true" || ctx->value()->getText() == "false") {
+            current->add(
+                    new ParamBool(
+                            varName,
+                            stoi(ctx->value()->NUMBER()->getText())
+                    )
+            );
+        } else if (ctx->value()->arr()) {
+            ParamArray *array = new ParamArray(varName);
+            current->add(array);
+            current = array;
+            visit(ctx->value()->arr());
+            current = curr;
 
-            } else if (ctx->value()->obj()) {
-                ParamJSON *strct = new ParamJSON(varName);
-                current->add(strct);
-                current = strct;
-                visit(ctx->value()->obj());
-                current = curr;
-            } else {
-                throw CSP2SATBadInputTypeException(
-                        ctx->start->getLine(),
-                        ctx->start->getCharPositionInLine(),
-                        varName
-                );
-            }
+        } else if (ctx->value()->obj()) {
+            ParamJSON *strct = new ParamJSON(varName);
+            current->add(strct);
+            current = strct;
+            visit(ctx->value()->obj());
+            current = curr;
+        } else {
+            throw CSP2SATBadInputTypeException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    varName
+            );
         }
-        catch (CSP2SATException & e) {
-            cerr << e.getErrorMessage() << endl;
-            return 0;
-        }
+
 
         return nullptr;
     }
@@ -130,4 +124,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATINPUTPREDECLAREDPARAMSVISITOR_H
+#endif //CSP2SAT_CSP2SATJSONINPUTVISITOR_H

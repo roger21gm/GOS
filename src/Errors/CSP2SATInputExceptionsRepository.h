@@ -16,7 +16,17 @@ public:
                     pos,
                     "\"" + name + "\":" + "Only int and bool values allowed as params"
             ) {}
+};
 
+
+class CSP2SATInputNotFoundValue : public CSP2SATException {
+public:
+    CSP2SATInputNotFoundValue(const string &access) :
+            CSP2SATException(
+                    0,
+                    0,
+                    "\"" + access + "\":" + " Not found in input file"
+            ) {}
 };
 
 

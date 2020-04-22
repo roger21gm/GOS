@@ -12,7 +12,8 @@
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
-#include "../Visitors/Input/ParamsPredeclare/Param.h"
+#include "Input/Param.h"
+#include "../Errors/CSP2SATExceptionsRepository.h"
 
 class Utils {
 
@@ -37,7 +38,8 @@ public:
 
 
     static StructSymbol *
-    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula * formula, ParamJSON * inParams) {
+    definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula *formula,
+                              ParamJSON *inParams) {
 
         StructSymbol *newCustomTypeConst = new StructSymbol(
                 name,
@@ -47,25 +49,28 @@ public:
         for (pair<string, Symbol *> sym : customType->getScopeSymbols()) {
             if (sym.second->type->getTypeIndex() == SymbolTable::tCustom) {
                 StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
-                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst, formula, inParams);
+                StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst,
+                                                                 formula, inParams);
                 newCustomTypeConst->define(newVar);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                 ArraySymbol *aSy = (ArraySymbol *) sym.second;
-                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula, inParams);
+                ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula,
+                                                                           inParams);
                 newCustomTypeConst->define(newArrayConst);
             } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
                 Symbol *varSym = new VariableSymbol(sym.first, formula);
                 newCustomTypeConst->define(varSym);
             } else {
+                AssignableSymbol *newParam = new AssignableSymbol(sym.first, sym.second->type);
 
-                AssignableSymbol * newParam = new AssignableSymbol(sym.first, sym.second->type);
-                string fullScopedName = newCustomTypeConst->getFullName() + "." + sym.first;
-                int value = inParams->resolve(fullScopedName);
-                if(sym.second->type->getTypeIndex() == SymbolTable::tInt)
-                    newParam->setValue(new IntValue(value));
-                else
-                    newParam->setValue(new BoolValue(value));
-
+                if (!SymbolTable::entityDefinitionBlock) {
+                    string fullScopedName = newCustomTypeConst->getFullName() + "." + sym.first;
+                    int value = inParams->resolve(fullScopedName);
+                    if (sym.second->type->getTypeIndex() == SymbolTable::tInt)
+                        newParam->setValue(new IntValue(value));
+                    else
+                        newParam->setValue(new BoolValue(value));
+                }
 
                 newCustomTypeConst->define(newParam);
             }
@@ -74,7 +79,9 @@ public:
         return newCustomTypeConst;
     }
 
-    static ArraySymbol *createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula * formula, ParamJSON * inParams) {
+    static ArraySymbol *
+    createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula *formula,
+                                  ParamJSON *inParams) {
         vector<int> dimensions;
         Symbol *currType = arrayType;
         while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
@@ -86,7 +93,9 @@ public:
     }
 
     static ArraySymbol *
-    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType, SMTFormula * formula, ParamJSON * inParams) {
+    defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType,
+                   SMTFormula *formula, ParamJSON *inParams) {
+
 
         if (dimentions.size() == 1) {
             ArraySymbol *newArray = new ArraySymbol(
@@ -98,17 +107,20 @@ public:
             for (int i = 0; i < dimentions[0]; ++i) {
                 Symbol *element;
                 if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray, formula, inParams);
+                    element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray, formula,
+                                                        inParams);
                 else if (elementsType->getTypeIndex() == SymbolTable::tVarBool) {
                     element = new VariableSymbol(to_string(i), formula);
                 } else {
-                    AssignableSymbol * newParam = new AssignableSymbol(to_string(i), elementsType);
-                    string fullScopedName = newArray->getFullName() + "[" + to_string(i) + "]";
-                    int value = inParams->resolve(fullScopedName);
-                    if(elementsType->getTypeIndex() == SymbolTable::tInt)
-                        newParam->setValue(new IntValue(value));
-                    else
-                        newParam->setValue(new BoolValue(value));
+                    AssignableSymbol *newParam = new AssignableSymbol(to_string(i), elementsType);
+                    if (!SymbolTable::entityDefinitionBlock) {
+                        string fullScopedName = newArray->getFullName() + "[" + to_string(i) + "]";
+                        int value = inParams->resolve(fullScopedName);
+                        if (elementsType->getTypeIndex() == SymbolTable::tInt)
+                            newParam->setValue(new IntValue(value));
+                        else
+                            newParam->setValue(new BoolValue(value));
+                    }
                     element = newParam;
                 }
                 newArray->define(element);
@@ -123,11 +135,13 @@ public:
                     dimentions[0]
             );
             for (int i = 0; i < dimentions[0]; i++) {
-                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType, formula, inParams);
+                auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType,
+                                                    formula, inParams);
                 newDimention->define(constElement);
             }
             return newDimention;
         }
+
     }
 
 
@@ -155,7 +169,6 @@ public:
     }
 
 
-
     static string getTypeName(const int tType) {
         switch (tType) {
             case SymbolTable::tBool:
@@ -171,17 +184,17 @@ public:
         }
     }
 
-    static vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol * variableArray) {
+    static vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol *variableArray) {
         vector<literal> result = vector<literal>();
         map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
         if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
             for (auto currElem : arrayElems) {
-                VariableSymbol * currVar = (VariableSymbol *) currElem.second;
+                VariableSymbol *currVar = (VariableSymbol *) currElem.second;
                 result.push_back(((VariableSymbol *) currElem.second)->getVar());
             }
         } else {
             cerr << "It must be a literal array" << endl;
-            throw;
+            throw CSP2SATException(0,0,"");
         }
         return result;
     }

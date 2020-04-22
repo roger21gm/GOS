@@ -99,10 +99,13 @@ TK_IDENT: ( ('a'..'z' | 'A'..'Z' | '_')('a'..'z' | 'A'..'Z' | '_' | '0'..'9')* )
 
 csp2sat: entityDefinitionBlock? viewpointBlock? constraintDefinitionBlock?;
 
-entityDefinitionBlock: TK_ENTITIES TK_COLON entityDefinition* ;
-entityDefinition: name=TK_IDENT TK_LBRACKET (varDefinition | paramDefinition)* TK_RBRACKET TK_SEMICOLON;
 
-viewpointBlock: TK_VIEWPOINT TK_COLON (varDefinition | paramDefinition)*;
+definition: varDefinition | paramDefinition;
+
+entityDefinitionBlock: TK_ENTITIES TK_COLON entityDefinition* ;
+entityDefinition: name=TK_IDENT TK_LBRACKET definition* TK_RBRACKET TK_SEMICOLON;
+
+viewpointBlock: TK_VIEWPOINT TK_COLON definition*;
 
 constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 

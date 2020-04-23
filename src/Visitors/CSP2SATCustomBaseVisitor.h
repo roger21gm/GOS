@@ -90,28 +90,26 @@ public:
 
     antlrcpp::Any visitExprEq(CSP2SATParser::ExprEqContext *ctx) override {
         Value *lVal = visit(ctx->exprRel(0));
-        if (ctx->exprRel().size() == 2) {
-            Value *rVal = visit(ctx->exprRel(1));
-            if (lVal->isBoolean() == rVal->isBoolean()) {
-                BoolValue *res = new BoolValue();
-                if (ctx->opEquality(0)->getText() == "==")
-                    res->setRealValue(lVal->getRealValue() == rVal->getRealValue());
-                else
-                    res->setRealValue(lVal->getRealValue() != rVal->getRealValue());
-                return (Value *) res;
-            } else {
-                throw CSP2SATTypeNotMatchException(
-                        ctx->opEquality(0)->start->getLine(),
-                        ctx->opEquality(0)->start->getCharPositionInLine(),
-                        ctx->getText()
-                );
+        if (ctx->exprRel().size() > 1) {
+            for(int i=1; i < ctx->exprRel().size(); i++){
+                Value *rVal = visit(ctx->exprRel(i));
+                if (lVal->isBoolean() == rVal->isBoolean()) {
+                    BoolValue *res = new BoolValue();
+                    if (ctx->opEquality(0)->getText() == "==")
+                        res->setRealValue(lVal->getRealValue() == rVal->getRealValue());
+                    else
+                        res->setRealValue(lVal->getRealValue() != rVal->getRealValue());
+                    lVal = res;
+                } else {
+                    throw CSP2SATTypeNotMatchException(
+                            ctx->opEquality(0)->start->getLine(),
+                            ctx->opEquality(0)->start->getCharPositionInLine(),
+                            ctx->getText()
+                    );
+                }
+
             }
-        } else if (ctx->exprRel().size() > 2) {
-            throw CSP2SATInvalidOperationException(
-                    ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText()
-            );
+
         }
         return lVal;
     }
@@ -334,7 +332,7 @@ public:
                 }
             }
         }
-        if (var == nullptr || !this->accessingNotLeafVariable && var->isScoped()) {
+        if (var == nullptr || (!this->accessingNotLeafVariable && var->isScoped())) {
             throw CSP2SATBadAccessException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),

@@ -49,14 +49,8 @@ public:
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
-                try{
-                    Value *a = visit(expr);
-                    dimentions.push_back(a->getRealValue());
-                }
-                catch (CSP2SATException & e) {
-                    cout << "aaaa ninuut" << endl;
-                }
-
+                Value *a = visit(expr);
+                dimentions.push_back(a->getRealValue());
             }
             newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
                                            this->_f, this->params);

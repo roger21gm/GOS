@@ -40,6 +40,19 @@ public:
             ) {}
 };
 
+
+class CSP2SATParamAsConstraintException : public CSP2SATException {
+public:
+    CSP2SATParamAsConstraintException(int line, int pos, string expr) :
+            CSP2SATException(
+                    line,
+                    pos,
+                    "\"" + expr + "\": Params not allowed as constraints"
+            ) {}
+};
+
+
+
 class CSP2SATTypeNotMatchException : public CSP2SATException {
 public:
     CSP2SATTypeNotMatchException(int line, int pos, string expr) :

@@ -17,7 +17,7 @@ private:
     SMTFormula *f;
     SymbolTable *st;
 
-    void fillModelValuesResult(Scope *currentScope, const EncodedFormula formula, const vector<bool> bmodel) {
+    void fillModelValuesResult(Scope *currentScope, const EncodedFormula formula, const vector<bool> & bmodel) {
         map<string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
 
         for (pair<string, Symbol *> sym : currentScopeSymbols) {
@@ -40,11 +40,13 @@ private:
 
         for(pair<string, Symbol *> sym : currentScopeSymbols){
             if(sym.second->type){
-                if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray)
-                    if(!isdigit(sym.first[0]))
-                        printModelSolution( (ScopedSymbol*) sym.second, os, prefix + "." + sym.first );
+                if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray) {
+                    if (!isdigit(sym.first[0]))
+                        printModelSolution((ScopedSymbol *) sym.second, os, prefix + "." + sym.first);
                     else
-                        printModelSolution( (ScopedSymbol*) sym.second, os, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
+                        printModelSolution((ScopedSymbol *) sym.second, os,
+                                           isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
+                }
                 else{
                     string output = "var -> ";
                     if(!prefix.empty() && prefix[0] == '.')
@@ -61,8 +63,6 @@ private:
 
                     if(sym.second->type->getTypeIndex() == SymbolTable::tVarBool){
                         VariableSymbol * currentVariable = (VariableSymbol *)sym.second;
-
-
                         os << output  << " -> " << (currentVariable->getModelValue() ? "true" : "false") << endl;
                     }
                 }
@@ -82,16 +82,12 @@ public:
     }
 
     bool printSolution(ostream &os) const override {
-
         printModelSolution(this->st->gloabls, os);
-
-
         return true;
     }
 
     void setModel(const EncodedFormula &ef, int lb, int ub, const vector<bool> &bmodel, const vector<int> &imodel) override {
         fillModelValuesResult(this->st->gloabls, ef, bmodel);
-        Encoding::setModel(ef, lb, ub, bmodel, imodel);
     }
 };
 

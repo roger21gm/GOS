@@ -35,17 +35,16 @@ public:
 
 
     antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
-        if(ctx->forall()){
+        if (ctx->forall()) {
             inForall = true;
             visit(ctx->forall());
             inForall = false;
-        }
-        else {
+        } else {
             try {
                 CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
             }
-            catch (CSP2SATException & e) {
-                if(inForall) throw;
+            catch (CSP2SATException &e) {
+                if (inForall) throw;
                 cerr << e.getErrorMessage() << endl;
             }
         }
@@ -93,20 +92,29 @@ public:
     antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {
         clausesReturn *clauses = visit(ctx->constraint_base());
         if (ctx->TK_CONSTRAINT_NOT()) {
-            clause result;
-            for (clause currClause : clauses->clauses) {
-                if (currClause.v.size() == 1)
-                    result |= !currClause.v.front();
-                else {
-                    throw CSP2SATInvalidFormulaException(
-                            ctx->start->getLine(),
-                            ctx->start->getCharPositionInLine(),
-                            ctx->getText(),
-                            "You can only negate literals or AND lists"
-                    );
+            clausesReturn *result = new clausesReturn();
+
+            if (clauses->clauses.size() == 1) {
+                for (auto literal : clauses->clauses.front().v) {
+                    result->addClause(!literal);
                 }
+            } else {
+                clause clauResult;
+                for (clause currClause : clauses->clauses) {
+                    if (currClause.v.size() == 1)
+                        clauResult |= !currClause.v.front();
+                    else {
+                        throw CSP2SATInvalidFormulaException(
+                                ctx->start->getLine(),
+                                ctx->start->getCharPositionInLine(),
+                                ctx->getText(),
+                                "You can only negate literals or AND lists"
+                        );
+                    }
+                }
+                result->addClause(clauResult);
             }
-            clauses = new clausesReturn(result);
+            clauses = result;
         }
         return clauses;
     }
@@ -145,16 +153,44 @@ public:
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
         clausesReturn *result = visit(ctx->constraint_and(0));
 
+
         if (ctx->constraint_and().size() > 1) {
+            vector<clausesReturn *> andClauses;
             clausesReturn *newClauses = new clausesReturn();
             clause orClause;
             for (int i = 0; i < ctx->constraint_and().size(); i++) {
                 clausesReturn *currClauses = visit(ctx->constraint_and(i));
-                for (clause curr : currClauses->clauses) {
-                    orClause |= curr;
-                }
+                if (currClauses->clauses.size() == 1)
+                    orClause |= currClauses->clauses.front();
+                else
+                    andClauses.push_back(currClauses);
             }
-            newClauses->addClause(orClause);
+
+            if (andClauses.size() == 0)
+                newClauses->addClause(orClause);
+            else if (andClauses.size() == 1) {
+                for (auto andClause : andClauses.front()->clauses) {
+                    if (andClause.v.size() == 1)
+                        newClauses->addClause(orClause | andClause);
+                    else {
+                        throw CSP2SATInvalidFormulaException(
+                                ctx->start->getLine(),
+                                ctx->start->getCharPositionInLine(),
+                                ctx->getText(),
+                                "AND_CLAUSULES | AND_LITERALS not allowed"
+                        );
+                    }
+                }
+            } else {
+                throw CSP2SATInvalidFormulaException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        ctx->getText(),
+                        "AND_CLAUSULES | AND_LITERALS not allowed"
+                );
+            }
+
+
             result = newClauses;
         }
 
@@ -215,6 +251,21 @@ public:
                             );
                         }
                     }
+                    leftExpr = new clausesReturn(result);
+                } else if (leftExpr->clauses.size() == 1 && leftExpr->clauses.front().v.size() == 1) {
+                    clausesReturn * res = new clausesReturn();
+                    for (auto andLiteral : rightExpr->clauses) {
+                        if (andLiteral.v.size() == 1) {
+                            res->addClause(andLiteral | !leftExpr->clauses.front().v.front());
+                        } else
+                            throw CSP2SATInvalidFormulaException(
+                                    ctx->start->getLine(),
+                                    ctx->start->getCharPositionInLine(),
+                                    ctx->getText(),
+                                    "Only allowed AND_LITERALS => OR_LITERALS"
+                            );
+                    }
+                    leftExpr = res;
                 } else {
                     throw CSP2SATInvalidFormulaException(
                             ctx->start->getLine(),
@@ -223,7 +274,6 @@ public:
                             "Only allowed AND_LITERALS => OR_LITERALS"
                     );
                 }
-                leftExpr = new clausesReturn(result);
             }
             result = leftExpr;
         }

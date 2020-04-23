@@ -43,7 +43,7 @@ public:
             current->add(
                     new ParamBool(
                             varName,
-                            stoi(ctx->value()->NUMBER()->getText())
+                            ctx->value()->getText() == "true"
                     )
             );
         } else if (ctx->value()->arr()) {

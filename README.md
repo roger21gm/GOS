@@ -262,6 +262,7 @@ AND_CLAUSES pot ser un AND_LITERALS si "a & b & c" o bé pot ser "(a | b) & a & 
   - !AND_LITERALS  ======> OR_LITERALS
     - !a =====> !a
     - !(a & b & c) =====> !a | !b | !c
+  - !OR_LITERALS =====> AND_LITERALS
 - **AND**
   - OR_LITERALS & OR_LITERALS   =======> AND_CLAUSES 
     - (a | b) & (c | d)  =====> C1: (a | b), C2: (c | d)
@@ -284,7 +285,7 @@ AND_CLAUSES pot ser un AND_LITERALS si "a & b & c" o bé pot ser "(a | b) & a & 
     - a => (c | d) =====> !a | c | d
   - //TODO : LITERAL => AND_LITERALS =====> AND_CLAUSES
     - a => (c & d) =====> C1: !a | c,  C2: !a | d 
-  - No permetem AND_LITERALS => OR_LITERALS 
+  - No permetem OR_LITERALS => AND_LITERALS 
 - **DOUBLE IMPLICATION**
   - LITERAL <-> AND_LITERALS ====> AND_CLAUSES
     - a <-> (b & c). =======> C1: !a | b, C2: !a | c, C3: a | !b | !c

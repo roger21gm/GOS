@@ -1,0 +1,37 @@
+viewpoint:
+    var a;
+    var b;
+    var c;
+    var d;
+    var e;
+    param int g;
+    param bool z;
+
+constraints:
+
+
+
+    if(true == true == true){
+        a;
+    }
+    else if(g == 10){
+        b;
+    };
+
+    //a;
+    //!a;
+    //!(a & b & c);
+    //!(a | b | c);
+    //(a | b) & (c | d);
+    //(a | b) & (b & c & e);
+    //(a & b) & (c | d);
+    //(a & b) & (c & d);
+    //((a & b) & (a & c)) & (d & e);
+    //(a | b) | (c | d);
+    //(a | b) | (c & d);
+    //(a & b) -> (c | d);
+    //(a & b) <- (c | d);
+    //a -> (c | d);
+    //a -> (c & d);
+    //a <-> (b & c);
+    //a <-> (b | c);

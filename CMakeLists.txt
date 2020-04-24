@@ -75,6 +75,6 @@ add_executable(
         src/api/smtapi/src/util/util.cpp
         src/api/smtapi/src/util/errors.cpp
         src/Errors/CSP2SATInputExceptionsRepository.h
-)
+        src/Visitors/Output/CSP2SATOutputVisitor.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

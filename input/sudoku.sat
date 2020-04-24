@@ -35,3 +35,5 @@ constraints:
             p[i][j][iniSudoku[i][j]-1];
         };
     };
+
+output:

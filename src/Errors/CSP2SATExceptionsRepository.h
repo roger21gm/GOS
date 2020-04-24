@@ -18,6 +18,15 @@ public:
             ) {}
 };
 
+class CSP2SATStringOnlyOutputException : public CSP2SATException {
+public:
+    CSP2SATStringOnlyOutputException(int line, int pos, const string &str) :
+            CSP2SATException(
+                    line,
+                    pos,
+                    "\"" + str + "\": String only allowed on output"
+            ) {}
+};
 
 class CSP2SATNotExistsException : public CSP2SATException {
 public:

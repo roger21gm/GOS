@@ -29,6 +29,19 @@ public:
         return nullptr;
     }
 
+    antlrcpp::Any visitViewpointBlock(CSP2SATParser::ViewpointBlockContext *ctx) override {
+        return CSP2SATBaseVisitor::visitViewpointBlock(ctx);
+    }
+
+    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
+        return nullptr;
+    }
+
+
     antlrcpp::Any visitDefinition(CSP2SATParser::DefinitionContext *ctx) override {
         try {
             return CSP2SATBaseVisitor::visitDefinition(ctx);
@@ -121,7 +134,7 @@ public:
             return (Symbol *) access;
         }
         catch (CSP2SATException &e) {
-            throw CSP2SATNotExistsException (
+            throw CSP2SATNotExistsException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
                     ctx->getText()
@@ -129,10 +142,17 @@ public:
         }
     }
 
-    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
-        return nullptr;
+    antlrcpp::Any visitListResultExpr(CSP2SATParser::ListResultExprContext *ctx) override {
+        if (!ctx->TK_STRING()) {
+            return CSP2SATCustomBaseVisitor::visitListResultExpr(ctx);
+        } else {
+            throw CSP2SATStringOnlyOutputException(
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine(),
+                    ctx->getText()
+            );
+        }
     }
-
 };
 
 

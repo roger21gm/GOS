@@ -24,13 +24,13 @@ class CSP2SATCustomBaseVisitor : public CSP2SATBaseVisitor {
 protected:
     bool accessingNotLeafVariable = false;
     SymbolTable *st;
-    SMTFormula * _f;
+    SMTFormula *_f;
     Scope *currentScope;
     Scope *currentLocalScope = nullptr;
 
 public:
 
-    explicit CSP2SATCustomBaseVisitor(SymbolTable *symbolTable, SMTFormula * f) {
+    explicit CSP2SATCustomBaseVisitor(SymbolTable *symbolTable, SMTFormula *f) {
         this->st = symbolTable;
         this->_f = f;
         this->currentScope = this->st->gloabls;
@@ -91,7 +91,7 @@ public:
     antlrcpp::Any visitExprEq(CSP2SATParser::ExprEqContext *ctx) override {
         Value *lVal = visit(ctx->exprRel(0));
         if (ctx->exprRel().size() > 1) {
-            for(int i=1; i < ctx->exprRel().size(); i++){
+            for (int i = 1; i < ctx->exprRel().size(); i++) {
                 Value *rVal = visit(ctx->exprRel(i));
                 if (lVal->isBoolean() == rVal->isBoolean()) {
                     BoolValue *res = new BoolValue();
@@ -268,8 +268,6 @@ public:
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
         if (var == nullptr) {
-            cout << a << endl;
-            cout << ctx->getText() << endl;
             throw CSP2SATNotExistsException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
@@ -400,7 +398,6 @@ public:
         return pair<string, ArraySymbol *>(ctx->TK_IDENT()->getText(), arrayDefined);
     }
 
-
     antlrcpp::Any visitComprehensionList(CSP2SATParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);
         map<string, ArraySymbol *> ranges;
@@ -420,33 +417,43 @@ public:
             bool condition = true;
             if (ctx->condExpr) {
                 Value *cond = visit(ctx->condExpr);
+                if (!cond->isBoolean()) {
+                    throw CSP2SATInvalidExpressionTypeException(
+                            ctx->condExpr->start->getLine(),
+                            ctx->condExpr->start->getCharPositionInLine(),
+                            ctx->condExpr->getText(),
+                            Utils::getTypeName(SymbolTable::tInt),
+                            Utils::getTypeName(SymbolTable::tBool)
+                    );
+                }
                 condition = cond->getRealValue();
             }
 
-            if (condition) {
-                Symbol *exprRes;
-                if (ctx->listResultExpr()->varAcc) {
-                    this->accessingNotLeafVariable = true;
-                    exprRes = visit(ctx->listResultExpr());
-                    this->accessingNotLeafVariable = false;
-                } else {
-                    Value *val = visit(ctx->listResultExpr()->resExpr);
-                    auto *valueResult = new AssignableSymbol(
-                            to_string(rand()),
-                            val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
-                    );
-                    valueResult->setValue(val);
-                    exprRes = valueResult;
-                }
-
-                if (newList == nullptr)
-                    newList = new ArraySymbol(
-                            "comprehensionListAux",
-                            listLocalScope,
-                            exprRes->type
-                    );
-                newList->add(exprRes);
+            Symbol *exprRes;
+            if (ctx->listResultExpr()->varAcc) {
+                this->accessingNotLeafVariable = true;
+                exprRes = visit(ctx->listResultExpr());
+                this->accessingNotLeafVariable = false;
+            } else {
+                Value *val = visit(ctx->listResultExpr()->resExpr);
+                auto *valueResult = new AssignableSymbol(
+                        to_string(rand()),
+                        val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
+                );
+                valueResult->setValue(val);
+                exprRes = valueResult;
             }
+
+            if (newList == nullptr)
+                newList = new ArraySymbol(
+                        "comprehensionListAux",
+                        listLocalScope,
+                        exprRes->type
+                );
+
+            if (condition)
+                newList->add(exprRes);
+
         }
         this->currentScope = listLocalScope->getEnclosingScope();
         return newList;
@@ -478,11 +485,17 @@ public:
             Symbol *curr = nullptr;
             if (currVal->varAcc) {
                 curr = visit(currVal);
-            } else {
+            } else if (currVal->resExpr) {
                 Value *exprVal = visit(currVal->resExpr);
                 curr = new AssignableSymbol(to_string(rand()),
                                             exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
                 ((AssignableSymbol *) curr)->setValue(exprVal);
+            } else {
+                throw CSP2SATStringOnlyOutputException(
+                        ctx->start->getLine(),
+                        ctx->start->getCharPositionInLine(),
+                        ctx->getText()
+                );
             }
 
             if (resultList == nullptr) {
@@ -505,10 +518,8 @@ public:
                 );
             }
         }
-
         return resultList;
     }
-
 };
 
 

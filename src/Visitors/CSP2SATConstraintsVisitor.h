@@ -34,6 +34,23 @@ public:
                                                                                                            f) {}
 
 
+    antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    antlrcpp::Any visitViewpointBlock(CSP2SATParser::ViewpointBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
+        return CSP2SATBaseVisitor::visitConstraintDefinitionBlock(ctx);
+    }
+
+    antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
+        return nullptr;
+    }
+
+
     antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
         if (ctx->forall()) {
             inForall = true;
@@ -339,31 +356,34 @@ public:
     }
 
     antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
-        auto *forallLocalScope = new LocalScope(this->currentScope);
+        try{
+            auto *forallLocalScope = new LocalScope(this->currentScope);
 
-        map<string, ArraySymbol *> ranges;
-        this->currentScope = forallLocalScope;
-        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
-            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
-            ranges.insert(currAuxVar);
-        }
-
-        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
-        for (const auto &assignation: possibleAssignations) {
-            for (const auto &auxVarAssign : assignation)
-                forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
-
-            try {
-                visit(ctx->localConstraintDefinitionBlock());
+            map<string, ArraySymbol *> ranges;
+            this->currentScope = forallLocalScope;
+            for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
+                pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
+                ranges.insert(currAuxVar);
             }
-            catch (CSP2SATException &e) {
-                cerr << e.getErrorMessage() << endl;
-                return nullptr;
+
+            vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
+            for (const auto &assignation: possibleAssignations) {
+                for (const auto &auxVarAssign : assignation)
+                    forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
+
+                try {
+                    visit(ctx->localConstraintDefinitionBlock());
+                }
+                catch (CSP2SATException &e) {
+                    cerr << e.getErrorMessage() << endl;
+                    return nullptr;
+                }
             }
+            this->currentScope = forallLocalScope->getEnclosingScope();
         }
-        this->currentScope = forallLocalScope->getEnclosingScope();
-
-
+        catch(CSP2SATException & e){
+            cerr << e.getErrorMessage() << endl;
+        }
         return nullptr;
     }
 
@@ -414,8 +434,6 @@ public:
                     "list<literal>"
             );
         }
-
-
     }
 };
 

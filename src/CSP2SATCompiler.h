@@ -29,6 +29,7 @@
 #include "Errors/CSP2SATErrorListener.h"
 #include "CSP2SATEncoding.h"
 #include "Visitors/Input/CSP2SATJSONInputVisitor.h"
+#include "Visitors/Output/CSP2SATOutputVisitor.h"
 
 using namespace antlr4;
 using namespace CSP2SAT;
@@ -84,8 +85,12 @@ public:
             if(!symbolTable->errors){
                 CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
                 BasicController c(sargs, encoding,false, 0, 0);
-                c.run();
+                //c.run();
                 //symbolTable->showAllDefinedVariables();
+
+
+                CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
+                runVisitor(outputVisitor, modelStr);
             }
             else {
                 cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;
@@ -94,7 +99,6 @@ public:
         else {
             cerr << "Execution stopped due to errors in input" << endl;
         }
-
     }
 
 private:

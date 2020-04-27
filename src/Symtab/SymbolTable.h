@@ -26,17 +26,20 @@ public:
     static const int tInt = 2;
     static const int tBool = 3;
     static const int tVarBool = 4;
+    static const int tString = 5;
     GlobalScope * gloabls;
 
     static BuiltInTypeSymbol *_integer;
     static BuiltInTypeSymbol *_boolean;
     static BuiltInTypeSymbol *_varbool;
+    static BuiltInTypeSymbol *_string;
 
     SymbolTable(){
         gloabls = new GlobalScope();
         this->gloabls->define(_integer);
         this->gloabls->define(_boolean);
         this->gloabls->define(_varbool);
+        this->gloabls->define(_string);
     }
 
     void showAllDefinedVariables(){
@@ -91,6 +94,7 @@ private:
 BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolTable::tInt);
 BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 BuiltInTypeSymbol * SymbolTable::_varbool = new BuiltInTypeSymbol("varbool", SymbolTable::tVarBool);
+BuiltInTypeSymbol * SymbolTable::_string = new BuiltInTypeSymbol("string", SymbolTable::tString);
 bool SymbolTable::entityDefinitionBlock = false;
 bool SymbolTable::errors = false;
 

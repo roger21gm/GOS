@@ -143,7 +143,7 @@ public:
     }
 
     antlrcpp::Any visitListResultExpr(CSP2SATParser::ListResultExprContext *ctx) override {
-        if (!ctx->TK_STRING()) {
+        if (!ctx->string()) {
             return CSP2SATCustomBaseVisitor::visitListResultExpr(ctx);
         } else {
             throw CSP2SATStringOnlyOutputException(

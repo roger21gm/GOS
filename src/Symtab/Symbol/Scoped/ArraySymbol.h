@@ -58,6 +58,10 @@ public:
         return scopeSymbols;
     }
 
+    vector<Symbol*> getSymbolVector() {
+        return elements;
+    }
+
     void setSize(int siz){
         this->size = siz;
     }

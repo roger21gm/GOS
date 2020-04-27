@@ -85,7 +85,7 @@ public:
             if(!symbolTable->errors){
                 CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
                 BasicController c(sargs, encoding,false, 0, 0);
-                //c.run();
+                c.run();
                 //symbolTable->showAllDefinedVariables();
 
 

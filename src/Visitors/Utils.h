@@ -34,6 +34,20 @@ private:
         }
     }
 
+    static void printAll(const vector<vector<Symbol*>> & allVecs, const vector<string> & names, vector<map<string, Symbol *>> & result, vector<Symbol*> currComb = vector<Symbol*>(), int vecIndex = 0) {
+        if (vecIndex >= allVecs.size()) {
+            result.emplace_back();
+            for(int i = 0; i < currComb.size(); ++i)
+                result.back()[names[i]] = currComb[i];
+            return;
+        }
+        for (size_t i=0; i<allVecs[vecIndex].size(); i++) {
+            vector<Symbol*> curr = vector<Symbol*>(currComb);
+            curr.push_back(allVecs[vecIndex][i]);
+            printAll(allVecs, names, result, curr, vecIndex + 1);
+        }
+    }
+
 public:
 
 
@@ -162,8 +176,11 @@ public:
             unnamedRanges.push_back(curr);
 
         }
+
+
         vector<map<string, Symbol *>> result;
-        generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
+        printAll(unnamedRanges, names, result);
+        //generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
 
         return result;
     }
@@ -194,7 +211,7 @@ public:
             }
         } else {
             cerr << "It must be a literal array" << endl;
-            throw CSP2SATException(0,0,"");
+            throw CSP2SATException(0, 0, "");
         }
         return result;
     }

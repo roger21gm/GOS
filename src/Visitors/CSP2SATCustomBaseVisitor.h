@@ -14,6 +14,7 @@
 #include "../Errors/CSP2SATException.h"
 #include "../Errors/CSP2SATExceptionsRepository.h"
 #include "../Symtab/Scope/LocalScope.h"
+#include "../Symtab/Symbol/StringSymbol.h"
 
 
 using namespace CSP2SAT;
@@ -378,7 +379,7 @@ public:
                     this->currentScope,
                     SymbolTable::_integer
             );
-            for (int i = 0; i < (maxValue - minValue); ++i) {
+            for (int i = 0; i <= (maxValue - minValue); i++) {
                 AssignableSymbol *newValue = new AssignableSymbol(to_string(i), SymbolTable::_integer);
                 newValue->setValue(new IntValue(minValue + i));
                 result->add(newValue);
@@ -434,7 +435,8 @@ public:
                 this->accessingNotLeafVariable = true;
                 exprRes = visit(ctx->listResultExpr());
                 this->accessingNotLeafVariable = false;
-            } else {
+            }
+            else if (ctx->listResultExpr()->resExpr) {
                 Value *val = visit(ctx->listResultExpr()->resExpr);
                 auto *valueResult = new AssignableSymbol(
                         to_string(rand()),
@@ -442,6 +444,10 @@ public:
                 );
                 valueResult->setValue(val);
                 exprRes = valueResult;
+            }
+            else {
+                string currStr = visit(ctx->listResultExpr()->string());
+                exprRes = new StringSymbol(currStr);
             }
 
             if (newList == nullptr)
@@ -491,11 +497,8 @@ public:
                                             exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
                 ((AssignableSymbol *) curr)->setValue(exprVal);
             } else {
-                throw CSP2SATStringOnlyOutputException(
-                        ctx->start->getLine(),
-                        ctx->start->getCharPositionInLine(),
-                        ctx->getText()
-                );
+                string currStr = visit(currVal->string());
+                curr = new StringSymbol(currStr);
             }
 
             if (resultList == nullptr) {

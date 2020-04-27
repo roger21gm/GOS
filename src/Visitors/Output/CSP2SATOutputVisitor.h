@@ -27,35 +27,116 @@ public:
     }
 
     antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
-        return CSP2SATBaseVisitor::visitOutputBlock(ctx);
-    }
+        for(auto str : ctx->string()) {
+            try{
+                string out = visit(str);
+                cout << out << endl;
+            }
+            catch (CSP2SATException & e) {
+                cerr << e.getErrorMessage() << endl;
+                return nullptr;
+            }
 
 
-//    antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
-//        if(ctx->string()){
-//            string result = visit(ctx->string());
-//            cout << result << endl;
-//        }
-//        return nullptr;
-//    }
-
-    antlrcpp::Any visitString(CSP2SATParser::StringContext *ctx) override {
-        string str = ctx->TK_STRING()->getText();
-        str.erase(std::remove(str.begin(),str.end(),'\"'),str.end());
-        return str;
-    }
-
-    antlrcpp::Any visitString_agg(CSP2SATParser::String_aggContext *ctx) override {
-        for(auto currStr : ctx->string()){
-            string currentString = visit(currStr);
-            cout << currentString;
         }
-        cout << endl;
         return nullptr;
     }
 
+    antlrcpp::Any visitString(CSP2SATParser::StringContext *ctx) override {
+        string result = "";
+        if(ctx->TK_STRING()){
+            string iniText = ctx->TK_STRING()->getText();
+            iniText.erase(std::remove(iniText.begin(),iniText.end(),'\"'),iniText.end());
+            result = Helpers::toRawString(iniText);
 
+        }
+        else if(ctx->stringTernary()){
+            string ternaryResult = visit(ctx->stringTernary());
+            result = ternaryResult;
+        }
+        else if(ctx->list()){
+            ArraySymbol * str = visit(ctx->list());
+            if(str->getElementsType()->getTypeIndex() == SymbolTable::tString){
+                for(auto currStr : str->getSymbolVector())
+                    result += currStr->getName();
+            }
+            else {
+                throw;
+            }
+        }
+        else if(ctx->concatString()){
+            string lString = visit(ctx->string());
+            string rString = visit(ctx->concatString()->string());
+            result = lString + rString;
 
+            auto currentConcat = ctx->concatString()->concatString();
+            while(currentConcat){
+                string current = visit(currentConcat->string());
+                result += current;
+                currentConcat = currentConcat->concatString();
+            }
+        }
+        else if(ctx->expr()){
+            Value * val = visit(ctx->expr());
+            result = to_string(val->getRealValue());
+        }
+        else if(ctx->varAccess()){
+            accessingNotLeafVariable = true;
+            Symbol * var = visit(ctx->varAccess());
+            accessingNotLeafVariable = false;
+            if(!var->isScoped()){
+                if(var->isAssignable())
+                    result = to_string(((AssignableSymbol*)var)->getValue()->getRealValue());
+                else
+                    result = ((VariableSymbol*)var)->getModelValue() ? "true" : "false";
+            }
+            else {
+                ArraySymbol * arrayAccess = (ArraySymbol*)var;
+                result += "[";
+                for(auto elem : arrayAccess->getSymbolVector()){
+                    if(elem->isAssignable())
+                        result += to_string(((AssignableSymbol*)elem)->getValue()->getRealValue());
+                    else
+                        result += ((VariableSymbol*)elem)->getModelValue() ? "true" : "false";
+
+                    if(elem != arrayAccess->getSymbolVector().back())
+                        result += ", ";
+                }
+                result += "]";
+            }
+
+        }
+        else if(ctx->TK_LPAREN()){
+            string innerParen = visit(ctx->string());
+            result = innerParen;
+        }
+        return (string) result;
+    }
+
+    antlrcpp::Any visitStringTernary(CSP2SATParser::StringTernaryContext *ctx) override {
+        Value * cond = visit(ctx->condition);
+
+        if(cond->getRealValue())
+            return visit(ctx->op1);
+        else
+            return visit(ctx->op2);
+    }
+
+    antlrcpp::Any visitExpr_base(CSP2SATParser::Expr_baseContext *ctx) override {
+        if (ctx->expr()) {
+            return visit(ctx->expr());
+        } else if (ctx->varAccess()) {
+            Symbol *value = visit(ctx->varAccess());
+            if (value->isAssignable()) {
+                return (Value *) ((AssignableSymbol *) value)->getValue();
+            } else {
+                bool a = ((VariableSymbol*) value)->getModelValue();
+                Value * modelValue = new BoolValue(a);
+                return (Value *) modelValue;
+            }
+        }
+        return CSP2SATBaseVisitor::visitExpr_base(ctx);
+    }
 };
 
 

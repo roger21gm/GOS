@@ -86,12 +86,10 @@ public:
             if (valSym != nullptr && valSym->type && valSym->type->getTypeIndex() == SymbolTable::tVarBool) {
                 clause->addClause(((VariableSymbol *) valSym)->getVar());
             } else {
-                throw CSP2SATInvalidExpressionTypeException(
+                throw CSP2SATParamAsConstraintException(
                         ctx->start->getLine(),
                         ctx->start->getCharPositionInLine(),
-                        ctx->getText(),
-                        valSym != nullptr ? Utils::getTypeName(valSym->type->getTypeIndex()) : "undefined",
-                        Utils::getTypeName(SymbolTable::tVarBool)
+                        ctx->getText()
                 );
             }
         } else if (ctx->TK_BOOLEAN_VALUE()) {
@@ -270,7 +268,7 @@ public:
                     }
                     leftExpr = new clausesReturn(result);
                 } else if (leftExpr->clauses.size() == 1 && leftExpr->clauses.front().v.size() == 1) {
-                    clausesReturn * res = new clausesReturn();
+                    clausesReturn *res = new clausesReturn();
                     for (auto andLiteral : rightExpr->clauses) {
                         if (andLiteral.v.size() == 1) {
                             res->addClause(andLiteral | !leftExpr->clauses.front().v.front());
@@ -356,7 +354,7 @@ public:
     }
 
     antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
-        try{
+        try {
             auto *forallLocalScope = new LocalScope(this->currentScope);
 
             map<string, ArraySymbol *> ranges;
@@ -367,6 +365,7 @@ public:
             }
 
             vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
+
             for (const auto &assignation: possibleAssignations) {
                 for (const auto &auxVarAssign : assignation)
                     forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
@@ -381,7 +380,7 @@ public:
             }
             this->currentScope = forallLocalScope->getEnclosingScope();
         }
-        catch(CSP2SATException & e){
+        catch (CSP2SATException &e) {
             cerr << e.getErrorMessage() << endl;
         }
         return nullptr;

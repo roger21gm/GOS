@@ -93,7 +93,7 @@ TK_CONSTRAINT_AGG_AMK : 'AMK';
 TK_IDENT: ( ('a'..'z' | 'A'..'Z' | '_')('a'..'z' | 'A'..'Z' | '_' | '0'..'9')* );
 
 fragment ESCAPED_QUOTE : '\\"';
-TK_STRING :   '"' ( ESCAPED_QUOTE | ~('\n'|'\r') )*? '"';
+TK_STRING :   '"' ( ESCAPED_QUOTE | ~('"') )*? '"';
 
 TK_STRING_AGG_OP: '++';
 
@@ -110,7 +110,7 @@ viewpointBlock: TK_VIEWPOINT TK_COLON definition*;
 
 constraintDefinitionBlock: TK_CONSTRAINTS TK_COLON constraintDefinition*;
 
-outputBlock: TK_OUTPUT TK_COLON (string_agg TK_SEMICOLON)*;
+outputBlock: TK_OUTPUT TK_COLON (string TK_SEMICOLON)*;
 
 varDefinition: TK_VAR type=TK_BASE_TYPE_BOOL? name=TK_IDENT arrayDefinition TK_SEMICOLON;
 paramDefinition: (
@@ -171,19 +171,16 @@ ifThenElse:
     (TK_ELSEIF TK_LPAREN expr TK_RPAREN TK_LBRACKET localConstraintDefinitionBlock TK_RBRACKET)*
     (TK_ELSE TK_LBRACKET localConstraintDefinitionBlock TK_RBRACKET)?;
 
-list: listTypes;
-
-listTypes:
-      min=expr TK_RANGE_DOTS max=expr #rangList
+list: min=expr TK_RANGE_DOTS max=expr #rangList
     | TK_LCLAUDATOR listResultExpr TK_CONSTRAINT_OR_PIPE auxiliarListAssignation (TK_COMMA auxiliarListAssignation)* (TK_WHERE condExpr=expr)? TK_RCLAUDATOR #comprehensionList
     | TK_LCLAUDATOR listResultExpr (TK_COMMA listResultExpr)* TK_RCLAUDATOR #explicitList
     | varAccess #varAccessList;
 
 
 listResultExpr:
-    | TK_STRING
     | varAcc=constraint_literal
-    | resExpr=expr;
+    | resExpr=expr
+    | string;
 
 constraint: constraint_expression | constraint_aggreggate_op;
 
@@ -210,7 +207,6 @@ constraint_base:
     | TK_BOOLEAN_VALUE
     | TK_LPAREN constraint_expression TK_RPAREN;
 
-
 aggregate_op: TK_CONSTRAINT_AGG_EK | TK_CONSTRAINT_AGG_AMK | TK_CONSTRAINT_AGG_ALK;
 constraint_aggreggate_op: aggregate_op TK_LPAREN list TK_COMMA param=expr TK_RPAREN;
 
@@ -218,8 +214,16 @@ constraint_aggreggate_op: aggregate_op TK_LPAREN list TK_COMMA param=expr TK_RPA
 //OUTPUT
 
 string:
-    TK_STRING
-    | list;
+    string concatString
+    | TK_LPAREN string TK_RPAREN
+    | stringTernary
+    | varAccess
+    | expr
+    | list
+    | TK_STRING;
 
-string_agg: string (TK_STRING_AGG_OP string)*;
+stringTernary:
+    condition=exprAnd TK_INTERROGANT op1=string TK_COLON op2=string;
 
+concatString:
+    TK_STRING_AGG_OP string concatString?;

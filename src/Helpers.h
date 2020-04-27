@@ -33,6 +33,39 @@ public:
         }
         return result;
     }
+
+    static string toRawString(std::string const& in)
+    {
+        char c;
+        istringstream s(in);
+        enum { CHARACTER, ESCAPE } state = CHARACTER;
+
+        string result = "";
+        while (s.get(c)) {
+            switch (state) {
+                case CHARACTER:
+                    if (c == '\\') {
+                        state = ESCAPE;
+                    } else {
+                        result += c;
+                    }
+                    break;
+
+                case ESCAPE:
+                    switch (c) {
+                        case 'n':
+                            result += "\n";
+                            break;
+                        case 't':
+                            result += "\t";
+                            break;
+                    }
+                    state = CHARACTER;
+                    break;
+            }
+        }
+        return result;
+    }
 };
 
 

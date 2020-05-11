@@ -13,6 +13,14 @@ class CSP2SATOutputVisitor : public CSP2SATCustomBaseVisitor {
 public:
     CSP2SATOutputVisitor(SymbolTable *symbolTable, SMTFormula *f) : CSP2SATCustomBaseVisitor(symbolTable, f) {}
 
+    antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override {
+        if(ctx->outputBlock()){
+            visit(ctx->outputBlock());
+            return true;
+        }
+        return false;
+    }
+
 
     antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
         return nullptr;

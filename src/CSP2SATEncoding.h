@@ -81,6 +81,11 @@ public:
         return f;
     }
 
+    bool printModelSolution(ostream &os) const {
+        printModelSolution(this->st->gloabls, os);
+        return true;
+    }
+
     bool printSolution(ostream &os) const override {
         //printModelSolution(this->st->gloabls, os);
         return true;

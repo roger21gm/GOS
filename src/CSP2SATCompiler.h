@@ -42,13 +42,13 @@ public:
         _f = new SMTFormula();
     }
 
-    void runVisitor(CSP2SATBaseVisitor * visitor, string inStr){
+    auto runVisitor(CSP2SATBaseVisitor * visitor, string inStr){
         ANTLRInputStream input(inStr);
         CSP2SATLexer lexer(&input);
         CommonTokenStream tokens(&lexer);
         CSP2SATParser parser(&tokens);
         CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
-        visitor->visit(tree);
+        return visitor->visit(tree);
     }
 
     auto runInputVisitor(JSONBaseVisitor * visitor, string inStr){
@@ -76,11 +76,11 @@ public:
                 CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
                 BasicController c(sargs, encoding,false, 0, 0);
                 c.run();
-                //symbolTable->showAllDefinedVariables();
-
 
                 CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
-                runVisitor(outputVisitor, modelStr);
+                bool customOutput = runVisitor(outputVisitor, modelStr);
+                if(!customOutput)
+                    encoding->printModelSolution(cout);
             }
             else {
                 cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;

@@ -35,8 +35,5 @@ constraints:
     };
 
 output:
-    //"Solució sudoku: \n";
-    //[ k+1 ++ " " ++ ((j+1) % 3 == 0 ? " " : "") ++ (j==8 ? (i+1) % 3 == 0 ? "\n\n": "\n" : "") | i in 0..8, j in 0..8, k in 0..8 where p[i][j][k]];
-
-    [p[i][_][j] ++ "\n" | i in 0..8, j in 0..8];
-
+    "Solució sudoku: \n";
+    [ k+1 ++ " " ++ ((j+1) % 3 == 0 ? " " : "") ++ (j==8 ? (i+1) % 3 == 0 ? "\n\n": "\n" : "") | i in 0..8, j in 0..8, k in 0..8 where p[i][j][k]];

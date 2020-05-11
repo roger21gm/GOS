@@ -4,4 +4,3 @@ cmake-build-debug
 gen
 deps/antlr/.nosync
 build
-src/api

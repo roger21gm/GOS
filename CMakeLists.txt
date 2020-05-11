@@ -45,36 +45,37 @@ add_executable(
         src/main.cpp
         ${ANTLR_CSP2SAT_CXX_OUTPUTS}
         ${ANTLR_JSON_CXX_OUTPUTS}
-        src/api/smtapi/src/smtformula.cpp
-        src/api/smtapi/src/smtapi.cpp
-        src/api/smtapi/src/encoding.cpp
-        src/api/smtapi/src/MDD/mddbuilder.cpp
-        src/api/smtapi/src/MDD/amopbbddbuilder.cpp
-        src/api/smtapi/src/MDD/amopbmddbuilder.cpp
-        src/api/smtapi/src/MDD/mdd.cpp
-        src/api/smtapi/src/controllers/basiccontroller.cpp
-        src/api/smtapi/src/controllers/solvingarguments.cpp
-        src/api/smtapi/src/controllers/arguments.cpp
-        src/api/smtapi/src/optimizers/buoptimizer.cpp
-        src/api/smtapi/src/optimizers/singlecheck.cpp
-        src/api/smtapi/src/optimizers/uboptimizer.cpp
-        src/api/smtapi/src/optimizers/dicooptimizer.cpp
-        src/api/smtapi/src/optimizers/nativeoptimizer.cpp
-        src/api/smtapi/src/optimizers/optimizer.cpp
-        src/api/smtapi/src/encoders/fileencoder.cpp
-        src/api/smtapi/src/encoders/encoder.cpp
-        src/api/smtapi/src/encoders/apiencoder.cpp
-        src/api/smtapi/src/encoders/smtlib2fileencoder.cpp
-        src/api/smtapi/src/encoders/dimacsfileencoder.cpp
-        src/api/smtapi/src/encoders/glucoseapiencoder.cpp
-        src/api/smtapi/src/encoders/minisatapiencoder.cpp
-        src/api/smtapi/src/solvers/glucose/simp/SimpSolver.cc
-        src/api/smtapi/src/solvers/glucose/core/Solver.cc
-        src/api/smtapi/src/solvers/minisat/simp/SimpSolver.cc
-        src/api/smtapi/src/solvers/minisat/core/Solver.cc
-        src/api/smtapi/src/util/util.cpp
-        src/api/smtapi/src/util/errors.cpp
+        src/api/smtformula.cpp
+        src/api/smtapi.cpp
+        src/api/encoding.cpp
+        src/api/MDD/mddbuilder.cpp
+        src/api/MDD/amopbbddbuilder.cpp
+        src/api/MDD/amopbmddbuilder.cpp
+        src/api/MDD/mdd.cpp
+        src/api/controllers/basiccontroller.cpp
+        src/api/controllers/solvingarguments.cpp
+        src/api/controllers/arguments.cpp
+        src/api/optimizers/buoptimizer.cpp
+        src/api/optimizers/singlecheck.cpp
+        src/api/optimizers/uboptimizer.cpp
+        src/api/optimizers/dicooptimizer.cpp
+        src/api/optimizers/nativeoptimizer.cpp
+        src/api/optimizers/optimizer.cpp
+        src/api/encoders/fileencoder.cpp
+        src/api/encoders/encoder.cpp
+        src/api/encoders/apiencoder.cpp
+        src/api/encoders/smtlib2fileencoder.cpp
+        src/api/encoders/dimacsfileencoder.cpp
+        src/api/encoders/glucoseapiencoder.cpp
+        src/api/encoders/minisatapiencoder.cpp
+        src/api/solvers/glucose/simp/SimpSolver.cc
+        src/api/solvers/glucose/core/Solver.cc
+        src/api/solvers/minisat/simp/SimpSolver.cc
+        src/api/solvers/minisat/core/Solver.cc
+        src/api/util/util.cpp
+        src/api/util/errors.cpp
         src/Errors/CSP2SATInputExceptionsRepository.h
-        src/Visitors/Output/CSP2SATOutputVisitor.h src/Symtab/Symbol/StringSymbol.h)
+        src/Visitors/Output/CSP2SATOutputVisitor.h
+        src/Symtab/Symbol/StringSymbol.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

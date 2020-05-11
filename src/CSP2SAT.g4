@@ -92,6 +92,8 @@ TK_CONSTRAINT_AGG_AMK : 'AMK';
 
 TK_IDENT: ( ('a'..'z' | 'A'..'Z' | '_')('a'..'z' | 'A'..'Z' | '_' | '0'..'9')* );
 
+
+//OUTPUT
 fragment ESCAPED_QUOTE : '\\"';
 TK_STRING :   '"' ( ESCAPED_QUOTE | ~('"') )*? '"';
 

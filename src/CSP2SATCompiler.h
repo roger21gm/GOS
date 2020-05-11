@@ -72,16 +72,6 @@ public:
             CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
             runVisitor(constraintsVisitor, modelStr);
 
-//            int index = 1;
-//            for(auto a : _f->getClauses()){
-//                cout << "Clàusula " << index << endl << "\t";
-//                for(auto b : a.v){
-//                    cout << (b.sign ? "" : "!") << b.v.id << " ";
-//                }
-//                cout << endl;
-//                index++;
-//            };
-
             if(!symbolTable->errors){
                 CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
                 BasicController c(sargs, encoding,false, 0, 0);

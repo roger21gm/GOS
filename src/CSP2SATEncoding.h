@@ -82,7 +82,7 @@ public:
     }
 
     bool printSolution(ostream &os) const override {
-        printModelSolution(this->st->gloabls, os);
+        //printModelSolution(this->st->gloabls, os);
         return true;
     }
 

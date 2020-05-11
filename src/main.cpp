@@ -1,5 +1,5 @@
 #include <string>
-#include <controllers/solvingarguments.h>
+#include "api/controllers/solvingarguments.h"
 #include "CSP2SATCompiler.h"
 
 using namespace std;

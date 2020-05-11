@@ -36,7 +36,7 @@ include_directories(${ANTLR_JSON_OUTPUT_DIR})
 
 # build CSP2SATCompiler
 file(GLOB CSP2SAT_SRC "src/*.cpp")
-include_directories(${PROJECT_SOURCE_DIR}/src/api/smtapi/src)
+include_directories(${PROJECT_SOURCE_DIR}/src/api/)
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/antlr4cpp_generated_src)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
 

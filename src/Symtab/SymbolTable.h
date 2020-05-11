@@ -9,7 +9,7 @@
 #include <iostream>
 #include "Scope/GlobalScope.h"
 #include "Symbol/BuiltInTypeSymbol.h"
-#include "../api/smtapi/src/smtformula.h"
+#include "smtformula.h"
 #include "Symbol/Scoped/ScopedSymbol.h"
 #include "Value/Value.h"
 #include "Symbol/Valued/AssignableSymbol.h"

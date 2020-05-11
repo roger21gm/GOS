@@ -311,7 +311,6 @@ public:
 
 	//The name of a variable cannot contain the character "_"
 
-
 	//Get a new unnamed Boolean variable
 	boolvar newBoolVar();
 	//Get a new named Boolean variable, with up to 3 subindices in the name

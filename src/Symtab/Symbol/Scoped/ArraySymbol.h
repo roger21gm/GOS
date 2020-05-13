@@ -7,6 +7,7 @@
 
 
 #include "../../../Helpers.h"
+#include "../../../Errors/CSP2SATExceptionsRepository.h"
 
 class ArraySymbol : public ScopedSymbol {
 
@@ -42,8 +43,7 @@ public:
             if(index < size){
                 return elements[index];
             }
-            cerr << "Accessing array out of range";
-            throw;
+            throw CSP2SATOutOfRangeException(0, 0, getFullName() + "[" + name + "]");
         }
         else
             return enclosingScope->resolve(name);

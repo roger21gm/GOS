@@ -70,6 +70,16 @@ public:
             ) {}
 };
 
+class CSP2SATOutOfRangeException : public CSP2SATException {
+public:
+    CSP2SATOutOfRangeException(int line, int pos, string expr) :
+            CSP2SATException(
+                    line,
+                    pos,
+                    "\"" + expr + "\" access out of range"
+            ) {}
+};
+
 class CSP2SATTypeNotMatchException : public CSP2SATException {
 public:
     CSP2SATTypeNotMatchException(int line, int pos, string expr) :

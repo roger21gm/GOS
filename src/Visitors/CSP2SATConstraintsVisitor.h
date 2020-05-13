@@ -26,9 +26,6 @@ struct clausesReturn {
 };
 
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
-private:
-    bool inForall = false;
-
 public:
     explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable, SMTFormula *f) : CSP2SATCustomBaseVisitor(symbolTable,
                                                                                                            f) {}
@@ -42,28 +39,45 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
-        return CSP2SATBaseVisitor::visitConstraintDefinitionBlock(ctx);
-    }
-
     antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
         return nullptr;
     }
 
-
-    antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
-        if (ctx->forall()) {
-            inForall = true;
-            visit(ctx->forall());
-            inForall = false;
-        } else {
+    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
+        for(auto constraint : ctx->constraintDefinition()){
             try {
-                CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+                visit(constraint);
             }
-            catch (CSP2SATException &e) {
-                if (inForall) throw;
+            catch (CSP2SATException & e) {
                 cerr << e.getErrorMessage() << endl;
             }
+        }
+        return nullptr;
+    }
+
+    antlrcpp::Any
+    visitLocalConstraintDefinitionBlock(CSP2SATParser::LocalConstraintDefinitionBlockContext *ctx) override {
+        try{
+            for(auto constraint : ctx->constraintDefinition()){
+                visit(constraint);
+            }
+        }
+        catch (CSP2SATException & e) {
+            throw e;
+        }
+        return nullptr;
+    }
+
+
+
+
+    antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
+
+        try {
+            CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+        }
+        catch (CSP2SATException &e) {
+            throw e;
         }
         return nullptr;
     }
@@ -354,35 +368,26 @@ public:
     }
 
     antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
-        try {
-            auto *forallLocalScope = new LocalScope(this->currentScope);
 
-            map<string, ArraySymbol *> ranges;
-            this->currentScope = forallLocalScope;
-            for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
-                pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
-                ranges.insert(currAuxVar);
-            }
+        auto *forallLocalScope = new LocalScope(this->currentScope);
 
-            vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
-
-            for (const auto &assignation: possibleAssignations) {
-                for (const auto &auxVarAssign : assignation)
-                    forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
-
-                try {
-                    visit(ctx->localConstraintDefinitionBlock());
-                }
-                catch (CSP2SATException &e) {
-                    cerr << e.getErrorMessage() << endl;
-                    return nullptr;
-                }
-            }
-            this->currentScope = forallLocalScope->getEnclosingScope();
+        map<string, ArraySymbol *> ranges;
+        this->currentScope = forallLocalScope;
+        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
+            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
+            ranges.insert(currAuxVar);
         }
-        catch (CSP2SATException &e) {
-            cerr << e.getErrorMessage() << endl;
+
+        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
+
+        for (const auto &assignation: possibleAssignations) {
+            for (const auto &auxVarAssign : assignation)
+                forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
+            visit(ctx->localConstraintDefinitionBlock());
         }
+
+        this->currentScope = forallLocalScope->getEnclosingScope();
+
         return nullptr;
     }
 

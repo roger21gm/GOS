@@ -15,7 +15,7 @@ public:
 
     antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override {
         if(ctx->outputBlock()){
-            visit(ctx->outputBlock());
+            CSP2SATBaseVisitor::visitCsp2sat(ctx);
             return true;
         }
         return false;
@@ -44,8 +44,6 @@ public:
                 cerr << e.getErrorMessage() << endl;
                 return nullptr;
             }
-
-
         }
         return nullptr;
     }
@@ -69,7 +67,11 @@ public:
                     result += currStr->getName();
             }
             else {
-                throw;
+                throw CSP2SATStringOnlyOutputException(
+                    ctx->list()->start->getLine(),
+                    ctx->list()->start->getCharPositionInLine(),
+                    ctx->list()->getText()
+                );
             }
         }
         else if(ctx->concatString()){

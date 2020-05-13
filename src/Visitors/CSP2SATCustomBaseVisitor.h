@@ -37,6 +37,20 @@ public:
         this->currentScope = this->st->gloabls;
     }
 
+    antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override {
+        try{
+            return CSP2SATBaseVisitor::visitCsp2sat(ctx);
+        }
+        catch (CSP2SATException & e) {
+            cerr << e.getErrorMessage() << endl;
+        }
+        catch (exception & e) {
+            cerr << e.what() << endl;
+        }
+        return nullptr;
+    }
+
+
     antlrcpp::Any visitExprTop(CSP2SATParser::ExprTopContext *ctx) override {
         try {
             return CSP2SATBaseVisitor::visitExprTop(ctx);
@@ -239,8 +253,8 @@ public:
                         ctx->getStart()->getLine(),
                         ctx->getStart()->getCharPositionInLine(),
                         ctx->getText(),
-                        Utils::getTypeName(SymbolTable::tInt),
-                        Utils::getTypeName(value->type->getTypeIndex())
+                        Utils::getTypeName(value->type->getTypeIndex()),
+                        Utils::getTypeName(SymbolTable::tInt)
                 );
             }
         }
@@ -398,6 +412,8 @@ public:
         ArraySymbol *arrayDefined = visit(ctx->list());
         return pair<string, ArraySymbol *>(ctx->TK_IDENT()->getText(), arrayDefined);
     }
+
+
 
     antlrcpp::Any visitComprehensionList(CSP2SATParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);

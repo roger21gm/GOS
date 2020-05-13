@@ -37,6 +37,10 @@ public:
     }
 
 
+    bool existsInScope(const string &name) override {
+        return symbols.find(name) != symbols.end();
+    }
+
 private:
     Scope * enclosingScope;
 protected:

@@ -60,7 +60,15 @@ public:
             ) {}
 };
 
-
+class CSP2SATAlreadyExistException : public CSP2SATException {
+public:
+    CSP2SATAlreadyExistException(int line, int pos, string expr) :
+            CSP2SATException(
+                    line,
+                    pos,
+                    "\"" + expr + "\" already exists"
+            ) {}
+};
 
 class CSP2SATTypeNotMatchException : public CSP2SATException {
 public:

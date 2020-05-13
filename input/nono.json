@@ -1,0 +1,72 @@
+{
+    "boardSize" : 8,
+    "maxNonos" : 3,
+    "rowNonos" : [
+        {
+            "values" : [4,0,0],
+            "sumNonos" : 4
+        },
+        {
+            "values" : [2,2,0],
+            "sumNonos" : 4
+        },
+        {
+            "values" : [2,2,0],
+            "sumNonos" : 4
+        },
+        {
+            "values" : [8,0,0],
+            "sumNonos" : 8
+        },
+        {
+            "values" : [2,0,0],
+            "sumNonos" : 2
+        },
+        {
+            "values" : [2,2,0],
+            "sumNonos" : 4
+        },
+        {
+            "values" : [2,2,0],
+            "sumNonos" : 4
+        },
+        {
+            "values" : [4,0,0],
+            "sumNonos" : 4
+        }
+    ],
+    "colNonos" : [
+        {
+            "values" : [4,0,0],
+            "sumNonos" : 4
+        },
+        {
+            "values" : [6,0,0],
+            "sumNonos" : 6
+        },
+        {
+            "values" : [2,1,2],
+            "sumNonos" : 5
+        },
+        {
+            "values" : [1,1,1],
+            "sumNonos" : 3
+        },
+        {
+            "values" : [1,1,1],
+            "sumNonos" : 3
+        },
+        {
+            "values" : [2,1,2],
+            "sumNonos" : 5
+        },
+        {
+            "values" : [3,2,0],
+            "sumNonos" : 5
+        },
+        {
+            "values" : [2,1,0],
+            "sumNonos" : 3
+        }
+    ]
+}

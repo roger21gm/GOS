@@ -38,6 +38,10 @@ public:
     map<string, Symbol*> getScopeSymbols() override {
         return this->fields;
     }
+
+    bool existsInScope(const string &name) override {
+        return fields.find(name) != fields.end();
+    }
 };
 
 

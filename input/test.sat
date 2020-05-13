@@ -1,0 +1,11 @@
+entities:
+    A {
+        var a;
+    };
+
+viewpoint:
+    var a;
+    param int b;
+    A c[10];
+
+constraints:

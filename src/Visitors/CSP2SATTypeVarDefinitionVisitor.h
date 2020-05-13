@@ -56,9 +56,17 @@ public:
     antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
 
         CSP2SATBaseVisitor::visitVarDefinition(ctx);
-
         Symbol *newVar;
         string name = ctx->name->getText();
+
+        if(this->currentScope->existsInScope(name)) {
+            throw CSP2SATAlreadyExistException(
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine(),
+                    name
+            );
+        }
+
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
@@ -83,6 +91,15 @@ public:
         Symbol *newConst;
 
         string name = ctx->name->getText();
+
+        if(this->currentScope->existsInScope(name)) {
+            throw CSP2SATAlreadyExistException(
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine(),
+                    name
+            );
+        }
+
 
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             vector<int> dimentions;

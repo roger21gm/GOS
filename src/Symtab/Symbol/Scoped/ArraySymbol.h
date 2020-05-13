@@ -47,8 +47,17 @@ public:
         }
         else
             return enclosingScope->resolve(name);
-
     }
+
+    bool existsInScope(const string &name) override {
+        bool isNumber = Helpers::check_number(name);
+        if(isNumber){
+            int index = stoi(name);
+            return index < size;
+        }
+        else return false;
+    }
+
 
     map<string, Symbol*> getScopeSymbols() override {
         map<string, Symbol*> scopeSymbols;

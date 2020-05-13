@@ -9,6 +9,8 @@ viewpoint:
     var x[10];
 
 constraints:
-    &&([(x[i] & a) | c & d| i in 0..9]);
+    EK([!x[i] | i in 0..9], 6);
+    ALO([x[i] | i in 0..9]);
+    ALK([x[i] | i in 0..9], 6);
 
 

@@ -14,6 +14,7 @@
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
 #include "Input/Param.h"
 #include "../Errors/CSP2SATExceptionsRepository.h"
+#include "../Symtab/Symbol/formulaReturn.h"
 
 class Utils {
 
@@ -204,14 +205,22 @@ public:
     static vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol *variableArray) {
         vector<literal> result = vector<literal>();
         map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
-        if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+        if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
+          || variableArray->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
             for (auto currElem : arrayElems) {
-                VariableSymbol *currVar = (VariableSymbol *) currElem.second;
-                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+                if(currElem.second->type->getTypeIndex() == SymbolTable::tVarBool){
+                    result.push_back(((VariableSymbol *) currElem.second)->getVar());
+                }
+                else {
+                    formulaReturn * formula = (formulaReturn *) currElem.second;
+                    if(formula->clauses.size() == 1 && formula->clauses.front().v.size() == 1){
+                        result.push_back(formula->clauses.front().v.front());
+                    }
+                }
             }
         } else {
-            cerr << "It must be a literal array" << endl;
-            throw CSP2SATException(0, 0, "");
+            //cerr << "It must be a literal array" << endl;
+            throw CSP2SATException(0, 0,variableArray->getFullName() + " must be a list of literals");
         }
         return result;
     }

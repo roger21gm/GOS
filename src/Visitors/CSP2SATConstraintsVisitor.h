@@ -455,12 +455,10 @@ public:
             return nullptr;
         }
         catch (CSP2SATException &e) {
-            throw CSP2SATInvalidExpressionTypeException(
+            throw CSP2SATException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
-                    ctx->list()->getText(),
-                    "list<int>",
-                    "list<literal>"
+                    ctx->list()->getText() + " must be a list of literals"
             );
         }
     }

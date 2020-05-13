@@ -9,8 +9,9 @@ viewpoint:
     var x[10];
 
 constraints:
-    EK([!x[i] | i in 0..9], 6);
-    ALO([x[i] | i in 0..9]);
-    ALK([x[i] | i in 0..9], 6);
+   a;
+
+output:
+    a;
 
 

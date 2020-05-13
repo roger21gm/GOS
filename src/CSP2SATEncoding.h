@@ -16,6 +16,7 @@ class CSP2SATEncoding : public Encoding {
 private:
     SMTFormula *f;
     SymbolTable *st;
+    bool sat = false;
 
     void fillModelValuesResult(Scope *currentScope, const EncodedFormula formula, const vector<bool> & bmodel) {
         map<string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
@@ -92,7 +93,12 @@ public:
     }
 
     void setModel(const EncodedFormula &ef, int lb, int ub, const vector<bool> &bmodel, const vector<int> &imodel) override {
+        sat = true;
         fillModelValuesResult(this->st->gloabls, ef, bmodel);
+    }
+
+    bool isSat(){
+        return sat;
     }
 };
 

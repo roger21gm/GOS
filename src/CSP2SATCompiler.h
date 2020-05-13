@@ -77,10 +77,16 @@ public:
                 BasicController c(sargs, encoding,false, 0, 0);
                 c.run();
 
-                CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
-                bool customOutput = runVisitor(outputVisitor, modelStr);
-                if(!customOutput)
-                    encoding->printModelSolution(cout);
+                if(encoding->isSat()){
+                    CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
+                    bool customOutput = runVisitor(outputVisitor, modelStr);
+                    if(!customOutput)
+                        encoding->printModelSolution(cout);
+                }
+                else{
+                    cout << "UNSAT" << endl;
+                }
+
             }
             else {
                 cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;

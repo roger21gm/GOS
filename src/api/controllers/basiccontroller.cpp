@@ -111,7 +111,7 @@ void BasicController::onProvedOptimum(int opt){
 }
 
 void BasicController::onProvedSAT(){
-	std::cout << "s SATISFIABLE" << std::endl;
+	std::cout << "s SATISFIABLE" << std::endl << std::endl;
 }
 
 void BasicController::onProvedUNSAT(){

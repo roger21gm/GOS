@@ -83,10 +83,6 @@ public:
                     if(!customOutput)
                         encoding->printModelSolution(cout);
                 }
-                else{
-                    cout << "UNSAT" << endl;
-                }
-
             }
             else {
                 cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;

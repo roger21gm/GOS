@@ -9,7 +9,7 @@ viewpoint:
     var x[10];
 
 constraints:
-   a;
+   &&([a, !a]);
 
 output:
     a;

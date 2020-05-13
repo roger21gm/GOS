@@ -1,14 +1,14 @@
-entities:
-    A {
-        var a;
-    };
-
 viewpoint:
     var a;
+    var c;
+    var d;
+    var e;
+    var f;
+    var g;
     param int b;
-    A c[10];
+    var x[10];
 
 constraints:
-   
+    &&([(x[i] & a) | c & d| i in 0..9]);
 
 

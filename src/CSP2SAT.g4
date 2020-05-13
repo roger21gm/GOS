@@ -183,7 +183,8 @@ list: min=expr TK_RANGE_DOTS max=expr #rangList
 
 
 listResultExpr:
-    | varAcc=constraint_literal
+      constraint_expression
+    | varAcc=varAccess
     | resExpr=expr
     | string;
 

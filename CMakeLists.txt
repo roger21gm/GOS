@@ -76,6 +76,6 @@ add_executable(
         src/api/util/errors.cpp
         src/Errors/CSP2SATInputExceptionsRepository.h
         src/Visitors/Output/CSP2SATOutputVisitor.h
-        src/Symtab/Symbol/StringSymbol.h)
+        src/Symtab/Symbol/StringSymbol.h src/Symtab/Symbol/formulaReturn.h)
 target_link_libraries(CSP2SAT antlr4_static)
 

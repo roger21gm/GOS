@@ -15,6 +15,7 @@
 #include "../Errors/CSP2SATExceptionsRepository.h"
 #include "../Symtab/Scope/LocalScope.h"
 #include "../Symtab/Symbol/StringSymbol.h"
+#include "../Symtab/Symbol/formulaReturn.h"
 
 
 using namespace CSP2SAT;
@@ -364,21 +365,6 @@ public:
         }
     }
 
-    antlrcpp::Any visitListResultExpr(CSP2SATParser::ListResultExprContext *ctx) override {
-        Symbol *result = nullptr;
-        if (ctx->varAcc && ctx->varAcc->constraint_base()->varAccess()) {
-            result = visit(ctx->varAcc->constraint_base()->varAccess());
-            if (ctx->varAcc->TK_CONSTRAINT_NOT()) {
-                if (result->type->getTypeIndex() == SymbolTable::tVarBool) {
-                    result = new VariableSymbol("!" + result->name, !((VariableSymbol *) result)->getVar());
-                }
-            }
-        } else {
-            throw;
-        }
-        return result;
-    }
-
     antlrcpp::Any visitRangList(CSP2SATParser::RangListContext *ctx) override {
 
         Value *minRange = visit(ctx->min);
@@ -461,9 +447,13 @@ public:
                 valueResult->setValue(val);
                 exprRes = valueResult;
             }
-            else {
+            else if (ctx->listResultExpr()->string()){
                 string currStr = visit(ctx->listResultExpr()->string());
                 exprRes = new StringSymbol(currStr);
+            }
+            else {
+                formulaReturn * formula = visit(ctx->listResultExpr()->constraint_expression());
+                exprRes = (Symbol*) formula;
             }
 
             if (newList == nullptr)
@@ -475,7 +465,6 @@ public:
 
             if (condition)
                 newList->add(exprRes);
-
         }
         this->currentScope = listLocalScope->getEnclosingScope();
         return newList;
@@ -512,9 +501,12 @@ public:
                 curr = new AssignableSymbol(to_string(rand()),
                                             exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
                 ((AssignableSymbol *) curr)->setValue(exprVal);
-            } else {
+            } else if (currVal->string()) {
                 string currStr = visit(currVal->string());
                 curr = new StringSymbol(currStr);
+            } else {
+                formulaReturn * a =  visit(currVal->constraint_expression());
+                curr = (Symbol*) a;
             }
 
             if (resultList == nullptr) {

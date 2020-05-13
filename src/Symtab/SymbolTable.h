@@ -27,12 +27,14 @@ public:
     static const int tBool = 3;
     static const int tVarBool = 4;
     static const int tString = 5;
+    static const int tFormula = 5;
     GlobalScope * gloabls;
 
     static BuiltInTypeSymbol *_integer;
     static BuiltInTypeSymbol *_boolean;
     static BuiltInTypeSymbol *_varbool;
     static BuiltInTypeSymbol *_string;
+    static BuiltInTypeSymbol *_formula;
 
     SymbolTable(){
         gloabls = new GlobalScope();
@@ -40,6 +42,7 @@ public:
         this->gloabls->define(_boolean);
         this->gloabls->define(_varbool);
         this->gloabls->define(_string);
+        this->gloabls->define(_formula);
     }
 
     void showAllDefinedVariables(){
@@ -95,6 +98,7 @@ BuiltInTypeSymbol * SymbolTable::_integer = new BuiltInTypeSymbol("int", SymbolT
 BuiltInTypeSymbol * SymbolTable::_boolean = new BuiltInTypeSymbol("bool", SymbolTable::tBool);
 BuiltInTypeSymbol * SymbolTable::_varbool = new BuiltInTypeSymbol("varbool", SymbolTable::tVarBool);
 BuiltInTypeSymbol * SymbolTable::_string = new BuiltInTypeSymbol("string", SymbolTable::tString);
+BuiltInTypeSymbol * SymbolTable::_formula = new BuiltInTypeSymbol("formula", SymbolTable::tFormula);
 bool SymbolTable::entityDefinitionBlock = false;
 bool SymbolTable::errors = false;
 

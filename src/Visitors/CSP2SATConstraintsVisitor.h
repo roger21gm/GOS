@@ -5,25 +5,8 @@
 #ifndef CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
 #define CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
 
+#include "../Symtab/Symbol/formulaReturn.h"
 
-struct clausesReturn {
-    clausesReturn() {}
-
-    clausesReturn(clause claus) {
-        clauses.push_back(claus);
-    }
-
-    void addClause(clause claus) {
-        clauses.push_back(claus);
-    }
-
-    void addClauses(vector<clause> claus) {
-        for (clause curr : claus)
-            clauses.push_back(curr);
-    }
-
-    vector<clause> clauses;
-};
 
 class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
 public:
@@ -85,7 +68,7 @@ public:
 
     antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
         if (ctx->constraint_expression()) {
-            clausesReturn *result = visit(ctx->constraint_expression());
+            formulaReturn *result = visit(ctx->constraint_expression());
             for (clause clause : result->clauses)
                 this->_f->addClause(clause);
         } else visit(ctx->constraint_aggreggate_op());
@@ -94,7 +77,7 @@ public:
     }
 
     antlrcpp::Any visitConstraint_base(CSP2SATParser::Constraint_baseContext *ctx) override {
-        clausesReturn *clause = new clausesReturn();
+        formulaReturn *clause = new formulaReturn();
         if (ctx->varAccess()) {
             Symbol *valSym = visit(ctx->varAccess());
             if (valSym != nullptr && valSym->type && valSym->type->getTypeIndex() == SymbolTable::tVarBool) {
@@ -112,16 +95,16 @@ public:
             else
                 clause->addClause(this->_f->falseVar());
         } else {
-            clausesReturn *innerParenClauses = visit(ctx->constraint_expression());
+            formulaReturn *innerParenClauses = visit(ctx->constraint_expression());
             clause->addClauses(innerParenClauses->clauses);
         }
         return clause;
     }
 
     antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {
-        clausesReturn *clauses = visit(ctx->constraint_base());
+        formulaReturn *clauses = visit(ctx->constraint_base());
         if (ctx->TK_CONSTRAINT_NOT()) {
-            clausesReturn *result = new clausesReturn();
+            formulaReturn *result = new formulaReturn();
 
             if (clauses->clauses.size() == 1) {
                 for (auto literal : clauses->clauses.front().v) {
@@ -149,9 +132,9 @@ public:
     }
 
     antlrcpp::Any visitCAndExpression(CSP2SATParser::CAndExpressionContext *ctx) override {
-        clausesReturn *newClauses = new clausesReturn();
+        formulaReturn *newClauses = new formulaReturn();
         for (int i = 0; i < ctx->constraint_literal().size(); i++) {
-            clausesReturn *currClauses = visit(ctx->constraint_literal(i));
+            formulaReturn *currClauses = visit(ctx->constraint_literal(i));
             newClauses->addClauses(currClauses->clauses);
         }
         return newClauses;
@@ -159,12 +142,17 @@ public:
 
     antlrcpp::Any visitCAndList(CSP2SATParser::CAndListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
-        clausesReturn *newClauses = new clausesReturn();
-        if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+        formulaReturn *newClauses = new formulaReturn();
+        if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
+            || list->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
             map<string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
-                newClauses->addClause(((VariableSymbol *) it->second)->getVar());
+                if(it->second->type->getTypeIndex() == SymbolTable::tVarBool)
+                    newClauses->addClause(((VariableSymbol *) it->second)->getVar());
+                else {
+                    newClauses->addClauses(((formulaReturn*) it->second)->clauses);
+                }
                 it++;
             }
         } else {
@@ -180,15 +168,15 @@ public:
 
 
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
-        clausesReturn *result = visit(ctx->constraint_and(0));
+        formulaReturn *result = visit(ctx->constraint_and(0));
 
 
         if (ctx->constraint_and().size() > 1) {
-            vector<clausesReturn *> andClauses;
-            clausesReturn *newClauses = new clausesReturn();
+            vector<formulaReturn *> andClauses;
+            formulaReturn *newClauses = new formulaReturn();
             clause orClause;
             for (int i = 0; i < ctx->constraint_and().size(); i++) {
-                clausesReturn *currClauses = visit(ctx->constraint_and(i));
+                formulaReturn *currClauses = visit(ctx->constraint_and(i));
                 if (currClauses->clauses.size() == 1)
                     orClause |= currClauses->clauses.front();
                 else
@@ -229,11 +217,19 @@ public:
     antlrcpp::Any visitCOrList(CSP2SATParser::COrListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
         clause orClause;
-        if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool) {
+        if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
+            || list->getElementsType()->getTypeIndex() == SymbolTable::tFormula
+        ) {
             map<string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
-                orClause |= ((VariableSymbol *) it->second)->getVar();
+                if(it->second->type->getTypeIndex() == SymbolTable::tVarBool)
+                    orClause |= ((VariableSymbol *) it->second)->getVar();
+                else {
+                    for (auto clause : ((formulaReturn *) it->second)->clauses) {
+                        orClause |= clause;
+                    }
+                }
                 it++;
             }
         } else {
@@ -241,11 +237,11 @@ public:
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
                     ctx->getText(),
-                    "Constraint OR list elements must be literals"
+                    "Constraint OR list elements must be propositional formulas"
             );
         }
 
-        clausesReturn *newClauses = new clausesReturn();
+        formulaReturn *newClauses = new formulaReturn();
         newClauses->addClause(orClause);
 
         return newClauses;
@@ -253,15 +249,15 @@ public:
 
 
     antlrcpp::Any visitConstraint_implication(CSP2SATParser::Constraint_implicationContext *ctx) override {
-        clausesReturn *result = visit(ctx->constraint_or(0));
+        formulaReturn *result = visit(ctx->constraint_or(0));
 
         if (ctx->constraint_or().size() > 1) {
-            clausesReturn *leftExpr = result;
+            formulaReturn *leftExpr = result;
 
             for (int i = 1; i < ctx->constraint_or().size(); ++i) {
-                clausesReturn *rightExpr = visit(ctx->constraint_or(i));
+                formulaReturn *rightExpr = visit(ctx->constraint_or(i));
                 if (ctx->implication_operator(i - 1)->getText() == "<-") {
-                    clausesReturn *aux = rightExpr;
+                    formulaReturn *aux = rightExpr;
                     rightExpr = leftExpr;
                     leftExpr = aux;
                 }
@@ -280,9 +276,9 @@ public:
                             );
                         }
                     }
-                    leftExpr = new clausesReturn(result);
+                    leftExpr = new formulaReturn(result);
                 } else if (leftExpr->clauses.size() == 1 && leftExpr->clauses.front().v.size() == 1) {
-                    clausesReturn *res = new clausesReturn();
+                    formulaReturn *res = new formulaReturn();
                     for (auto andLiteral : rightExpr->clauses) {
                         if (andLiteral.v.size() == 1) {
                             res->addClause(andLiteral | !leftExpr->clauses.front().v.front());
@@ -311,15 +307,15 @@ public:
 
     antlrcpp::Any
     visitConstraint_double_implication(CSP2SATParser::Constraint_double_implicationContext *ctx) override {
-        clausesReturn *res = visit(ctx->constraint_implication(0));
+        formulaReturn *res = visit(ctx->constraint_implication(0));
 
         if (ctx->constraint_implication().size() == 2) {
-            clausesReturn *lExp = res;
-            clausesReturn *rExp = visit(ctx->constraint_implication(1));
+            formulaReturn *lExp = res;
+            formulaReturn *rExp = visit(ctx->constraint_implication(1));
 
 
             if (!(lExp->clauses.size() == 1 && lExp->clauses.front().v.size() == 1)) {
-                clausesReturn *aux = rExp;
+                formulaReturn *aux = rExp;
                 rExp = lExp;
                 lExp = aux;
             }
@@ -328,7 +324,7 @@ public:
 
                 literal lLit = lExp->clauses.front().v.front();
 
-                clausesReturn *result = new clausesReturn();
+                formulaReturn *result = new formulaReturn();
 
                 if (rExp->clauses.size() == 1) { // OR left side
                     for (auto currLit : rExp->clauses.front().v) {

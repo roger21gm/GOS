@@ -30,5 +30,16 @@ public:
 };
 
 
+class CSP2SATBadCardinalityConstraint : public CSP2SATException {
+public:
+    CSP2SATBadCardinalityConstraint(int line, int pos, const string &name) :
+            CSP2SATException(
+                    line,
+                    pos,
+                    name + ": Bad cardinality input"
+            ) {}
+};
+
+
 
 #endif //CSP2SAT_CSP2SATINPUTEXCEPTIONSREPOSITORY_H

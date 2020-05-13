@@ -87,8 +87,11 @@ TK_CONSTRAINT_AND: '&';
 TK_CONSTRAINT_NOT: '!';
 
 TK_CONSTRAINT_AGG_EK : 'EK';
+TK_CONSTRAINT_AGG_EO : 'EO';
 TK_CONSTRAINT_AGG_ALK : 'ALK';
+TK_CONSTRAINT_AGG_ALO : 'ALO';
 TK_CONSTRAINT_AGG_AMK : 'AMK';
+TK_CONSTRAINT_AGG_AMO : 'AMO';
 
 TK_IDENT: ( ('a'..'z' | 'A'..'Z' | '_')('a'..'z' | 'A'..'Z' | '_' | '0'..'9')* );
 
@@ -209,8 +212,15 @@ constraint_base:
     | TK_BOOLEAN_VALUE
     | TK_LPAREN constraint_expression TK_RPAREN;
 
-aggregate_op: TK_CONSTRAINT_AGG_EK | TK_CONSTRAINT_AGG_AMK | TK_CONSTRAINT_AGG_ALK;
-constraint_aggreggate_op: aggregate_op TK_LPAREN list TK_COMMA param=expr TK_RPAREN;
+aggregate_op:
+    TK_CONSTRAINT_AGG_EK
+    | TK_CONSTRAINT_AGG_EO
+    | TK_CONSTRAINT_AGG_AMK
+    | TK_CONSTRAINT_AGG_AMO
+    | TK_CONSTRAINT_AGG_ALK
+    | TK_CONSTRAINT_AGG_ALO;
+    
+constraint_aggreggate_op: aggregate_op TK_LPAREN list (TK_COMMA param=expr)? TK_RPAREN;
 
 
 //OUTPUT

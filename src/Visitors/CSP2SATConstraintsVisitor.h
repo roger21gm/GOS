@@ -415,18 +415,47 @@ public:
     }
 
     antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
-        Value *k = visit(ctx->param);
+        Value *k = nullptr;
+        if(ctx->param){
+            k = visit(ctx->param);
+        }
         ArraySymbol *list = visit(ctx->list());
 
         try {
             vector<literal> literalList = Utils::getLiteralVectorFromVariableArraySymbol(list);
-            if (ctx->aggregate_op()->getText() == "EK") {
-                this->_f->addEK(literalList, k->getRealValue());
-            } else if (ctx->aggregate_op()->getText() == "ALK") {
-                this->_f->addALK(literalList, k->getRealValue());
-            } else {
-                this->_f->addAMK(literalList, k->getRealValue());
+            if(k != nullptr) {
+                if (ctx->aggregate_op()->getText() == "EK") {
+                    this->_f->addEK(literalList, k->getRealValue());
+                } else if (ctx->aggregate_op()->getText() == "ALK") {
+                    this->_f->addALK(literalList, k->getRealValue());
+                } else if (ctx->aggregate_op()->getText() == "AMK"){
+                    this->_f->addAMK(literalList, k->getRealValue());
+                }
+                else {
+                    throw CSP2SATBadCardinalityConstraint(
+                            ctx->start->getLine(),
+                            ctx->start->getCharPositionInLine(),
+                            ctx->getText()
+                    );
+                }
             }
+            else {
+                if (ctx->aggregate_op()->getText() == "EO") {
+                    this->_f->addEO(literalList);
+                } else if (ctx->aggregate_op()->getText() == "ALO") {
+                    this->_f->addALO(literalList);
+                } else if (ctx->aggregate_op()->getText() == "AMO"){
+                    this->_f->addAMO(literalList);
+                }
+                else {
+                    throw CSP2SATBadCardinalityConstraint(
+                            ctx->start->getLine(),
+                            ctx->start->getCharPositionInLine(),
+                            ctx->getText()
+                    );
+                }
+            }
+
             return nullptr;
         }
         catch (CSP2SATException &e) {

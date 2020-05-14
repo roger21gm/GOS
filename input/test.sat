@@ -1,17 +1,10 @@
 viewpoint:
-    var a;
-    var c;
-    var d;
-    var e;
-    var f;
-    var g;
-    param int b;
-    var x[10];
+    var x[3][5];
 
 constraints:
-   &&([a, !a]);
+    forall(i in 1..5, j in [i+1, i+5, i+4]){
+        x[i][j];
+    };
 
-output:
-    a;
 
 

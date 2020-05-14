@@ -4,35 +4,43 @@
     "rowNonos" : [
         {
             "values" : [4,0,0],
-            "sumNonos" : 4
+            "sumNonos" : 4,
+            "numNonos": 1
         },
         {
             "values" : [2,2,0],
-            "sumNonos" : 4
+            "sumNonos" : 4,
+            "numNonos": 2
         },
         {
             "values" : [2,2,0],
-            "sumNonos" : 4
+            "sumNonos" : 4,
+            "numNonos": 2
         },
         {
             "values" : [8,0,0],
-            "sumNonos" : 8
+            "sumNonos" : 8,
+            "numNonos": 1
         },
         {
             "values" : [2,0,0],
-            "sumNonos" : 2
+            "sumNonos" : 2,
+            "numNonos": 1
         },
         {
             "values" : [2,2,0],
-            "sumNonos" : 4
+            "sumNonos" : 4,
+            "numNonos": 2
         },
         {
             "values" : [2,2,0],
-            "sumNonos" : 4
+            "sumNonos" : 4,
+            "numNonos": 2
         },
         {
             "values" : [4,0,0],
-            "sumNonos" : 4
+            "sumNonos" : 4,
+            "numNonos": 1
         }
     ],
     "colNonos" : [

@@ -27,11 +27,11 @@ public:
     }
 
     antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
-        for(auto constraint : ctx->constraintDefinition()){
+        for (auto constraint : ctx->constraintDefinition()) {
             try {
                 visit(constraint);
             }
-            catch (CSP2SATException & e) {
+            catch (CSP2SATException &e) {
                 cerr << e.getErrorMessage() << endl;
             }
         }
@@ -40,18 +40,16 @@ public:
 
     antlrcpp::Any
     visitLocalConstraintDefinitionBlock(CSP2SATParser::LocalConstraintDefinitionBlockContext *ctx) override {
-        try{
-            for(auto constraint : ctx->constraintDefinition()){
+        try {
+            for (auto constraint : ctx->constraintDefinition()) {
                 visit(constraint);
             }
         }
-        catch (CSP2SATException & e) {
+        catch (CSP2SATException &e) {
             throw e;
         }
         return nullptr;
     }
-
-
 
 
     antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
@@ -148,10 +146,10 @@ public:
             map<string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
-                if(it->second->type->getTypeIndex() == SymbolTable::tVarBool)
+                if (it->second->type->getTypeIndex() == SymbolTable::tVarBool)
                     newClauses->addClause(((VariableSymbol *) it->second)->getVar());
                 else {
-                    newClauses->addClauses(((formulaReturn*) it->second)->clauses);
+                    newClauses->addClauses(((formulaReturn *) it->second)->clauses);
                 }
                 it++;
             }
@@ -219,11 +217,11 @@ public:
         clause orClause;
         if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
             || list->getElementsType()->getTypeIndex() == SymbolTable::tFormula
-        ) {
+                ) {
             map<string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
-                if(it->second->type->getTypeIndex() == SymbolTable::tVarBool)
+                if (it->second->type->getTypeIndex() == SymbolTable::tVarBool)
                     orClause |= ((VariableSymbol *) it->second)->getVar();
                 else {
                     for (auto clause : ((formulaReturn *) it->second)->clauses) {
@@ -364,18 +362,10 @@ public:
     }
 
     antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
-
         auto *forallLocalScope = new LocalScope(this->currentScope);
+        vector<map<string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
 
-        map<string, ArraySymbol *> ranges;
         this->currentScope = forallLocalScope;
-        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
-            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
-            ranges.insert(currAuxVar);
-        }
-
-        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
-
         for (const auto &assignation: possibleAssignations) {
             for (const auto &auxVarAssign : assignation)
                 forallLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
@@ -412,38 +402,35 @@ public:
 
     antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
         Value *k = nullptr;
-        if(ctx->param){
+        if (ctx->param) {
             k = visit(ctx->param);
         }
         ArraySymbol *list = visit(ctx->list());
 
         try {
             vector<literal> literalList = Utils::getLiteralVectorFromVariableArraySymbol(list);
-            if(k != nullptr) {
+            if (k != nullptr) {
                 if (ctx->aggregate_op()->getText() == "EK") {
                     this->_f->addEK(literalList, k->getRealValue());
                 } else if (ctx->aggregate_op()->getText() == "ALK") {
                     this->_f->addALK(literalList, k->getRealValue());
-                } else if (ctx->aggregate_op()->getText() == "AMK"){
+                } else if (ctx->aggregate_op()->getText() == "AMK") {
                     this->_f->addAMK(literalList, k->getRealValue());
-                }
-                else {
+                } else {
                     throw CSP2SATBadCardinalityConstraint(
                             ctx->start->getLine(),
                             ctx->start->getCharPositionInLine(),
                             ctx->getText()
                     );
                 }
-            }
-            else {
+            } else {
                 if (ctx->aggregate_op()->getText() == "EO") {
                     this->_f->addEO(literalList);
                 } else if (ctx->aggregate_op()->getText() == "ALO") {
                     this->_f->addALO(literalList);
-                } else if (ctx->aggregate_op()->getText() == "AMO"){
+                } else if (ctx->aggregate_op()->getText() == "AMO") {
                     this->_f->addAMO(literalList);
-                }
-                else {
+                } else {
                     throw CSP2SATBadCardinalityConstraint(
                             ctx->start->getLine(),
                             ctx->start->getCharPositionInLine(),

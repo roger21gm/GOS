@@ -26,7 +26,7 @@ constraints:
         AMK([p[i+l][j+g][k] | l in 0..2, g in 0..2], 1);
     };
 
-    &&([p[0][0][0], ![0][0][0]);
+
 
     //Inicialitzem els valors fixats del sudoku.
     forall(i in 0..8, j in 0..8){

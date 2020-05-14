@@ -2,48 +2,31 @@ entities:
     nono {
         param int values[maxNonos];
         param int sumNonos;
+        param int numNonos;
     };
 
 viewpoint:
     param int boardSize;
     param int maxNonos;
     nono rowNonos[boardSize];
-    nono colNonos[boardSize];
+    //nono colNonos[boardSize];
 
 
     var x[boardSize][boardSize];
     var blockPosRow[boardSize][maxNonos][boardSize];
-    var blockPosCol[boardSize][maxNonos][boardSize];
+    //var blockPosCol[boardSize][maxNonos][boardSize];
 
 
 constraints:
 
-    forall(i in 0..boardSize-1){
-        //EK(x[i][_], rowNonos[i].sumNonos);
-        //EK(x[_][i], colNonos[i].sumNonos);
-        forall(b in 0..maxNonos-1){
-            if(rowNonos[i].values[b] != 0){
-                EK(blockPosRow[i][b][_], rowNonos[i].values[b]);
-            };
-        };
+    forall(i in 0..boardSize-1, j in i..boardSize-1){
+        EK(x[i][_], rowNonos[i].sumNonos);
+        //EK([blockPosRow[i][b][j] | j in 0..boardSize-1, b in 0..maxNonos-1], rowNonos[i].numNonos);
     };
-
-    forall(i in 0..boardSize-1){ //Per cada fila
-        forall(j in 0..boardSize-1){
-            forall(b in 0..maxNonos-1){
-                if(rowNonos[i].values[b] != 0 and j+rowNonos[i].values[b] < boardSize) {
-                    if(j+rowNonos[i].values[b] + 1 < boardSize){
-                        blockPosRow[i][b][j] <-> ((&&([x[i][k] | k in j..j+rowNonos[i].values[b]-1])) & !x[i][j+rowNonos[i].values[b]]);
-                    }
-                    else {
-                        blockPosRow[i][b][j] <-> (&&([x[i][k] | k in j..j+rowNonos[i].values[b]-1]));
-                    };
-                };
-            };
-        };
-    };
-
 
 
 output:
     [ (x[i][j] ? "X" : " ") ++ " " ++ (j==boardSize-1 ? "\n" : "") | i in 0..boardSize-1, j in 0..boardSize-1];
+
+    "True nonos : ";
+    [blockPosRow[i][b][j] ? ("x["++ i ++ "][" ++ b ++ "][" ++ j ++ "]\n") : "" | i in 0..boardSize-1, b in 0..maxNonos-1, j in 0..boardSize-1];

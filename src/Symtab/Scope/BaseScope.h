@@ -18,6 +18,10 @@ public:
         symbols[sym->getName()] = sym;
     }
 
+    void define(string name, Symbol *sym) {
+        symbols[name] = sym;
+    }
+
     explicit BaseScope(Scope *parent) : enclosingScope(parent) {}
 
     Scope * getEnclosingScope() override {

@@ -373,7 +373,7 @@ public:
         int minValue = minRange->getRealValue();
         int maxValue = maxRange->getRealValue();
 
-        if (minValue < maxValue) {
+        if (minValue <= maxValue) {
             ArraySymbol *result = new ArraySymbol(
                     "auxRangList",
                     this->currentScope,
@@ -403,16 +403,10 @@ public:
 
     antlrcpp::Any visitComprehensionList(CSP2SATParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);
-        map<string, ArraySymbol *> ranges;
-        this->currentScope = listLocalScope;
-        for (int i = 0; i < ctx->auxiliarListAssignation().size(); i++) {
-            pair<string, ArraySymbol *> currAuxVar = visit(ctx->auxiliarListAssignation(i));
-            ranges.insert(currAuxVar);
-        }
-
-        vector<map<string, Symbol *>> possibleAssignations = Utils::getAllCombinations(ranges);
+        vector<map<string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
         ArraySymbol *newList = nullptr;
 
+        this->currentScope = listLocalScope;
         for (const auto &assignation: possibleAssignations) {
             for (const auto &auxVarAssign : assignation)
                 listLocalScope->assign(auxVarAssign.first, auxVarAssign.second);
@@ -465,6 +459,7 @@ public:
 
             if (condition)
                 newList->add(exprRes);
+
         }
         this->currentScope = listLocalScope->getEnclosingScope();
         return newList;
@@ -530,6 +525,28 @@ public:
             }
         }
         return resultList;
+    }
+
+protected:
+    vector<map<string, Symbol *>> getAllCombinations(vector<CSP2SAT::CSP2SATParser::AuxiliarListAssignationContext *> aux){
+        vector<map<string, Symbol *>> combinations = vector<map<string, Symbol *>>();
+        LocalScope * combScope = new LocalScope(this->currentScope);
+        getAllCombinations(0, aux, combinations, combScope);
+        return combinations;
+    }
+
+    void getAllCombinations(int idx, vector<CSP2SAT::CSP2SATParser::AuxiliarListAssignationContext *> aux, vector<map<string, Symbol *>> & combinations, LocalScope * combinationsScope) {
+        if (idx == aux.size()) {
+            combinations.push_back(combinationsScope->getScopeSymbols());
+            return;
+        }
+        this->currentScope = combinationsScope;
+        pair<string, ArraySymbol *> currArr = visit(aux[idx]);
+        for (int i = 0; i < currArr.second->getSize(); i++) {
+            combinationsScope->define(currArr.first, currArr.second->resolve(to_string(i)));
+            getAllCombinations(idx + 1, aux, combinations, combinationsScope);
+        }
+        this->currentScope = combinationsScope->getEnclosingScope();
     }
 };
 

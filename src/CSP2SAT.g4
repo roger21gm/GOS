@@ -198,13 +198,19 @@ constraint_double_implication: constraint_implication (TK_OP_DOUBLE_IMPLIC const
 implication_operator: (TK_OP_IMPLIC_L | TK_OP_IMPLIC_R);
 constraint_implication: constraint_or (implication_operator constraint_or)*;
 
-constraint_or:
-    constraint_and (TK_CONSTRAINT_OR_PIPE constraint_and)*                   #cOrExpression
-    | TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN   #cOrList;
 
-constraint_and:
-      constraint_literal (TK_CONSTRAINT_AND  constraint_literal)*    #cAndExpression
-    | TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN   #cAndList;
+constraint_or: constraint_or_2 (TK_CONSTRAINT_OR_PIPE constraint_or_2)* #cOrExpression;
+
+constraint_or_2:
+    TK_CONSTRAINT_OR_PIPE TK_CONSTRAINT_OR_PIPE TK_LPAREN list TK_RPAREN #cOrList
+    | constraint_and #cAnd;
+
+
+constraint_and: constraint_and_2 (TK_CONSTRAINT_AND  constraint_and_2)* #cAndExpression;
+
+constraint_and_2:
+    TK_CONSTRAINT_AND TK_CONSTRAINT_AND TK_LPAREN list TK_RPAREN #cAndList
+    | constraint_literal #cLit;
 
 constraint_literal: TK_CONSTRAINT_NOT? constraint_base;
 
@@ -220,7 +226,7 @@ aggregate_op:
     | TK_CONSTRAINT_AGG_AMO
     | TK_CONSTRAINT_AGG_ALK
     | TK_CONSTRAINT_AGG_ALO;
-    
+
 constraint_aggreggate_op: aggregate_op TK_LPAREN list (TK_COMMA param=expr)? TK_RPAREN;
 
 

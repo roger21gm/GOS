@@ -423,43 +423,43 @@ public:
                             Utils::getTypeName(SymbolTable::tBool)
                     );
                 }
-                condition = cond->getRealValue();
+                condition = cond->getRealValue() == 1;
             }
 
             Symbol *exprRes;
-            if (ctx->listResultExpr()->varAcc) {
-                this->accessingNotLeafVariable = true;
-                exprRes = visit(ctx->listResultExpr());
-                this->accessingNotLeafVariable = false;
-            }
-            else if (ctx->listResultExpr()->resExpr) {
-                Value *val = visit(ctx->listResultExpr()->resExpr);
-                auto *valueResult = new AssignableSymbol(
-                        to_string(rand()),
-                        val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
-                );
-                valueResult->setValue(val);
-                exprRes = valueResult;
-            }
-            else if (ctx->listResultExpr()->string()){
-                string currStr = visit(ctx->listResultExpr()->string());
-                exprRes = new StringSymbol(currStr);
-            }
-            else {
-                formulaReturn * formula = visit(ctx->listResultExpr()->constraint_expression());
-                exprRes = (Symbol*) formula;
-            }
+            if(condition){
+                if (ctx->listResultExpr()->varAcc) {
+                    this->accessingNotLeafVariable = true;
+                    exprRes = visit(ctx->listResultExpr());
+                    this->accessingNotLeafVariable = false;
+                }
+                else if (ctx->listResultExpr()->resExpr) {
+                    Value *val = visit(ctx->listResultExpr()->resExpr);
+                    auto *valueResult = new AssignableSymbol(
+                            to_string(rand()),
+                            val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
+                    );
+                    valueResult->setValue(val);
+                    exprRes = valueResult;
+                }
+                else if (ctx->listResultExpr()->string()){
+                    string currStr = visit(ctx->listResultExpr()->string());
+                    exprRes = new StringSymbol(currStr);
+                }
+                else {
+                    formulaReturn * formula = visit(ctx->listResultExpr()->constraint_expression());
+                    exprRes = (Symbol*) formula;
+                }
 
-            if (newList == nullptr)
-                newList = new ArraySymbol(
-                        "comprehensionListAux",
-                        listLocalScope,
-                        exprRes->type
-                );
+                if (newList == nullptr)
+                    newList = new ArraySymbol(
+                            "comprehensionListAux",
+                            listLocalScope,
+                            exprRes->type
+                    );
 
-            if (condition)
                 newList->add(exprRes);
-
+            }
         }
         this->currentScope = listLocalScope->getEnclosingScope();
         return newList;

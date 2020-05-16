@@ -2,79 +2,15 @@
     "boardSize" : 8,
     "maxNonos" : 3,
     "rowNonos" : [
-        {
-            "values" : [4,0,0],
-            "sumNonos" : 4,
-            "numNonos": 1
-        },
-        {
-            "values" : [2,2,0],
-            "sumNonos" : 4,
-            "numNonos": 2
-        },
-        {
-            "values" : [2,2,0],
-            "sumNonos" : 4,
-            "numNonos": 2
-        },
-        {
-            "values" : [8,0,0],
-            "sumNonos" : 8,
-            "numNonos": 1
-        },
-        {
-            "values" : [2,0,0],
-            "sumNonos" : 2,
-            "numNonos": 1
-        },
-        {
-            "values" : [2,2,0],
-            "sumNonos" : 4,
-            "numNonos": 2
-        },
-        {
-            "values" : [2,2,0],
-            "sumNonos" : 4,
-            "numNonos": 2
-        },
-        {
-            "values" : [4,0,0],
-            "sumNonos" : 4,
-            "numNonos": 1
-        }
+        [4,0,0],
+        [2,2,0],
+        [2,1,0],
+        [2,2,0],
+        [2,4,0],
+        [2,3,0],
+        [6,0,0],
+        [2,1,0]
     ],
-    "colNonos" : [
-        {
-            "values" : [4,0,0],
-            "sumNonos" : 4
-        },
-        {
-            "values" : [6,0,0],
-            "sumNonos" : 6
-        },
-        {
-            "values" : [2,1,2],
-            "sumNonos" : 5
-        },
-        {
-            "values" : [1,1,1],
-            "sumNonos" : 3
-        },
-        {
-            "values" : [1,1,1],
-            "sumNonos" : 3
-        },
-        {
-            "values" : [2,1,2],
-            "sumNonos" : 5
-        },
-        {
-            "values" : [3,2,0],
-            "sumNonos" : 5
-        },
-        {
-            "values" : [2,1,0],
-            "sumNonos" : 3
-        }
-    ]
+    "rowNonosSum": [4, 4, 3, 4, 6, 5, 6, 3],
+    "rowNonosNum": [1, 2, 2, 2, 2, 2, 1, 2]
 }

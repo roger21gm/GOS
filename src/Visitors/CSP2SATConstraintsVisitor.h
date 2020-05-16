@@ -131,8 +131,8 @@ public:
 
     antlrcpp::Any visitCAndExpression(CSP2SATParser::CAndExpressionContext *ctx) override {
         formulaReturn *newClauses = new formulaReturn();
-        for (int i = 0; i < ctx->constraint_literal().size(); i++) {
-            formulaReturn *currClauses = visit(ctx->constraint_literal(i));
+        for (int i = 0; i < ctx->constraint_and_2().size(); i++) {
+            formulaReturn *currClauses = visit(ctx->constraint_and_2(i));
             newClauses->addClauses(currClauses->clauses);
         }
         return newClauses;
@@ -166,15 +166,15 @@ public:
 
 
     antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
-        formulaReturn *result = visit(ctx->constraint_and(0));
+        formulaReturn *result = visit(ctx->constraint_or_2(0));
 
 
-        if (ctx->constraint_and().size() > 1) {
+        if (ctx->constraint_or_2().size() > 1) {
             vector<formulaReturn *> andClauses;
             formulaReturn *newClauses = new formulaReturn();
             clause orClause;
-            for (int i = 0; i < ctx->constraint_and().size(); i++) {
-                formulaReturn *currClauses = visit(ctx->constraint_and(i));
+            for (int i = 0; i < ctx->constraint_or_2().size(); i++) {
+                formulaReturn *currClauses = visit(ctx->constraint_or_2(i));
                 if (currClauses->clauses.size() == 1)
                     orClause |= currClauses->clauses.front();
                 else

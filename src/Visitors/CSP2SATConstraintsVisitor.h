@@ -141,6 +141,7 @@ public:
     antlrcpp::Any visitCAndList(CSP2SATParser::CAndListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
         formulaReturn *newClauses = new formulaReturn();
+        string a = ctx->getText();
         if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
             || list->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
             map<string, Symbol *> a = list->getScopeSymbols();
@@ -158,7 +159,7 @@ public:
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
                     ctx->getText(),
-                    "Constraint AND list elements must be literals"
+                    "Invalid Constraint AND"
             );
         }
         return newClauses;

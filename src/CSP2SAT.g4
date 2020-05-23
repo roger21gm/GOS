@@ -59,6 +59,11 @@ TK_FORALL: 'forall';
 
 
 //EXPRESSIONS
+TK_OP_AGG_SUM: 'sum';
+TK_OP_AGG_LENGTH: 'length';
+TK_OP_AGG_MAX: 'max';
+TK_OP_AGG_MIN: 'min';
+
 TK_OP_LOGIC_NOT: 'not';
 TK_OP_LOGIC_AND: 'and';
 TK_OP_LOGIC_OR: 'or';
@@ -129,8 +134,13 @@ arrayDefinition: (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)*;
 // EXPRESSIONS
 
 expr:
-    exprAnd #exprTop
+    exprListAgg #exprTop
     | condition=exprAnd TK_INTERROGANT op1=expr TK_COLON op2=expr #exprTernary;
+
+opAggregateExpr: TK_OP_AGG_LENGTH | TK_OP_AGG_MAX | TK_OP_AGG_MIN | TK_OP_AGG_SUM;
+exprListAgg:
+    opAggregateExpr TK_LPAREN list TK_RPAREN #exprListAggregateOp
+    | exprAnd #exprAnd2;
 
 exprAnd: exprOr (TK_OP_LOGIC_AND exprOr)*;
 exprOr: exprEq (TK_OP_LOGIC_OR exprEq)*;
@@ -183,9 +193,9 @@ list: min=expr TK_RANGE_DOTS max=expr #rangList
 
 
 listResultExpr:
-      constraint_expression
-    | varAcc=varAccess
+    varAcc=varAccess
     | resExpr=expr
+    | constraint_expression
     | string;
 
 constraint: constraint_expression | constraint_aggreggate_op;

@@ -68,6 +68,55 @@ public:
             return visit(ctx->op2);
     }
 
+    antlrcpp::Any visitExprListAggregateOp(CSP2SATParser::ExprListAggregateOpContext *ctx) override {
+        ArraySymbol * list = visit(ctx->list());
+        Value * result = nullptr;
+
+        if(list->getElementsType()->getTypeIndex() == SymbolTable::tInt){
+
+            vector<Symbol*> elements = list->getSymbolVector();
+
+            if(ctx->opAggregateExpr()->getText() == "sum"){
+                int sum = 0;
+                for(auto & element : elements)
+                    sum += ((AssignableSymbol*)element)->getValue()->getRealValue();
+                result = new IntValue(sum);
+            }
+            else if(ctx->opAggregateExpr()->getText() == "max"){
+                int max = INT_MIN;
+                for(auto & element : elements){
+                    if(((AssignableSymbol*)element)->getValue()->getRealValue() > max){
+                        max = ((AssignableSymbol*)element)->getValue()->getRealValue();
+                    }
+                }
+                result = new IntValue(max);
+            }
+            else if(ctx->opAggregateExpr()->getText() == "min"){
+                int min = INT_MAX;
+                for(auto & element : elements){
+                    if(((AssignableSymbol*)element)->getValue()->getRealValue() < min){
+                        min = ((AssignableSymbol*)element)->getValue()->getRealValue();
+                    }
+                }
+                result = new IntValue(min);
+            }
+            else { //Length
+                result = new IntValue(elements.size());
+            }
+        }
+        else{
+            throw CSP2SATInvalidExpressionTypeException(
+                        ctx->start->getStartIndex(),
+                        ctx->start->getCharPositionInLine(),
+                        ctx->getText(),
+                        "list<" + Utils::getTypeName(list->getElementsType()->getTypeIndex()) + ">",
+                        Utils::getTypeName(SymbolTable::tInt)
+                    );
+        }
+
+        return result;
+    }
+
     antlrcpp::Any visitExprAnd(CSP2SATParser::ExprAndContext *ctx) override {
         Value *result = visit(ctx->exprOr(0));
         if (ctx->exprOr().size() > 1) {
@@ -427,39 +476,39 @@ public:
             }
 
             Symbol *exprRes;
-            if(condition){
-                if (ctx->listResultExpr()->varAcc) {
-                    this->accessingNotLeafVariable = true;
-                    exprRes = visit(ctx->listResultExpr());
-                    this->accessingNotLeafVariable = false;
-                }
-                else if (ctx->listResultExpr()->resExpr) {
-                    Value *val = visit(ctx->listResultExpr()->resExpr);
-                    auto *valueResult = new AssignableSymbol(
-                            to_string(rand()),
-                            val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
-                    );
-                    valueResult->setValue(val);
-                    exprRes = valueResult;
-                }
-                else if (ctx->listResultExpr()->string()){
-                    string currStr = visit(ctx->listResultExpr()->string());
-                    exprRes = new StringSymbol(currStr);
-                }
-                else {
-                    formulaReturn * formula = visit(ctx->listResultExpr()->constraint_expression());
-                    exprRes = (Symbol*) formula;
-                }
 
-                if (newList == nullptr)
-                    newList = new ArraySymbol(
-                            "comprehensionListAux",
-                            listLocalScope,
-                            exprRes->type
-                    );
-
-                newList->add(exprRes);
+            if (ctx->listResultExpr()->varAcc) {
+                this->accessingNotLeafVariable = true;
+                exprRes = visit(ctx->listResultExpr());
+                this->accessingNotLeafVariable = false;
             }
+            else if (ctx->listResultExpr()->resExpr) {
+                Value *val = visit(ctx->listResultExpr()->resExpr);
+                auto *valueResult = new AssignableSymbol(
+                        to_string(rand()),
+                        val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
+                );
+                valueResult->setValue(val);
+                exprRes = valueResult;
+            }
+            else if (ctx->listResultExpr()->string()){
+                string currStr = visit(ctx->listResultExpr()->string());
+                exprRes = new StringSymbol(currStr);
+            }
+            else {
+                formulaReturn * formula = visit(ctx->listResultExpr()->constraint_expression());
+                exprRes = (Symbol*) formula;
+            }
+
+            if (newList == nullptr)
+                newList = new ArraySymbol(
+                        "comprehensionListAux",
+                        listLocalScope,
+                        exprRes->type
+                );
+
+            if(condition)
+                newList->add(exprRes);
         }
         this->currentScope = listLocalScope->getEnclosingScope();
         return newList;

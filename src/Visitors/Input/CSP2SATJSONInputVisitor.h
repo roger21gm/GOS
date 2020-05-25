@@ -87,7 +87,7 @@ public:
                 current->add(
                         new ParamBool(
                                 to_string(index),
-                                stoi(currVal->NUMBER()->getText())
+                                currVal->getText() == "true"
                         )
                 );
             } else if (currVal->arr()) {

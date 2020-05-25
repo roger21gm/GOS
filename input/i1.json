@@ -1,5 +1,6 @@
 {
     "g" : 10,
-    "z" : true
+    "z" : true,
+    "t" : [true, true, true, true, true, true, true, true, true, true]
 }
 

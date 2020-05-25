@@ -36,18 +36,24 @@ using namespace CSP2SAT;
 using namespace std;
 
 class CSP2SATCompiler {
+private:
+    bool synError = false;
 public:
     CSP2SATCompiler(string inStr, string modelStr, SolvingArguments *sargs) : inStr(std::move(inStr)), modelStr(std::move(modelStr)), sargs(sargs) {
         symbolTable = new SymbolTable();
         _f = new SMTFormula();
     }
 
-    auto runVisitor(CSP2SATBaseVisitor * visitor, string inStr){
+    auto runVisitor(CSP2SATBaseVisitor * visitor, string inStr, bool showSintaxErrors = true){
         ANTLRInputStream input(inStr);
         CSP2SATLexer lexer(&input);
         CommonTokenStream tokens(&lexer);
         CSP2SATParser parser(&tokens);
+        if(!showSintaxErrors)
+            parser.removeErrorListeners();
         CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
+        if(parser.getNumberOfSyntaxErrors() > 0)
+            synError = true;
         return visitor->visit(tree);
     }
 
@@ -70,22 +76,27 @@ public:
 
         if(!symbolTable->errors){
             CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
-            runVisitor(constraintsVisitor, modelStr);
+            runVisitor(constraintsVisitor, modelStr, false);
 
-            if(!symbolTable->errors){
-                CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
-                BasicController c(sargs, encoding,false, 0, 0);
-                c.run();
+            if(!synError){
+                if(!symbolTable->errors){
+                    CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
+                    BasicController c(sargs, encoding,false, 0, 0);
+                    c.run();
 
-                if(encoding->isSat()){
-                    CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
-                    bool customOutput = runVisitor(outputVisitor, modelStr);
-                    if(!customOutput)
-                        encoding->printModelSolution(cout);
+                    if(encoding->isSat()){
+                        CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
+                        bool customOutput = runVisitor(outputVisitor, modelStr, false);
+                        if(!customOutput)
+                            encoding->printModelSolution(cout);
+                    }
+                }
+                else {
+                    cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;
                 }
             }
-            else {
-                cerr << endl <<  "Execution stopped due to errors in constraint definition" << endl;
+            else{
+                cerr << "Execution stopped" << endl;
             }
         }
         else {

@@ -6,18 +6,11 @@ viewpoint:
     var e;
     param int g;
     param bool z;
+    param bool t[10];
 
 constraints:
-
-
-
-    if(true == true == true){
-        a;
-    }
-    else if(g == 10){
-        b;
-    };
-
+    a <-> a & b;
+    c;
     //a;
     //!a;
     //!(a & b & c);

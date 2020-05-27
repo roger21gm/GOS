@@ -40,7 +40,7 @@ public:
 
         if(isNumber){
             int index = stoi(name);
-            if(index < size){
+            if(index < size && index >= 0){
                 return elements[index];
             }
             throw CSP2SATOutOfRangeException(0, 0, getFullName() + "[" + name + "]");

@@ -320,7 +320,6 @@ public:
             this->currentScope = this->currentLocalScope;
             Value *index = visit(ctx->index);
             this->currentScope = prev;
-
             Symbol *res = this->currentScope->resolve(to_string(index->getRealValue()));
             return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
         }
@@ -330,6 +329,11 @@ public:
 
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
         string a = ctx->TK_IDENT()->getText();
+        string b = ctx->getText();
+        if (b == "hasStartedRow[i][b][j-rowNonos[i][b]-1]"){
+            cout << "aaa" << endl;
+        }
+
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
         if (var == nullptr) {
@@ -395,6 +399,9 @@ public:
                 }
             }
         }
+
+
+
         if (var == nullptr || (!this->accessingNotLeafVariable && var->isScoped())) {
             throw CSP2SATBadAccessException(
                     ctx->start->getLine(),

@@ -7,95 +7,54 @@ viewpoint:
     param int colNonos[colSize][maxNonos];
 
     var x[rowSize][colSize];
-    var startRow[rowSize][maxNonos][colSize];
-    var startCol[colSize][maxNonos][rowSize];
+    var hasStartedRow[rowSize][maxNonos][colSize];
 
 constraints:
+
+    //Order encoding
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            forall(j in 0..colSize-2){
+                hasStartedRow[i][b][j] -> hasStartedRow[i][b][j+1];
+            };
+        }
+        else{
+            &&( [!hasStartedRow[i][b][j] | j in 0..colSize-1] );
+        };
+    };
+
+
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            !hasStartedRow[i][b][colSize-rowNonos[i][b]];
+        };
+    };
+
+    //Channelling between hasStarted and x
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            forall(j in 0..colSize-1){
+                if(j >= rowNonos[i][b]){
+                    x[i][j] <- hasStartedRow[i][b][j] & !hasStartedRow[i][b][j-rowNonos[i][b]]; 
+                }
+                else {
+                    x[i][j] <- hasStartedRow[i][b][j];
+                };
+            };
+        };
+    };
+
     forall(i in 0..rowSize-1){
         EK(x[i], sum(rowNonos[i]));
-        EK([ startRow[i][b][j] | b in 0..maxNonos-1, j in 0..colSize-1 ], length( [rowNonos[i][b] | b in 0..maxNonos-1 where rowNonos[i][b] != 0 ] ));
-        forall(b in 0..maxNonos-1){
-            if(rowNonos[i][b] == 0){
-                &&([!startRow[i][b][j] | j in 0..colSize-1]);
-            };
-            AMO( startRow[i][b] );
-        };
+    };
+
+    //Nono b abans que b+1.
+    forall(i in 0..rowSize-1, b in 0..maxNonos-2){
         forall(j in 0..colSize-1){
-            AMO( startRow[i][_][j] );
+            hasStartedRow[i][b+1][j] -> hasStartedRow[i][b][j-rowNonos[i][b]-1];
         };
     };
-
-    forall(i in 0..rowSize-1, b in 0..maxNonos-1, j in 0..colSize-1){
-        if(rowNonos[i][b] != 0){
-            if(j+rowNonos[i][b]-1 < colSize){
-                startRow[i][b][j] -> &&([ x[i][k] | k in j..j+rowNonos[i][b]-1 ]);
-                if(j+rowNonos[i][b] < colSize){
-                    startRow[i][b][j] -> !x[i][j+rowNonos[i][b]];
-                };
-                if(j-1 >= 0){
-                    startRow[i][b][j] -> !x[i][j-1];
-                };
-
-                if(j+1 < colSize){
-                    forall(followingCells in j+1..colSize-1){
-                        if(b > 0){
-                            forall(prevBlocks in 0..b-1){
-                                startRow[i][b][j] -> !startRow[i][prevBlocks][followingCells];
-                            };
-                        };
-                    };
-                };
-            }
-            else {
-                !startRow[i][b][j];
-            };
-        };
-    };
-
-
-    forall(i in 0..colSize-1){
-        EK(x[_][i], sum(colNonos[i]));
-        EK([ startCol[i][b][j] | b in 0..maxNonos-1, j in 0..rowSize-1 ], length( [colNonos[i][b] | b in 0..maxNonos-1 where colNonos[i][b] != 0 ] ));
-        forall(b in 0..maxNonos-1){
-            if(colNonos[i][b] == 0){
-                &&([!startCol[i][b][j] | j in 0..rowSize-1]);
-            };
-            AMO( startCol[i][b] );
-        };
-        forall(j in 0..rowSize-1){
-            AMO( startCol[i][_][j] );
-        };
-    };
-
-    forall(i in 0..colSize-1, b in 0..maxNonos-1, j in 0..rowSize-1){
-        if(colNonos[i][b] != 0){
-            if(j+colNonos[i][b]-1 < rowSize){
-                startCol[i][b][j] -> &&([ x[k][i] | k in j..j+colNonos[i][b]-1 ]);
-                if(j+colNonos[i][b] < colSize){
-                    startCol[i][b][j] -> !x[j+colNonos[i][b]][i];
-                };
-                if(j-1 >= 0){
-                    startCol[i][b][j] -> !x[j-1][i];
-                };
-
-                if(j+1 < colSize){
-                    forall(followingCells in j+1..colSize-1){
-                        if(b > 0){
-                            forall(prevBlocks in 0..b-1){
-                                startCol[i][b][j] -> !startCol[i][prevBlocks][followingCells];
-                            };
-                        };
-                    };
-                };
-            }
-            else {
-                !startCol[i][b][j];
-            };
-        };
-    };
-
-
-
+    
 
 output:
     [ (x[i][j] ? "X" : " ") ++ " " ++ (j==colSize-1 ? "\n" : "") | i in 0..rowSize-1, j in 0..colSize-1];

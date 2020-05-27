@@ -9,9 +9,13 @@
 class Helpers {
 
 public:
-    static bool check_number(string str) {
-        for (int i = 0; i < str.length(); i++)
-            if (isdigit(str[i]) == false)
+    static bool check_number(const string & str) {
+        string num = str;
+        if(num[0] == '-'){
+            num.erase(0);
+        }
+        for (int i = 0; i < num.length(); i++)
+            if (isdigit(num[i]) == 0)
                 return false;
         return true;
     }

@@ -17,10 +17,8 @@ DimacsFileEncoder::DimacsFileEncoder(Encoding * enc, const std::string & solver)
 		this->solver="glucose_release";
 	else if(solver=="openwbo")
 		this->solver="open-wbo_release";
-	else{
-		std::cerr << "Unsupported solver " << solver << std::endl;
-		exit(BADARGUMENTS_ERROR);
-	}
+	else
+        this->solver=solver;
 }
 
 DimacsFileEncoder::~DimacsFileEncoder(){

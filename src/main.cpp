@@ -4,7 +4,7 @@
 
 using namespace std;
 
-string readFile(string name){
+string readFile(string name) {
     ifstream inFile;
     inFile.open(name); //open the input file
     stringstream inputStream;
@@ -14,28 +14,46 @@ string readFile(string name){
 }
 
 
+enum ProgramArg {
+    SHOWFORMULA
+};
+
 int main(int argc, char **argv) {
 
-    Arguments<int> *pargs = new Arguments<int>(
+    Arguments<ProgramArg> *pargs = new Arguments<ProgramArg>(
             {
                     arguments::arg("modelfile", "Instance file path."),
                     arguments::arg("datafile", "Input params file path."),
             },
-            2, {}, "Solve CSP to SAT"
+            2,
+            {
+                    arguments::bop("pf", "print-formula", SHOWFORMULA, false, "Print CNF formula"),
+            },
+            "Solve CSP to SAT"
     );
 
-    SolvingArguments * sargs = SolvingArguments::readArguments(argc,argv,pargs);
+
+    SolvingArguments *sargs = SolvingArguments::readArguments(argc, argv, pargs);
+
+    bool showFormula = pargs->getBoolOption(SHOWFORMULA);
 
     SolvingArg solver = sargs->getOptionRef("-s");
-    sargs->setOption(solver, (string)"minisat");
+    sargs->setOption(solver, (string) "minisat");
 
     SolvingArg optimize = sargs->getOptionRef("-o");
-    sargs->setOption(optimize, (string)"check");
+    sargs->setOption(optimize, (string) "check");
+
+    if (showFormula) {
+        SolvingArg print = sargs->getOptionRef("-e");
+        sargs->setOption(print, true);
+        SolvingArg format = sargs->getOptionRef("-f");
+        sargs->setOption(format, (string) "dimacs");
+    }
 
     string inputStr = readFile(pargs->getArgument(1));
     string modelStr = readFile(pargs->getArgument(0));
 
-    CSP2SATCompiler * compiler = new CSP2SATCompiler(inputStr, modelStr, sargs);
+    CSP2SATCompiler *compiler = new CSP2SATCompiler(inputStr, modelStr, sargs);
     compiler->run();
 
     return 0;

@@ -2,18 +2,18 @@
 // Created by Roger Generoso Masós on 20/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATJSONINPUTVISITOR_H
-#define CSP2SAT_CSP2SATJSONINPUTVISITOR_H
+#ifndef CSP2SAT_GOSJSONINPUTVISITOR_H
+#define CSP2SAT_GOSJSONINPUTVISITOR_H
 
 #include <JSONBaseVisitor.h>
 #include "Param.h"
-#include "../../Errors/CSP2SATInputExceptionsRepository.h"
+#include "../../Errors/GOSInputExceptionsRepository.h"
 
 
-using namespace CSP2SAT;
+using namespace GOS;
 using namespace std;
 
-class CSP2SATJSONInputVisitor : public JSONBaseVisitor {
+class GOSJSONInputVisitor : public JSONBaseVisitor {
 
 private:
     ParamJSON *base;
@@ -21,7 +21,7 @@ private:
 
 public:
 
-    CSP2SATJSONInputVisitor() {
+    GOSJSONInputVisitor() {
         base = new ParamJSON("base");
         current = base;
     }
@@ -124,4 +124,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATJSONINPUTVISITOR_H
+#endif //CSP2SAT_GOSJSONINPUTVISITOR_H

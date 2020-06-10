@@ -2,36 +2,36 @@
 // Created by Roger Generoso Masós on 19/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATEXCEPTIONSREPOSITORY_H
-#define CSP2SAT_CSP2SATEXCEPTIONSREPOSITORY_H
+#ifndef CSP2SAT_GOSEXCEPTIONSREPOSITORY_H
+#define CSP2SAT_GOSEXCEPTIONSREPOSITORY_H
 
 
-#include "CSP2SATException.h"
+#include "GOSException.h"
 
-class CSP2SATBadAccessException : public CSP2SATException {
+class CSP2SATBadAccessException : public GOSException {
 public:
     CSP2SATBadAccessException(int line, int pos, const string &badAccess) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "Invalid access: \"" + badAccess + "\" is not a variable or param"
             ) {}
 };
 
-class CSP2SATStringOnlyOutputException : public CSP2SATException {
+class CSP2SATStringOnlyOutputException : public GOSException {
 public:
     CSP2SATStringOnlyOutputException(int line, int pos, const string &str) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "\"" + str + "\": String only allowed on output"
             ) {}
 };
 
-class CSP2SATNotExistsException : public CSP2SATException {
+class CSP2SATNotExistsException : public GOSException {
 public:
     CSP2SATNotExistsException(int line, int pos, const string &badAccess) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "Invalid: \"" + badAccess + "\" don't exists"
@@ -39,10 +39,10 @@ public:
 };
 
 
-class CSP2SATInvalidExpressionTypeException : public CSP2SATException {
+class CSP2SATInvalidExpressionTypeException : public GOSException {
 public:
     CSP2SATInvalidExpressionTypeException(int line, int pos, string expr, string typeFound, string typeExpected) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "Invalid expression type \"" + expr + "\": found " + typeFound + " vs expected " + typeExpected
@@ -50,50 +50,50 @@ public:
 };
 
 
-class CSP2SATParamAsConstraintException : public CSP2SATException {
+class CSP2SATParamAsConstraintException : public GOSException {
 public:
     CSP2SATParamAsConstraintException(int line, int pos, string expr) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "\"" + expr + "\": Params not allowed as constraints"
             ) {}
 };
 
-class CSP2SATAlreadyExistException : public CSP2SATException {
+class CSP2SATAlreadyExistException : public GOSException {
 public:
     CSP2SATAlreadyExistException(int line, int pos, string expr) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "\"" + expr + "\" already exists"
             ) {}
 };
 
-class CSP2SATOutOfRangeException : public CSP2SATException {
+class CSP2SATOutOfRangeException : public GOSException {
 public:
     CSP2SATOutOfRangeException(int line, int pos, string expr) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "\"" + expr + "\" access out of range"
             ) {}
 };
 
-class CSP2SATTypeNotMatchException : public CSP2SATException {
+class CSP2SATTypeNotMatchException : public GOSException {
 public:
     CSP2SATTypeNotMatchException(int line, int pos, string expr) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "Types not matching \"" + expr + "\""
             ) {}
 };
 
-class CSP2SATInvalidOperationException : public CSP2SATException {
+class CSP2SATInvalidOperationException : public GOSException {
 public:
     CSP2SATInvalidOperationException(int line, int pos, string expr) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "Invalid operation \"" + expr + "\""
@@ -101,10 +101,10 @@ public:
 };
 
 
-class CSP2SATInvalidFormulaException : public CSP2SATException {
+class CSP2SATInvalidFormulaException : public GOSException {
 public:
     CSP2SATInvalidFormulaException(int line, int pos, string formula, string message = "") :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "Invalid formula \"" + formula + "\": " + message
@@ -112,4 +112,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATEXCEPTIONSREPOSITORY_H
+#endif //CSP2SAT_GOSEXCEPTIONSREPOSITORY_H

@@ -1,6 +1,6 @@
 #include <string>
 #include "api/controllers/solvingarguments.h"
-#include "CSP2SATCompiler.h"
+#include "GOSCompiler.h"
 
 using namespace std;
 
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     string inputStr = readFile(pargs->getArgument(1));
     string modelStr = readFile(pargs->getArgument(0));
 
-    CSP2SATCompiler *compiler = new CSP2SATCompiler(inputStr, modelStr, sargs);
+    GOSCompiler *compiler = new GOSCompiler(inputStr, modelStr, sargs);
     compiler->run();
 
     return 0;

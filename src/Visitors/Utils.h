@@ -13,7 +13,7 @@
 #include "../Symtab/Symbol/Valued/AssignableSymbol.h"
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
 #include "Input/Param.h"
-#include "../Errors/CSP2SATExceptionsRepository.h"
+#include "../Errors/GOSExceptionsRepository.h"
 #include "../Symtab/Symbol/formulaReturn.h"
 
 class Utils {
@@ -221,7 +221,7 @@ public:
             }
         } else {
             //cerr << "It must be a literal array" << endl;
-            throw CSP2SATException(0, 0,variableArray->getFullName() + " must be a list of literals");
+            throw GOSException(0, 0, variableArray->getFullName() + " must be a list of literals");
         }
         return result;
     }

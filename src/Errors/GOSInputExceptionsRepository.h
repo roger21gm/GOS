@@ -2,16 +2,16 @@
 // Created by Roger Generoso Masós on 20/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATINPUTEXCEPTIONSREPOSITORY_H
-#define CSP2SAT_CSP2SATINPUTEXCEPTIONSREPOSITORY_H
+#ifndef CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H
+#define CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H
 
 
-#include "CSP2SATException.h"
+#include "GOSException.h"
 
-class CSP2SATBadInputTypeException : public CSP2SATException {
+class CSP2SATBadInputTypeException : public GOSException {
 public:
     CSP2SATBadInputTypeException(int line, int pos, const string &name) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     "\"" + name + "\":" + "Only int and bool values allowed as params"
@@ -19,10 +19,10 @@ public:
 };
 
 
-class CSP2SATInputNotFoundValue : public CSP2SATException {
+class CSP2SATInputNotFoundValue : public GOSException {
 public:
     CSP2SATInputNotFoundValue(const string &access) :
-            CSP2SATException(
+            GOSException(
                     0,
                     0,
                     "\"" + access + "\":" + " Not found in input file"
@@ -30,10 +30,10 @@ public:
 };
 
 
-class CSP2SATBadCardinalityConstraint : public CSP2SATException {
+class CSP2SATBadCardinalityConstraint : public GOSException {
 public:
     CSP2SATBadCardinalityConstraint(int line, int pos, const string &name) :
-            CSP2SATException(
+            GOSException(
                     line,
                     pos,
                     name + ": Bad cardinality input"
@@ -42,4 +42,4 @@ public:
 
 
 
-#endif //CSP2SAT_CSP2SATINPUTEXCEPTIONSREPOSITORY_H
+#endif //CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H

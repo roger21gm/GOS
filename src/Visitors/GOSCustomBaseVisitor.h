@@ -2,26 +2,26 @@
 // Created by Roger Generoso Masós on 30/03/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
-#define CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
+#ifndef CSP2SAT_GOSCUSTOMBASEVISITOR_H
+#define CSP2SAT_GOSCUSTOMBASEVISITOR_H
 
-#include <CSP2SATBaseVisitor.h>
+#include <BUPBaseVisitor.h>
 #include "../Symtab/SymbolTable.h"
 #include "../Symtab/Value/Value.h"
 #include "../Symtab/Value/BoolValue.h"
 #include "../Symtab/Value/IntValue.h"
 #include "../Visitors/Utils.h"
-#include "../Errors/CSP2SATException.h"
-#include "../Errors/CSP2SATExceptionsRepository.h"
+#include "../Errors/GOSException.h"
+#include "../Errors/GOSExceptionsRepository.h"
 #include "../Symtab/Scope/LocalScope.h"
 #include "../Symtab/Symbol/StringSymbol.h"
 #include "../Symtab/Symbol/formulaReturn.h"
 
 
-using namespace CSP2SAT;
+using namespace GOS;
 using namespace std;
 
-class CSP2SATCustomBaseVisitor : public CSP2SATBaseVisitor {
+class GOSCustomBaseVisitor : public BUPBaseVisitor {
 
 protected:
     bool accessingNotLeafVariable = false;
@@ -32,17 +32,17 @@ protected:
 
 public:
 
-    explicit CSP2SATCustomBaseVisitor(SymbolTable *symbolTable, SMTFormula *f) {
+    explicit GOSCustomBaseVisitor(SymbolTable *symbolTable, SMTFormula *f) {
         this->st = symbolTable;
         this->_f = f;
         this->currentScope = this->st->gloabls;
     }
 
-    antlrcpp::Any visitCsp2sat(CSP2SATParser::Csp2satContext *ctx) override {
+    antlrcpp::Any visitCsp2sat(BUPParser::Csp2satContext *ctx) override {
         try{
-            return CSP2SATBaseVisitor::visitCsp2sat(ctx);
+            return BUPBaseVisitor::visitCsp2sat(ctx);
         }
-        catch (CSP2SATException & e) {
+        catch (GOSException & e) {
             cerr << e.getErrorMessage() << endl;
         }
         catch (exception & e) {
@@ -52,15 +52,15 @@ public:
     }
 
 
-    antlrcpp::Any visitExprTop(CSP2SATParser::ExprTopContext *ctx) override {
+    antlrcpp::Any visitExprTop(BUPParser::ExprTopContext *ctx) override {
         try {
-            return CSP2SATBaseVisitor::visitExprTop(ctx);
-        } catch (CSP2SATException &e) {
+            return BUPBaseVisitor::visitExprTop(ctx);
+        } catch (GOSException &e) {
             throw;
         }
     }
 
-    antlrcpp::Any visitExprTernary(CSP2SATParser::ExprTernaryContext *ctx) override {
+    antlrcpp::Any visitExprTernary(BUPParser::ExprTernaryContext *ctx) override {
         Value *condition = visit(ctx->condition);
         if (condition->getRealValue())
             return visit(ctx->op1);
@@ -68,7 +68,7 @@ public:
             return visit(ctx->op2);
     }
 
-    antlrcpp::Any visitExprListAggregateOp(CSP2SATParser::ExprListAggregateOpContext *ctx) override {
+    antlrcpp::Any visitExprListAggregateOp(BUPParser::ExprListAggregateOpContext *ctx) override {
         ArraySymbol * list = visit(ctx->list());
         Value * result = nullptr;
 
@@ -117,7 +117,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitExprAnd(CSP2SATParser::ExprAndContext *ctx) override {
+    antlrcpp::Any visitExprAnd(BUPParser::ExprAndContext *ctx) override {
         Value *result = visit(ctx->exprOr(0));
         if (ctx->exprOr().size() > 1) {
             BoolValue *res = new BoolValue(true);
@@ -130,7 +130,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitExprOr(CSP2SATParser::ExprOrContext *ctx) override {
+    antlrcpp::Any visitExprOr(BUPParser::ExprOrContext *ctx) override {
         Value *result = visit(ctx->exprEq(0));
         if (ctx->exprEq().size() > 1) {
             BoolValue *res = new BoolValue(false);
@@ -153,7 +153,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitExprEq(CSP2SATParser::ExprEqContext *ctx) override {
+    antlrcpp::Any visitExprEq(BUPParser::ExprEqContext *ctx) override {
         Value *lVal = visit(ctx->exprRel(0));
         if (ctx->exprRel().size() > 1) {
             for (int i = 1; i < ctx->exprRel().size(); i++) {
@@ -179,7 +179,7 @@ public:
         return lVal;
     }
 
-    antlrcpp::Any visitExprRel(CSP2SATParser::ExprRelContext *ctx) override {
+    antlrcpp::Any visitExprRel(BUPParser::ExprRelContext *ctx) override {
         Value *lVal = visit(ctx->exprSumDiff(0));
         if (ctx->exprSumDiff().size() == 2) {
             Value *rVal = visit(ctx->exprSumDiff(1));
@@ -224,7 +224,7 @@ public:
         return lVal;
     }
 
-    antlrcpp::Any visitExprSumDiff(CSP2SATParser::ExprSumDiffContext *ctx) override {
+    antlrcpp::Any visitExprSumDiff(BUPParser::ExprSumDiffContext *ctx) override {
         Value *result = visit(ctx->exprMulDivMod(0));
         if (ctx->exprMulDivMod().size() > 1) {
             IntValue *res = new IntValue(result->getRealValue());
@@ -251,7 +251,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitExprMulDivMod(CSP2SATParser::ExprMulDivModContext *ctx) override {
+    antlrcpp::Any visitExprMulDivMod(BUPParser::ExprMulDivModContext *ctx) override {
         Value *result = visit(ctx->exprNot(0));
         if (ctx->exprNot().size() > 1) {
             IntValue *res = new IntValue(result->getRealValue());
@@ -273,7 +273,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitExprNot(CSP2SATParser::ExprNotContext *ctx) override {
+    antlrcpp::Any visitExprNot(BUPParser::ExprNotContext *ctx) override {
         Value *result = visit(ctx->expr_base());
         if (ctx->op) {
             if (result->isBoolean()) {
@@ -291,7 +291,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitExpr_base(CSP2SATParser::Expr_baseContext *ctx) override {
+    antlrcpp::Any visitExpr_base(BUPParser::Expr_baseContext *ctx) override {
         if (ctx->expr()) {
             return visit(ctx->expr());
         } else if (ctx->varAccess()) {
@@ -308,11 +308,11 @@ public:
                 );
             }
         }
-        return CSP2SATBaseVisitor::visitExpr_base(ctx);
+        return BUPBaseVisitor::visitExpr_base(ctx);
     }
 
 
-    antlrcpp::Any visitVarAccessObjectOrArray(CSP2SATParser::VarAccessObjectOrArrayContext *ctx) override {
+    antlrcpp::Any visitVarAccessObjectOrArray(BUPParser::VarAccessObjectOrArrayContext *ctx) override {
         if (ctx->attr) {
             return (Symbol *) this->currentScope->resolve(ctx->attr->getText());
         } else if (ctx->index) {
@@ -327,7 +327,7 @@ public:
     }
 
 
-    antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
+    antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override {
         string a = ctx->TK_IDENT()->getText();
         string b = ctx->getText();
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
@@ -409,7 +409,7 @@ public:
     }
 
 
-    antlrcpp::Any visitValueBaseType(CSP2SATParser::ValueBaseTypeContext *ctx) override {
+    antlrcpp::Any visitValueBaseType(BUPParser::ValueBaseTypeContext *ctx) override {
         if (ctx->integer) {
             return (Value *) new IntValue(stoi(ctx->integer->getText()));
         } else {
@@ -417,7 +417,7 @@ public:
         }
     }
 
-    antlrcpp::Any visitRangList(CSP2SATParser::RangListContext *ctx) override {
+    antlrcpp::Any visitRangList(BUPParser::RangListContext *ctx) override {
 
         Value *minRange = visit(ctx->min);
         Value *maxRange = visit(ctx->max);
@@ -438,7 +438,7 @@ public:
             }
             return result;
         } else {
-            throw CSP2SATException(
+            throw GOSException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
                     "Range must be ascendant"
@@ -446,14 +446,14 @@ public:
         }
     }
 
-    antlrcpp::Any visitAuxiliarListAssignation(CSP2SATParser::AuxiliarListAssignationContext *ctx) override {
+    antlrcpp::Any visitAuxiliarListAssignation(BUPParser::AuxiliarListAssignationContext *ctx) override {
         ArraySymbol *arrayDefined = visit(ctx->list());
         return pair<string, ArraySymbol *>(ctx->TK_IDENT()->getText(), arrayDefined);
     }
 
 
 
-    antlrcpp::Any visitComprehensionList(CSP2SATParser::ComprehensionListContext *ctx) override {
+    antlrcpp::Any visitComprehensionList(BUPParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);
         vector<map<string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
         ArraySymbol *newList = nullptr;
@@ -517,7 +517,7 @@ public:
         return newList;
     }
 
-    antlrcpp::Any visitVarAccessList(CSP2SATParser::VarAccessListContext *ctx) override {
+    antlrcpp::Any visitVarAccessList(BUPParser::VarAccessListContext *ctx) override {
         Symbol *array = nullptr;
         this->accessingNotLeafVariable = true;
         array = visit(ctx->varAccess());
@@ -536,7 +536,7 @@ public:
         }
     }
 
-    antlrcpp::Any visitExplicitList(CSP2SATParser::ExplicitListContext *ctx) override {
+    antlrcpp::Any visitExplicitList(BUPParser::ExplicitListContext *ctx) override {
         ArraySymbol *resultList = nullptr;
 
         for (auto currVal : ctx->listResultExpr()) {
@@ -580,14 +580,14 @@ public:
     }
 
 protected:
-    vector<map<string, Symbol *>> getAllCombinations(vector<CSP2SAT::CSP2SATParser::AuxiliarListAssignationContext *> aux){
+    vector<map<string, Symbol *>> getAllCombinations(vector<GOS::BUPParser::AuxiliarListAssignationContext *> aux){
         vector<map<string, Symbol *>> combinations = vector<map<string, Symbol *>>();
         LocalScope * combScope = new LocalScope(this->currentScope);
         getAllCombinations(0, aux, combinations, combScope);
         return combinations;
     }
 
-    void getAllCombinations(int idx, vector<CSP2SAT::CSP2SATParser::AuxiliarListAssignationContext *> aux, vector<map<string, Symbol *>> & combinations, LocalScope * combinationsScope) {
+    void getAllCombinations(int idx, vector<GOS::BUPParser::AuxiliarListAssignationContext *> aux, vector<map<string, Symbol *>> & combinations, LocalScope * combinationsScope) {
         if (idx == aux.size()) {
             combinations.push_back(combinationsScope->getScopeSymbols());
             return;
@@ -603,4 +603,4 @@ protected:
 };
 
 
-#endif //CSP2SAT_CSP2SATCUSTOMBASEVISITOR_H
+#endif //CSP2SAT_GOSCUSTOMBASEVISITOR_H

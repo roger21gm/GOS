@@ -9,8 +9,8 @@
 #include "antlr4-runtime.h"
 
 // generated lexer and parser
-#include <CSP2SATLexer.h>
-#include <CSP2SATParser.h>
+#include <BUPLexer.h>
+#include <BUPParser.h>
 #include <JSONLexer.h>
 #include <JSONParser.h>
 
@@ -22,36 +22,36 @@
 
 
 // custom listener
-#include "Visitors/CSP2SATTypeVarDefinitionVisitor.h"
-#include "Visitors/CSP2SATConstraintsVisitor.h"
+#include "Visitors/GOSTypeVarDefinitionVisitor.h"
+#include "Visitors/GOSConstraintsVisitor.h"
 
 // custom error
-#include "Errors/CSP2SATErrorListener.h"
-#include "CSP2SATEncoding.h"
-#include "Visitors/Input/CSP2SATJSONInputVisitor.h"
-#include "Visitors/Output/CSP2SATOutputVisitor.h"
+#include "Errors/GOSErrorListener.h"
+#include "GOSEncoding.h"
+#include "Visitors/Input/GOSJSONInputVisitor.h"
+#include "Visitors/Output/GOSOutputVisitor.h"
 
 using namespace antlr4;
-using namespace CSP2SAT;
+using namespace GOS;
 using namespace std;
 
-class CSP2SATCompiler {
+class GOSCompiler {
 private:
     bool synError = false;
 public:
-    CSP2SATCompiler(string inStr, string modelStr, SolvingArguments *sargs) : inStr(std::move(inStr)), modelStr(std::move(modelStr)), sargs(sargs) {
+    GOSCompiler(string inStr, string modelStr, SolvingArguments *sargs) : inStr(std::move(inStr)), modelStr(std::move(modelStr)), sargs(sargs) {
         symbolTable = new SymbolTable();
         _f = new SMTFormula();
     }
 
-    auto runVisitor(CSP2SATBaseVisitor * visitor, string inStr, bool showSintaxErrors = true){
+    auto runVisitor(BUPBaseVisitor * visitor, string inStr, bool showSintaxErrors = true){
         ANTLRInputStream input(inStr);
-        CSP2SATLexer lexer(&input);
+        BUPLexer lexer(&input);
         CommonTokenStream tokens(&lexer);
-        CSP2SATParser parser(&tokens);
+        BUPParser parser(&tokens);
         if(!showSintaxErrors)
             parser.removeErrorListeners();
-        CSP2SATParser::Csp2satContext *tree = parser.csp2sat();
+        BUPParser::Csp2satContext *tree = parser.csp2sat();
         if(parser.getNumberOfSyntaxErrors() > 0)
             synError = true;
         return visitor->visit(tree);
@@ -68,19 +68,19 @@ public:
 
     void run(){
 
-        CSP2SATJSONInputVisitor * inputPreJsonVisitor = new CSP2SATJSONInputVisitor();
+        GOSJSONInputVisitor * inputPreJsonVisitor = new GOSJSONInputVisitor();
         ParamJSON * readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
-        CSP2SATTypeVarDefinitionVisitor * visitor = new CSP2SATTypeVarDefinitionVisitor(symbolTable, _f, readParams);
+        GOSTypeVarDefinitionVisitor * visitor = new GOSTypeVarDefinitionVisitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
 
         if(!symbolTable->errors){
-            CSP2SATConstraintsVisitor * constraintsVisitor = new CSP2SATConstraintsVisitor(symbolTable, _f);
+            GOSConstraintsVisitor * constraintsVisitor = new GOSConstraintsVisitor(symbolTable, _f);
             runVisitor(constraintsVisitor, modelStr, false);
 
             if(!synError){
                 if(!symbolTable->errors){
-                    CSP2SATEncoding * encoding = new CSP2SATEncoding(_f,symbolTable);
+                    GOSEncoding * encoding = new GOSEncoding(_f, symbolTable);
                     BasicController c(sargs, encoding,false, 0, 0);
                     c.run();
 

@@ -1,4 +1,4 @@
-grammar CSP2SAT;
+grammar BUP;
 
 WS
    : [ \t\n\r] + -> skip

@@ -2,36 +2,36 @@
 // Created by Roger Generoso Masós on 01/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
-#define CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
+#ifndef CSP2SAT_GOSCONSTRAINTSVISITOR_H
+#define CSP2SAT_GOSCONSTRAINTSVISITOR_H
 
 #include "../Symtab/Symbol/formulaReturn.h"
 
 
-class CSP2SATConstraintsVisitor : public CSP2SATCustomBaseVisitor {
+class GOSConstraintsVisitor : public GOSCustomBaseVisitor {
 public:
-    explicit CSP2SATConstraintsVisitor(SymbolTable *symbolTable, SMTFormula *f) : CSP2SATCustomBaseVisitor(symbolTable,
-                                                                                                           f) {}
+    explicit GOSConstraintsVisitor(SymbolTable *symbolTable, SMTFormula *f) : GOSCustomBaseVisitor(symbolTable,
+                                                                                                   f) {}
 
 
-    antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
+    antlrcpp::Any visitEntityDefinitionBlock(BUPParser::EntityDefinitionBlockContext *ctx) override {
         return nullptr;
     }
 
-    antlrcpp::Any visitViewpointBlock(CSP2SATParser::ViewpointBlockContext *ctx) override {
+    antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
         return nullptr;
     }
 
-    antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
+    antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
         return nullptr;
     }
 
-    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
+    antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
         for (auto constraint : ctx->constraintDefinition()) {
             try {
                 visit(constraint);
             }
-            catch (CSP2SATException &e) {
+            catch (GOSException &e) {
                 cerr << e.getErrorMessage() << endl;
             }
         }
@@ -39,32 +39,32 @@ public:
     }
 
     antlrcpp::Any
-    visitLocalConstraintDefinitionBlock(CSP2SATParser::LocalConstraintDefinitionBlockContext *ctx) override {
+    visitLocalConstraintDefinitionBlock(BUPParser::LocalConstraintDefinitionBlockContext *ctx) override {
         try {
             for (auto constraint : ctx->constraintDefinition()) {
                 visit(constraint);
             }
         }
-        catch (CSP2SATException &e) {
+        catch (GOSException &e) {
             throw e;
         }
         return nullptr;
     }
 
 
-    antlrcpp::Any visitConstraintDefinition(CSP2SATParser::ConstraintDefinitionContext *ctx) override {
+    antlrcpp::Any visitConstraintDefinition(BUPParser::ConstraintDefinitionContext *ctx) override {
 
         try {
-            CSP2SATBaseVisitor::visitConstraintDefinition(ctx);
+            BUPBaseVisitor::visitConstraintDefinition(ctx);
         }
-        catch (CSP2SATException &e) {
+        catch (GOSException &e) {
             throw e;
         }
         return nullptr;
     }
 
 
-    antlrcpp::Any visitConstraint(CSP2SATParser::ConstraintContext *ctx) override {
+    antlrcpp::Any visitConstraint(BUPParser::ConstraintContext *ctx) override {
         if (ctx->constraint_expression()) {
             formulaReturn *result = visit(ctx->constraint_expression());
             for (clause clause : result->clauses)
@@ -74,7 +74,7 @@ public:
 
     }
 
-    antlrcpp::Any visitConstraint_base(CSP2SATParser::Constraint_baseContext *ctx) override {
+    antlrcpp::Any visitConstraint_base(BUPParser::Constraint_baseContext *ctx) override {
         formulaReturn *clause = new formulaReturn();
         if (ctx->varAccess()) {
             Symbol *valSym = visit(ctx->varAccess());
@@ -99,7 +99,7 @@ public:
         return clause;
     }
 
-    antlrcpp::Any visitConstraint_literal(CSP2SATParser::Constraint_literalContext *ctx) override {
+    antlrcpp::Any visitConstraint_literal(BUPParser::Constraint_literalContext *ctx) override {
         formulaReturn *clauses = visit(ctx->constraint_base());
         if (ctx->TK_CONSTRAINT_NOT()) {
             formulaReturn *result = new formulaReturn();
@@ -129,7 +129,7 @@ public:
         return clauses;
     }
 
-    antlrcpp::Any visitCAndExpression(CSP2SATParser::CAndExpressionContext *ctx) override {
+    antlrcpp::Any visitCAndExpression(BUPParser::CAndExpressionContext *ctx) override {
         formulaReturn *newClauses = new formulaReturn();
         for (int i = 0; i < ctx->constraint_and_2().size(); i++) {
             formulaReturn *currClauses = visit(ctx->constraint_and_2(i));
@@ -138,7 +138,7 @@ public:
         return newClauses;
     }
 
-    antlrcpp::Any visitCAndList(CSP2SATParser::CAndListContext *ctx) override {
+    antlrcpp::Any visitCAndList(BUPParser::CAndListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
         formulaReturn *newClauses = new formulaReturn();
         string a = ctx->getText();
@@ -166,7 +166,7 @@ public:
     }
 
 
-    antlrcpp::Any visitCOrExpression(CSP2SATParser::COrExpressionContext *ctx) override {
+    antlrcpp::Any visitCOrExpression(BUPParser::COrExpressionContext *ctx) override {
         formulaReturn *result = visit(ctx->constraint_or_2(0));
 
 
@@ -213,7 +213,7 @@ public:
         return result;
     }
 
-    antlrcpp::Any visitCOrList(CSP2SATParser::COrListContext *ctx) override {
+    antlrcpp::Any visitCOrList(BUPParser::COrListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
         clause orClause;
         if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
@@ -247,7 +247,7 @@ public:
     }
 
 
-    antlrcpp::Any visitConstraint_implication(CSP2SATParser::Constraint_implicationContext *ctx) override {
+    antlrcpp::Any visitConstraint_implication(BUPParser::Constraint_implicationContext *ctx) override {
         formulaReturn *result = visit(ctx->constraint_or(0));
 
         if (ctx->constraint_or().size() > 1) {
@@ -305,7 +305,7 @@ public:
     }
 
     antlrcpp::Any
-    visitConstraint_double_implication(CSP2SATParser::Constraint_double_implicationContext *ctx) override {
+    visitConstraint_double_implication(BUPParser::Constraint_double_implicationContext *ctx) override {
         formulaReturn *res = visit(ctx->constraint_implication(0));
 
         if (ctx->constraint_implication().size() == 2) {
@@ -362,7 +362,7 @@ public:
         return res;
     }
 
-    antlrcpp::Any visitForall(CSP2SATParser::ForallContext *ctx) override {
+    antlrcpp::Any visitForall(BUPParser::ForallContext *ctx) override {
         auto *forallLocalScope = new LocalScope(this->currentScope);
         vector<map<string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
 
@@ -378,7 +378,7 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitIfThenElse(CSP2SATParser::IfThenElseContext *ctx) override {
+    antlrcpp::Any visitIfThenElse(BUPParser::IfThenElseContext *ctx) override {
         for (int i = 0; i < ctx->expr().size(); ++i) {
             Value *condVal = visit(ctx->expr(i));
             if (condVal->isBoolean()) {
@@ -401,7 +401,7 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitConstraint_aggreggate_op(CSP2SATParser::Constraint_aggreggate_opContext *ctx) override {
+    antlrcpp::Any visitConstraint_aggreggate_op(BUPParser::Constraint_aggreggate_opContext *ctx) override {
         Value *k = nullptr;
         if (ctx->param) {
             k = visit(ctx->param);
@@ -442,8 +442,8 @@ public:
 
             return nullptr;
         }
-        catch (CSP2SATException &e) {
-            throw CSP2SATException(
+        catch (GOSException &e) {
+            throw GOSException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
                     ctx->list()->getText() + " must be a list of literals"
@@ -453,4 +453,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATCONSTRAINTSVISITOR_H
+#endif //CSP2SAT_GOSCONSTRAINTSVISITOR_H

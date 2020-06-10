@@ -7,7 +7,7 @@
 
 
 #include "../../../Helpers.h"
-#include "../../../Errors/CSP2SATExceptionsRepository.h"
+#include "../../../Errors/GOSExceptionsRepository.h"
 
 class ArraySymbol : public ScopedSymbol {
 

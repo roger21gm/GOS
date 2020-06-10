@@ -2,22 +2,22 @@
 // Created by Roger Generoso Masós on 19/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATEXCEPTION_H
-#define CSP2SAT_CSP2SATEXCEPTION_H
+#ifndef CSP2SAT_GOSEXCEPTION_H
+#define CSP2SAT_GOSEXCEPTION_H
 
 #include <exception>
 #include <string>
 
 using namespace std;
 
-class CSP2SATException : public exception {
+class GOSException : public exception {
 private:
     int line;
     int column;
     string message;
 
 public:
-    CSP2SATException(int line, int pos, const string &message) : line(line), column(pos), message(message) {
+    GOSException(int line, int pos, const string &message) : line(line), column(pos), message(message) {
         SymbolTable::errors = true;
     }
 
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATEXCEPTION_H
+#endif //CSP2SAT_GOSEXCEPTION_H

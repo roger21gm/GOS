@@ -2,60 +2,60 @@
 // Created by Roger Generoso Masós on 11/03/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATTYPEVARDEFINITIONVISITOR_H
-#define CSP2SAT_CSP2SATTYPEVARDEFINITIONVISITOR_H
+#ifndef CSP2SAT_GOSTYPEVARDEFINITIONVISITOR_H
+#define CSP2SAT_GOSTYPEVARDEFINITIONVISITOR_H
 
 
-#include "CSP2SATCustomBaseVisitor.h"
+#include "GOSCustomBaseVisitor.h"
 #include "Input/Param.h"
 
-using namespace CSP2SAT;
+using namespace GOS;
 using namespace std;
 
-class CSP2SATTypeVarDefinitionVisitor : public CSP2SATCustomBaseVisitor {
+class GOSTypeVarDefinitionVisitor : public GOSCustomBaseVisitor {
 private:
     ParamJSON *params;
 
 public:
-    explicit CSP2SATTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula *f, ParamJSON *params)
-            : CSP2SATCustomBaseVisitor(symbolTable, f) {
+    explicit GOSTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula *f, ParamJSON *params)
+            : GOSCustomBaseVisitor(symbolTable, f) {
         this->params = params;
     }
 
-    antlrcpp::Any visitEntityDefinitionBlock(CSP2SATParser::EntityDefinitionBlockContext *ctx) override {
+    antlrcpp::Any visitEntityDefinitionBlock(BUPParser::EntityDefinitionBlockContext *ctx) override {
         SymbolTable::entityDefinitionBlock = true;
-        CSP2SATBaseVisitor::visitEntityDefinitionBlock(ctx);
+        BUPBaseVisitor::visitEntityDefinitionBlock(ctx);
         SymbolTable::entityDefinitionBlock = false;
         return nullptr;
     }
 
-    antlrcpp::Any visitViewpointBlock(CSP2SATParser::ViewpointBlockContext *ctx) override {
-        return CSP2SATBaseVisitor::visitViewpointBlock(ctx);
+    antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
+        return BUPBaseVisitor::visitViewpointBlock(ctx);
     }
 
-    antlrcpp::Any visitConstraintDefinitionBlock(CSP2SATParser::ConstraintDefinitionBlockContext *ctx) override {
+    antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
         return nullptr;
     }
 
-    antlrcpp::Any visitOutputBlock(CSP2SATParser::OutputBlockContext *ctx) override {
+    antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
         return nullptr;
     }
 
 
-    antlrcpp::Any visitDefinition(CSP2SATParser::DefinitionContext *ctx) override {
+    antlrcpp::Any visitDefinition(BUPParser::DefinitionContext *ctx) override {
         try {
-            return CSP2SATBaseVisitor::visitDefinition(ctx);
+            return BUPBaseVisitor::visitDefinition(ctx);
         }
-        catch (CSP2SATException &e) {
+        catch (GOSException &e) {
             cerr << e.getErrorMessage() << endl;
             return nullptr;
         }
     }
 
 
-    antlrcpp::Any visitVarDefinition(CSP2SATParser::VarDefinitionContext *ctx) override {
+    antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
 
-        CSP2SATBaseVisitor::visitVarDefinition(ctx);
+        BUPBaseVisitor::visitVarDefinition(ctx);
         Symbol *newVar;
         string name = ctx->name->getText();
 
@@ -84,8 +84,8 @@ public:
 
     }
 
-    antlrcpp::Any visitParamDefinition(CSP2SATParser::ParamDefinitionContext *ctx) override {
-        CSP2SATBaseVisitor::visitParamDefinition(ctx);
+    antlrcpp::Any visitParamDefinition(BUPParser::ParamDefinitionContext *ctx) override {
+        BUPBaseVisitor::visitParamDefinition(ctx);
 
         Type *type = (Type *) currentScope->resolve(ctx->type->getText());
         Symbol *newConst;
@@ -132,25 +132,25 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitEntityDefinition(CSP2SATParser::EntityDefinitionContext *ctx) override {
+    antlrcpp::Any visitEntityDefinition(BUPParser::EntityDefinitionContext *ctx) override {
         StructSymbol *newType;
         newType = new StructSymbol(ctx->name->getText(), currentScope);
         currentScope->define(newType);
 
         currentScope = newType;
-        CSP2SATBaseVisitor::visitEntityDefinition(ctx);
+        BUPBaseVisitor::visitEntityDefinition(ctx);
         currentScope = currentScope->getEnclosingScope();
         return nullptr;
     }
 
-    antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
+    antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override {
         try {
             int value = this->params->resolve(ctx->getText());
             AssignableSymbol *access = new AssignableSymbol(ctx->getText(), SymbolTable::_integer);
             access->setValue(new IntValue(value));
             return (Symbol *) access;
         }
-        catch (CSP2SATException &e) {
+        catch (GOSException &e) {
             throw CSP2SATNotExistsException(
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
@@ -159,9 +159,9 @@ public:
         }
     }
 
-    antlrcpp::Any visitListResultExpr(CSP2SATParser::ListResultExprContext *ctx) override {
+    antlrcpp::Any visitListResultExpr(BUPParser::ListResultExprContext *ctx) override {
         if (!ctx->string()) {
-            return CSP2SATCustomBaseVisitor::visitListResultExpr(ctx);
+            return GOSCustomBaseVisitor::visitListResultExpr(ctx);
         } else {
             throw CSP2SATStringOnlyOutputException(
                     ctx->start->getLine(),
@@ -173,4 +173,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATTYPEVARDEFINITIONVISITOR_H
+#endif //CSP2SAT_GOSTYPEVARDEFINITIONVISITOR_H

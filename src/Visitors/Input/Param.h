@@ -10,8 +10,8 @@
 #include <map>
 #include <regex>
 #include <iostream>
-#include "../../Errors/CSP2SATException.h"
-#include "../../Errors/CSP2SATInputExceptionsRepository.h"
+#include "../../Errors/GOSException.h"
+#include "../../Errors/GOSInputExceptionsRepository.h"
 
 using namespace std;
 

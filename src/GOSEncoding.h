@@ -11,7 +11,7 @@
 #include "Symtab/Symbol/Scoped/ScopedSymbol.h"
 #include "Symtab/Symbol/Valued/VariableSymbol.h"
 
-class CSP2SATEncoding : public Encoding {
+class GOSEncoding : public Encoding {
 
 private:
     SMTFormula *f;
@@ -73,7 +73,7 @@ private:
 
 public:
 
-    CSP2SATEncoding(SMTFormula *formula, SymbolTable *st) {
+    GOSEncoding(SMTFormula *formula, SymbolTable *st) {
         this->f = formula;
         this->st = st;
     }

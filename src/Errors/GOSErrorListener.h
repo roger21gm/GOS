@@ -2,19 +2,19 @@
 // Created by Roger Generoso Masós on 13/04/2020.
 //
 
-#ifndef CSP2SAT_CSP2SATERRORLISTENER_H
-#define CSP2SAT_CSP2SATERRORLISTENER_H
+#ifndef CSP2SAT_GOSERRORLISTENER_H
+#define CSP2SAT_GOSERRORLISTENER_H
 
-#include <CSP2SATLexer.h>
+#include <BUPLexer.h>
 
-using namespace CSP2SAT;
+using namespace GOS;
 using namespace antlr4;
 
-class CSP2SATErrorListener : public ANTLRErrorListener {
+class GOSErrorListener : public ANTLRErrorListener {
 
 
 public:
-    ~CSP2SATErrorListener() override {
+    ~GOSErrorListener() override {
 
     }
 
@@ -40,4 +40,4 @@ public:
 };
 
 
-#endif //CSP2SAT_CSP2SATERRORLISTENER_H
+#endif //CSP2SAT_GOSERRORLISTENER_H

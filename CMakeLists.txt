@@ -1,4 +1,4 @@
-project(CSP2SAT)
+project(GOS)
 
 cmake_minimum_required(VERSION 3.5)
 
@@ -17,25 +17,24 @@ include_directories(${ANTLR4_INCLUDE_DIRS})
 # generate ANTLR files
 find_package(ANTLR REQUIRED)
 antlr_target(
-        CSP2SAT
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/CSP2SAT.g4
-        PACKAGE CSP2SAT
+        GOS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/BUP.g4
+        PACKAGE GOS
         VISITOR
 )
 
 antlr_target(
         JSON
         ${CMAKE_CURRENT_SOURCE_DIR}/src/JSON.g4
-        PACKAGE CSP2SAT
+        PACKAGE GOS
         VISITOR
 )
 
-include_directories(${ANTLR_CSP2SAT_OUTPUT_DIR})
+include_directories(${ANTLR_GOS_OUTPUT_DIR})
 include_directories(${ANTLR_JSON_OUTPUT_DIR})
 
 
-# build CSP2SATCompiler
-file(GLOB CSP2SAT_SRC "src/*.cpp")
+# build GOSCompiler
 include_directories(${PROJECT_SOURCE_DIR}/src/api/)
 include_directories(${PROJECT_SOURCE_DIR}/cmake-build-debug/antlr4cpp_generated_src)
 include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
@@ -43,7 +42,7 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/antlr)
 add_executable(
         CSP2SAT
         src/main.cpp
-        ${ANTLR_CSP2SAT_CXX_OUTPUTS}
+        ${ANTLR_GOS_CXX_OUTPUTS}
         ${ANTLR_JSON_CXX_OUTPUTS}
         src/api/smtformula.cpp
         src/api/smtapi.cpp
@@ -73,9 +72,6 @@ add_executable(
         src/api/solvers/minisat/simp/SimpSolver.cc
         src/api/solvers/minisat/core/Solver.cc
         src/api/util/util.cpp
-        src/api/util/errors.cpp
-        src/Errors/CSP2SATInputExceptionsRepository.h
-        src/Visitors/Output/CSP2SATOutputVisitor.h
-        src/Symtab/Symbol/StringSymbol.h src/Symtab/Symbol/formulaReturn.h)
+        src/api/util/errors.cpp)
 target_link_libraries(CSP2SAT antlr4_static)
 

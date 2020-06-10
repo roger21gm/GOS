@@ -1,17 +1,7 @@
-entities:
-    B {
-        param int c1;
-    };
-    A {
-        param int b1[5];
-        var x;
-        B a;
-    };
-
 viewpoint:
     param int n;
-    var p[n][n][n];
     param int iniSudoku[9][9];
+    var p[n][n][n];
 
 constraints:
     forall(i in 0..8, j in 0..8){

@@ -330,10 +330,6 @@ public:
     antlrcpp::Any visitVarAccess(CSP2SATParser::VarAccessContext *ctx) override {
         string a = ctx->TK_IDENT()->getText();
         string b = ctx->getText();
-        if (b == "hasStartedRow[i][b][j-rowNonos[i][b]-1]"){
-            cout << "aaa" << endl;
-        }
-
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
         if (var == nullptr) {

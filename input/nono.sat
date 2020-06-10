@@ -8,9 +8,9 @@ viewpoint:
 
     var x[rowSize][colSize];
     var hasStartedRow[rowSize][maxNonos][colSize];
+    var hasStartedCol[colSize][maxNonos][rowSize];
 
 constraints:
-
     //Order encoding
     forall(i in 0..rowSize-1, b in 0..maxNonos-1){
         if(rowNonos[i][b] != 0){
@@ -24,9 +24,10 @@ constraints:
     };
 
 
+
     forall(i in 0..rowSize-1, b in 0..maxNonos-1){
         if(rowNonos[i][b] != 0){
-            !hasStartedRow[i][b][colSize-rowNonos[i][b]];
+            hasStartedRow[i][b][colSize-rowNonos[i][b]];
         };
     };
 
@@ -35,7 +36,7 @@ constraints:
         if(rowNonos[i][b] != 0){
             forall(j in 0..colSize-1){
                 if(j >= rowNonos[i][b]){
-                    x[i][j] <- hasStartedRow[i][b][j] & !hasStartedRow[i][b][j-rowNonos[i][b]]; 
+                    x[i][j] <- hasStartedRow[i][b][j] & !hasStartedRow[i][b][j-rowNonos[i][b]];
                 }
                 else {
                     x[i][j] <- hasStartedRow[i][b][j];
@@ -49,9 +50,70 @@ constraints:
     };
 
     //Nono b abans que b+1.
-    forall(i in 0..rowSize-1, b in 0..maxNonos-2){
+forall(i in 0..rowSize-1, b in 0..maxNonos-2){
+    if(rowNonos[i][b+1] != 0){
         forall(j in 0..colSize-1){
-            hasStartedRow[i][b+1][j] -> hasStartedRow[i][b][j-rowNonos[i][b]-1];
+            if(j-rowNonos[i][b]-1 >= 0){
+                hasStartedRow[i][b+1][j] -> hasStartedRow[i][b][j-rowNonos[i][b]-1];
+            }
+            else {
+                !hasStartedRow[i][b+1][j];
+            };
+        };
+    };
+};
+
+
+
+    //Order encoding
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            forall(i in 0..rowSize-2){
+                hasStartedCol[j][b][i] -> hasStartedCol[j][b][i+1];
+            };
+        }
+        else{
+            &&( [!hasStartedCol[j][b][i] | i in 0..rowSize-1] );
+        };
+    };
+
+
+
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            hasStartedCol[j][b][rowSize-colNonos[j][b]];
+        };
+    };
+
+    //Channelling between hasStarted and x
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            forall(i in 0..rowSize-1){
+                if(i >= colNonos[j][b]){
+                    x[i][j] <- hasStartedCol[j][b][i] & !hasStartedCol[j][b][i-colNonos[j][b]]; 
+                }
+                else {
+                    x[i][j] <- hasStartedCol[j][b][i];
+                };
+            };
+        };
+    };
+
+    forall(j in 0..colSize-1){
+        EK(x[_][j], sum(colNonos[j]));
+    };
+
+    //Nono b abans que b+1.
+    forall(j in 0..colSize-1, b in 0..maxNonos-2){
+        if(colNonos[j][b+1] != 0){
+            forall(i in 0..rowSize-1){
+                if(i-colNonos[j][b]-1 >= 0){
+                    hasStartedCol[j][b+1][i] -> hasStartedCol[j][b][i-colNonos[j][b]-1];
+                }
+                else {
+                    !hasStartedCol[j][b+1][i];
+                };
+            };
         };
     };
     

@@ -95,6 +95,10 @@ Basically, the process would be like doing a compilation of a high-level languag
 
 # Installing GOS
 
+Go to [Installing GOS](https://github.com/roger21gm/GOS/wiki/Installing-GOS) wiki page.
+
 # Getting Started
+
+Go to [Getting Started](https://github.com/roger21gm/GOS/wiki/Getting-Started) wiki page.
 
 

@@ -12,7 +12,7 @@ One of the most successful methodologies for solving CSP relies on the conversio
 
 # GOS & BUP
 
-The of the tool is **GOS** (**G**irona **O**ptimization **S**ystem) and the language that uses is **BUP**.
+The name of the tool is **GOS** (**G**irona **O**ptimization **S**ystem) and the language that uses is **BUP**.
 
 > As a curiosity, the name choice lies in the fact that in [Catalan](https://en.wikipedia.org/wiki/Catalan_language), my mother tongue, GOS means dog and, also in Catalan, the onomatopoeia that describes the sound that dogs make (the language they speak) is BUP-BUP! (woof-woof!).
 Therefore, GOS (dog) is the name of the tool implemented and BUP (woof) is the language defined that is used by GOS. Apart from that, a real dog (GOS) can be considered a tracker, and that is also what the project is about: looking for a solution to CSPs.

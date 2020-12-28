@@ -36,7 +36,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: sudo apt-get update && sudo apt-get install uuid && cmake --build . --config $BUILD_TYPE
+      run: sudo apt-get update && sudo apt-get install uuid-dev && cmake --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: ${{runner.workspace}}/build

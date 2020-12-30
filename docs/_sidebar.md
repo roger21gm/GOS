@@ -1,6 +1,9 @@
 - Getting started
 
   - [Introduction](introduction.md)
+  - GOS & BUP
+    - [GOS](gos_result.md)
+    - [BUP](bup_result.md)
   - [Quick start](quickstart.md)
 
 
@@ -17,3 +20,4 @@
     - [Strings](strings.md)
 
 - [Glossary](glossary.md)
+- [Result](result.md)

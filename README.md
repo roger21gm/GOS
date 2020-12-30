@@ -1,3 +1,12 @@
+
+Documentation:
+[![version 1][docs-img]](https://roger21gm.github.io/GOS)
+
+[docs-img]: https://img.shields.io/badge/docs-v1-blue.svg
+
+# The GOS tool
+
+
 # Introduction
 
 ## Introduction

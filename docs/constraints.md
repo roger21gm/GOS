@@ -242,5 +242,3 @@ BUP supports `if` structures used to conditionally add constraints to the model.
 <else if ( <boolExpression> ) { <constraint>* } >*
 <else { <constraint>* } >?
 ```
-
-<a name="myfootnote1">1</a>: Footnote content goes here

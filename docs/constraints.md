@@ -59,10 +59,21 @@ These are the **GOS** operators and their precedence:
 | Implication        | ->       | Left          | 4          |
 | Double Implication | <->      | Left          | 5          |
 
-### Variable
-Accés to a declared variable
-### Negation
-The negation operator has the following truth table:
+<!-- tabs:start -->
+
+#### ** Variable **
+Acces to a declared variable
+
+```
+x
+```
+
+#### ** Negation **
+```
+!x
+```
+
+The *negation* operator has the following truth table:
 
 
 | a | !a |
@@ -80,12 +91,156 @@ The allowed operations using `!` operator are:
 | `OR_LITERALS`  | `!AND_LITERALS` |
 | `AND_LITERALS` | `!OR_LITERALS`  |
 
-### And
-### Or
-### Implication
-### Double Implication
+
+#### **And**
+```
+a & b
+```
+
+The *and* operator `&` has the following truth table:
 
 
-## Cardinality Constraint
+| a | b | a & b |
+|:-:|:-:|:-:|
+| 0 | 0 | 0 |
+| 0 | 1 | 0 |
+| 1 | 0 | 0 |
+| 1 | 1 | 1 |
+
+The *And* operation could also be constructed through a list using the operator `&&` and a list of clauses. As it is a unary operator, `&&` has the precedence in the same level as the negation operator (see operator precedence)
+
+```
+&&( <list> )
+```
+
+
+The allowed operations using `&` operator are:
+
+
+| Result         | Expression      |
+| -------------- | --------------- |
+| `OR_LITERALS & OR_LITERALS`      | `AND_CLAUSES`      |
+| `OR_LITERALS & AND_LITERALS`  | `AND_CLAUSES` |
+| `AND_LITERALS & OR_LITERALS` | `AND_CLAUSES`  |
+| `AND_LITERALS & AND_LITERALS` | `AND_LITERALS`  |
+| `AND_CLAUSES & AND_CLAUSES` | `AND_CLAUSES`  |
+| `AND_LITERALS & OR_LITERALS` | `AND_CLAUSES`  |
+| `AND_CLAUSES & AND_CLAUSES` | `AND_CLAUSES`  |
+
+#### **Or**
+```
+a | b
+```
+
+The *Or* operator `|` has the following truth table:
+
+
+| a | b | a \| b |
+|:-:|:-:|:-:|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 1 |
+
+The *Or* operation could also be constructed through a list using the operator `||` and a list of clauses. As it is a unary operator, `||` has the precedence in the same level as the negation operator (see operator precedence)
+
+```
+||( <list> )
+```
+
+
+The allowed operations using `&` operator are:
+
+
+| Result         | Expression      |
+| -------------- | --------------- |
+| `LITERAL | LITERAL`      | `OR_LITERALS`      |
+| `OR_LITERALS | OR_LITERALS`      | `OR_LITERALS`      |
+| `OR_LITERALS | AND_LITERALS`      | `AND_CLAUSES`      |
+
+#### **Implication**
+```
+a -> b
+```
+
+The *implication* operator has the following truth table:
+
+
+| a | b | a -> b |
+|:-:|:-:|:-:|
+| 0 | 0 | 1 |
+| 0 | 1 | 1 |
+| 1 | 0 | 0 |
+| 1 | 1 | 1 |
+
+
+The allowed operations using `->` operator are:
+
+
+| Result         | Expression      |
+| -------------- | --------------- |
+| `AND_LITERALS -> OR_LITERALS`      | `OR_LITERALS`      |
+| `OR_LITERALS <- AND_LITERALS`  | `OR_LITERALS` |
+| `LITERAL -> AND_LITERALS` | `AND_CLAUSES`  |
+| `AND_LITERALS <- LITERAL` | `AND_CLAUSES`  |
+
+
+#### **Double Implication**
+```
+a <-> b
+```
+
+
+The *double implication* operator has the following truth table:
+
+
+| a | b | a <-> b |
+|:-:|:-:|:-:|
+| 0 | 0 | 1 |
+| 0 | 1 | 0 |
+| 1 | 0 | 0 |
+| 1 | 1 | 1 |
+
+
+The allowed operations using `<->` operator are:
+
+
+| Result         | Expression      |
+| -------------- | --------------- |
+| `LITERAL <-> AND_LITERALS`      | `AND_CLAUSES`      |
+| `AND_LITERALS <-> LITERAL`  | `AND_CLAUSES` |
+| `LITERAL <-> OR_LITERALS` | `AND_CLAUSES`  |
+| `OR_LITERALS <-> LITERAL` | `AND_CLAUSES`  |
+
+<!-- tabs:end -->
+
+## Cardinality Constraints
+Apart from simple boolean formulas, **BUP** allows *Cardinality Constraints* in the model specification, that are later automatically translated to CNF by **GOS**. These kind of constraints state that at most (at least, or exactly) *k* out of a propositional literals list can be true.
+
+- Exactly One:  `EO( <list> )`
+- At Most One:  `AMO ( <list> )`
+- At Least One:  `ALO ( <list> )`
+- Exactly *k*:  `EK( <list> )`
+- At Most *k*:   `AMK ( <list> )`
+- At Least *k*:  `ALK ( <list> )`
+
 ## `forall` Structure
+*BUP* language support `forall` structures used to loop lists and add constraints to the model.
+
+```
+forall ( <ident> in <list> <, <ident> in <list> >*) {
+    <constraint>*
+};
+```
+
 ## `if` Structure
+
+BUP supports `if` structures used to conditionally add constraints to the model.
+
+```
+<if ( <boolExpression> ) { <constraint>* } >
+<else if ( <boolExpression> ) { <constraint>* } >*
+<else { <constraint>* } >?
+```
+
+<a name="myfootnote1">1</a>: Footnote content goes here

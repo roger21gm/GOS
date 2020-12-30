@@ -29,7 +29,7 @@ Written in **BUP** language defining:
 
 - Necessary **parameters** (initially fixed sudoku values, board size,...).
 - **Variables** used to model the problem.
-- [**Constraints**](https://github.com/roger21gm/GOS/wiki/Constraints) applied over those variables (no repeated numbers in each row, column and sub-square, initial values must be respected,...)
+- [**Constraints**](/constraints) applied over those variables (no repeated numbers in each row, column and sub-square, initial values must be respected,...)
 - **Output** format.
 
 

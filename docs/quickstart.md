@@ -1,4 +1,6 @@
-## Nonogram
+<!-- tabs:start -->
+
+#### ** Nonogram **
 
 Nonograms, also known as Picross or Griddlers, are image logic puzzles in which cells in a grid must be colored or blank according to the numbers on the side of the grid to reveal a hidden image. In this type of puzzle, numbers are a form of discrete tomography that measures the number of continuous lines of filled-in squares there are in any given row or column. For example, a track of "4 8 3" would mean that there are sets of four, eight, and three filled squares, in that order, with at least one blank square between successive groups.
 
@@ -94,7 +96,7 @@ forall(i in 0..rowSize-1, b in 0..maxNonos-2){
 
 
 
-## Sudoku
+#### ** Sudoku **
 
 Sudoku is a popular Japanese puzzle that is based on the logical placement of numbers. The goal of Sudoku is to fill in a 9×9 grid with digits so that each column, row, and 3×3 section contain the numbers between 1 to 9. At the beginning of the game, the 9×9 grid will have some of the squares filled in. Your job is to use logic to fill in the missing digits and complete the grid.
 
@@ -186,5 +188,9 @@ Solució sudoku:
 4 3 8  5 2 6  9 1 7  
 7 9 6  3 1 8  4 5 2 
 ```
+
+<!-- tabs:end -->
+
+
 
 

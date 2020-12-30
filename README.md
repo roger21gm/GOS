@@ -22,6 +22,50 @@ GOS is a declarative tool for modelling and solving any CSP to SAT, improving it
 
 ![](https://i.imgur.com/orO0kZ8.jpg)
 
+# Building GOS
+
+To get the compiler executable follow the following steps:
+
+1. Clone the GOS GitHub repository
+```
+git clone https://github.com/roger21gm/GOS
+```
+2. Change current directory to the cloned repository
+```
+cd GOS
+```
+3. Create a directory to build the project
+```
+mkdir build
+```
+4. Change current directory to the created build directory
+```
+cd build
+```
+5. Run CMake to generate the makefile according to your OS and hardware
+```
+cmake ..
+```
+6. Finally run the makefile to generate the executable
+```
+make
+```
+
+# Running GOS
+
+Once make process ends, the executable file `./gos` is generated inside build directory. You can use *GOS* by adding two input files:
+- Model file written in BUP (see [documentation](https://roger21gm.github.io/gos))
+- Parameters file written in JSON 
+
+Having the current directory in the build directory, to run the compiler and get a solution, only write:
+```
+./gos <path_to_model_file> <path_to_model_file>
+```
+
+On the other hand, if you want to get the CNF formula in DIMACS format include the option `-pf=1` or `--print-formula`:
+```
+./gos -pf=1 <path_to_model_file> <path_to_model_file>
+```
 
 # Resources
 

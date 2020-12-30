@@ -1,14 +1,4 @@
 
-Documentation:
-[![version 1][docs-img]](https://roger21gm.github.io/GOS)
-
-[docs-img]: https://img.shields.io/badge/docs-v1-blue.svg
-
-# The GOS tool
-
-
-# Introduction
-
 ## Introduction
 
 **C**onstraint **S**atisfaction Problems \(**CSP**s\) consists on finding values for a set of variables subject to a set of constraints. Examples of CSPs are well-known puzzles such as Sudoku or problems appearing in industry such as Scheduling or Timetabling. This kind of problems can be easily modelled with declarative programming languages.

@@ -22,6 +22,12 @@ GOS is a declarative tool for modelling and solving any CSP to SAT, improving it
 
 ![](https://i.imgur.com/orO0kZ8.jpg)
 
+# Resources
+
+:house: Homepage: https://roger21gm.github.io/gos
+:books: Documentation: https://roger21gm.github.io/gos
+:file_folder: Source Code: https://github.com/roger21gm/GOS
+
 # Building GOS
 
 To get the compiler executable follow the following steps:
@@ -66,9 +72,3 @@ On the other hand, if you want to get the CNF formula in DIMACS format include t
 ```
 ./gos -pf=1 <path_to_model_file> <path_to_model_file>
 ```
-
-# Resources
-
-- Homepage: https://roger21gm.github.io/gos
-- Documentation: https://roger21gm.github.io/gos
-- Source Code: https://github.com/roger21gm/GOS

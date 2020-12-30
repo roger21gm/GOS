@@ -1,4 +1,4 @@
-# GOS
+# Introduction
 
 ## Introduction
 

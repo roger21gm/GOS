@@ -1,8 +1,8 @@
 
 
-# BUP language specification
+# Language specification
 
-This chapter contains the specification of the **BUP** modelling language, the language of **GOS**. 
+This chapter contains the specification of the **BUP** modelling language, the language of **GOS** tool. 
 
 **BUP** is a SAT-oriented declarative CSP modelling programming language. Similarly as we do with imperative languages, we want models written in BUP language to be as much reusable as possible, i.e., we want to separate the problem definition from the data of a particular instance.
 

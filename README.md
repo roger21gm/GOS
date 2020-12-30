@@ -24,9 +24,9 @@ GOS is a declarative tool for modelling and solving any CSP to SAT, improving it
 
 # Resources
 
-:house: Homepage: https://roger21gm.github.io/gos
-:books: Documentation: https://roger21gm.github.io/gos
-:file_folder: Source Code: https://github.com/roger21gm/GOS
+:house: Homepage: https://roger21gm.github.io/gos <br/>
+:books: Documentation: https://roger21gm.github.io/gos <br/>
+:file_folder: Source Code: https://github.com/roger21gm/GOS <br/>
 
 # Building GOS
 

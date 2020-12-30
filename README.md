@@ -24,8 +24,8 @@ GOS is a declarative tool for modelling and solving any CSP to SAT, improving it
 
 # Resources
 
-:house: Homepage: https://roger21gm.github.io/gos <br/>
-:books: Documentation: https://roger21gm.github.io/gos <br/>
+:house: Homepage: https://roger21gm.github.io/GOS <br/>
+:books: Documentation: https://roger21gm.github.io/GOS <br/>
 :file_folder: Source Code: https://github.com/roger21gm/GOS <br/>
 
 # Building GOS
@@ -60,7 +60,7 @@ make
 # Running GOS
 
 Once make process ends, the executable file `./gos` is generated inside build directory. You can use *GOS* by adding two input files:
-- Model file written in BUP (see [documentation](https://roger21gm.github.io/gos))
+- Model file written in BUP (see [documentation](https://roger21gm.github.io/GOS))
 - Parameters file written in JSON 
 
 Having the current directory in the build directory, to run the compiler and get a solution, only write:

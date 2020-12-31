@@ -1,3 +1,5 @@
+![a](https://i.imgur.com/dqq0PTd.png)
+
 ## Introduction
 
 **C**onstraint **S**atisfaction Problems \(**CSP**s\) consists on finding values for a set of variables subject to a set of constraints. Examples of CSPs are well-known puzzles such as Sudoku or problems appearing in industry such as Scheduling or Timetabling. This kind of problems can be easily modelled with declarative programming languages.

@@ -1,8 +1,5 @@
 ![a](https://i.imgur.com/dqq0PTd.png)
 
-
-
-
 ## Introduction
 
 **C**onstraint **S**atisfaction Problems \(**CSP**s\) consists on finding values for a set of variables subject to a set of constraints. Examples of CSPs are well-known puzzles such as Sudoku or problems appearing in industry such as Scheduling or Timetabling. This kind of problems can be easily modelled with declarative programming languages.
@@ -34,7 +31,7 @@ GOS is a declarative tool for modelling and solving any CSP to SAT, improving it
 :file_folder: Source Code: https://github.com/roger21gm/GOS <br/>
 :globe_with_meridians: Online demo: https://gos.rgeneroso.online <br/>
 
-# Building GOS
+## Building GOS
 
 To get the compiler executable follow the following steps:
 
@@ -63,7 +60,7 @@ cmake ..
 make
 ```
 
-# Running GOS
+## Running GOS
 
 Once make process ends, the executable file `./gos` is generated inside build directory. You can use *GOS* by adding two input files:
 - Model file written in BUP (see [documentation](https://roger21gm.github.io/GOS))

@@ -10,7 +10,7 @@ markdown_extensions:
    - pymdownx.superfences
 nav:
    - Getting Started:
-      - Introduction: 'introduction.md'
+      - Introduction: 'README.md'
       - GOS & BUP:
          - GOS: 'gos_result.md'
          - BUP: 'bup_result.md'

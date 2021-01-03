@@ -8,6 +8,17 @@ markdown_extensions:
    - admonition
    - pymdownx.tabbed
    - pymdownx.superfences
+repo_url: https://github.com/roger21gm/GOS
+repo_name: roger21gm/GOS
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/roger21gm
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/roger21gm
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/rogergeneroso
+
 nav:
    - Getting Started:
       - Introduction: 'README.md'
@@ -26,3 +37,8 @@ nav:
       - Lists: lists.md
       - Constraints: constraints.md
       - Strings: strings.md
+
+# Google Analytics
+google_analytics:
+  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - auto

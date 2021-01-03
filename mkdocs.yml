@@ -1,0 +1,28 @@
+site_name: GOS
+theme:
+  name: 'material'
+  features:
+    - navigation.tabs
+    - navigation.sections
+markdown_extensions:
+   - admonition
+   - pymdownx.tabbed
+   - pymdownx.superfences
+nav:
+   - Getting Started:
+      - Introduction: 'introduction.md'
+      - GOS & BUP:
+         - GOS: 'gos_result.md'
+         - BUP: 'bup_result.md'
+      - Quick start: 'quickstart.md'
+   - Language Specification:
+      - Introduction: bup_intro.md
+      - Blocks: bup.md
+      - Data types: data.md
+      - Identifiers: identifiers.md
+      - Comments: comments.md
+      - Expressions: expr.md
+      - Data access: access.md
+      - Lists: lists.md
+      - Constraints: constraints.md
+      - Strings: strings.md

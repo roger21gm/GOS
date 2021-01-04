@@ -2,6 +2,7 @@
 # BUP program structure
 
 The model file structure is divided in four blocks:
+
 - **Entity definition block**, where entities are defined.
 - **Viewpoint block**, where variables and parameters are declared.
 - **Constraints block**, where constraints are defined.

@@ -1,4 +1,5 @@
 A **constraint** in GOS can be (and only be) a:
+
 - Propositional Formula
 - Cardinality Constraint
 - `forall` structure

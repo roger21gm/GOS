@@ -37,7 +37,7 @@ nav:
       - Lists: lists.md
       - Constraints: constraints.md
       - Strings: strings.md
-
+   - Online demo: https://gos.rgeneroso.online
 # Google Analytics
 google_analytics:
   - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]

@@ -1,5 +1,6 @@
 //
 // Created by Roger Generoso Masós on 20/04/2020.
+// Edited by David Pérez Sánchez on 07/04/2022
 //
 
 #ifndef CSP2SAT_PARAM_H
@@ -18,6 +19,7 @@ using namespace std;
 class Param {
 public:
     Param(const string &name) : name(name) {}
+    virtual ~Param() {};
 
     virtual bool isValuable() = 0;
 
@@ -28,6 +30,7 @@ public:
 class ParamValuable : public Param {
 public:
     ParamValuable(const string &name) : Param(name) {}
+    virtual ~ParamValuable() {};
 
     bool isValuable() override {
         return true;
@@ -62,7 +65,8 @@ public:
 class ParamScoped : public Param {
 public:
     ParamScoped(const string &name) : Param(name) {}
-
+    virtual ~ParamScoped() {};
+    
     bool isValuable() override {
         return false;
     }

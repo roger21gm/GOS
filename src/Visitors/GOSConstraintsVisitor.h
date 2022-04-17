@@ -7,6 +7,7 @@
 
 #include "../Symtab/Symbol/formulaReturn.h"
 
+namespace GOS {
 
 class GOSConstraintsVisitor : public GOSCustomBaseVisitor {
 public:
@@ -391,8 +392,8 @@ public:
                         ctx->expr(i)->start->getLine(),
                         ctx->expr(i)->start->getCharPositionInLine(),
                         ctx->expr(i)->getText(),
-                        Utils::getTypeName(SymbolTable::tInt),
-                        Utils::getTypeName(SymbolTable::tBool)
+                        VisitorsUtils::getTypeName(SymbolTable::tInt),
+                        VisitorsUtils::getTypeName(SymbolTable::tBool)
                 );
             }
         }
@@ -409,7 +410,7 @@ public:
         ArraySymbol *list = visit(ctx->list());
 
         try {
-            vector<literal> literalList = Utils::getLiteralVectorFromVariableArraySymbol(list);
+            vector<literal> literalList = VisitorsUtils::getLiteralVectorFromVariableArraySymbol(list);
             if (k != nullptr) {
                 if (ctx->aggregate_op()->getText() == "EK") {
                     this->_f->addEK(literalList, k->getRealValue());
@@ -452,5 +453,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_GOSCONSTRAINTSVISITOR_H

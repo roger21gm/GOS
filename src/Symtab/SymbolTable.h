@@ -14,6 +14,8 @@
 #include "Value/Value.h"
 #include "Symbol/Valued/AssignableSymbol.h"
 
+namespace GOS {
+
 class SymbolTable {
 
 public:
@@ -102,6 +104,6 @@ BuiltInTypeSymbol * SymbolTable::_formula = new BuiltInTypeSymbol("formula", Sym
 bool SymbolTable::entityDefinitionBlock = false;
 bool SymbolTable::errors = false;
 
-
+}
 
 #endif //CSP2SAT_SYMBOLTABLE_H

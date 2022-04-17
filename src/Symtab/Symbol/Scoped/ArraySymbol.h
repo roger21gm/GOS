@@ -5,9 +5,10 @@
 #ifndef CSP2SAT_ARRAYSYMBOL_H
 #define CSP2SAT_ARRAYSYMBOL_H
 
-
-#include "../../../Helpers.h"
+#include "../../../GOSUtils.h"
 #include "../../../Errors/GOSExceptionsRepository.h"
+
+namespace GOS {
 
 class ArraySymbol : public ScopedSymbol {
 
@@ -36,7 +37,7 @@ public:
     }
 
     Symbol *resolve(const string& name) override {
-        bool isNumber = Helpers::check_number(name);
+        bool isNumber = Utils::check_number(name);
 
         if(isNumber){
             int index = stoi(name);
@@ -50,7 +51,7 @@ public:
     }
 
     bool existsInScope(const string &name) override {
-        bool isNumber = Helpers::check_number(name);
+        bool isNumber = Utils::check_number(name);
         if(isNumber){
             int index = stoi(name);
             return index < size;
@@ -92,11 +93,8 @@ public:
         elements.push_back(sym);
         size++;
     }
-
-
-
-
 };
 
+}
 
 #endif //CSP2SAT_ARRAYSYMBOL_H

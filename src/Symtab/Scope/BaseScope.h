@@ -5,11 +5,10 @@
 #ifndef CSP2SAT_BASESCOPE_H
 #define CSP2SAT_BASESCOPE_H
 
-
 #include <map>
 #include "Scope.h"
 
-using namespace std;
+namespace GOS {
 
 class BaseScope: public Scope {
 
@@ -51,5 +50,6 @@ protected:
     map<string, Symbol*> symbols;
 };
 
+}
 
 #endif //CSP2SAT_BASESCOPE_H

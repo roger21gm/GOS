@@ -11,6 +11,8 @@
 #include "../SymbolTable.h"
 #include "smtapi.h"
 
+namespace GOS {
+
 class formulaReturn : public Symbol {
 
 public:
@@ -32,5 +34,6 @@ public:
     vector<clause> clauses;
 };
 
+}
 
 #endif //CSP2SAT_FORMULARETURN_H

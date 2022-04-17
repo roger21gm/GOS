@@ -3,6 +3,7 @@ cmake-build-debug
 .vs
 .vscode
 .DS_Store
+.antlr
 gen
 deps/antlr/.nosync
 build

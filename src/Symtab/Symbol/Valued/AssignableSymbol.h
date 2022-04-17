@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_ASSIGNABLESYMBOL_H
 #define CSP2SAT_ASSIGNABLESYMBOL_H
 
-
 #include "../Valued/ValueSymbol.h"
+
+namespace GOS {
 
 class AssignableSymbol: public ValueSymbol {
 public:
@@ -30,5 +31,6 @@ private:
     Value * val;
 };
 
+}
 
 #endif //CSP2SAT_ASSIGNABLESYMBOL_H

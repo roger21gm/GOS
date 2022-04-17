@@ -5,12 +5,15 @@
 #ifndef CSP2SAT_GOSTYPEVARDEFINITIONVISITOR_H
 #define CSP2SAT_GOSTYPEVARDEFINITIONVISITOR_H
 
-
 #include "GOSCustomBaseVisitor.h"
 #include "Input/Param.h"
+#include <string>
+#include <vector>
 
-using namespace GOS;
-using namespace std;
+using std::string;
+using std::vector;
+
+namespace GOS {
 
 class GOSTypeVarDefinitionVisitor : public GOSCustomBaseVisitor {
 private:
@@ -54,7 +57,6 @@ public:
 
 
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
-
         BUPBaseVisitor::visitVarDefinition(ctx);
         Symbol *newVar;
         string name = ctx->name->getText();
@@ -73,7 +75,7 @@ public:
                 Value *a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
-            newVar = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
+            newVar = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
                                            this->_f, this->params);
         } else {
             newVar = new VariableSymbol(ctx->name->getText(), this->_f);
@@ -108,10 +110,10 @@ public:
                 dimentions.push_back(a->getRealValue());
             }
 
-            newConst = Utils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f,
+            newConst = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f,
                                              this->params);
         } else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = Utils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope,
+            newConst = VisitorsUtils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope,
                                                         this->_f, this->params);
         } else {
             AssignableSymbol *element = new AssignableSymbol(
@@ -172,5 +174,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_GOSTYPEVARDEFINITIONVISITOR_H

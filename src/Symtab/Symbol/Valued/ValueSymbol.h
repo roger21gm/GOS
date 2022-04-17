@@ -5,13 +5,15 @@
 #ifndef CSP2SAT_VALUESYMBOL_H
 #define CSP2SAT_VALUESYMBOL_H
 
-
 #include "../Symbol.h"
+
+namespace GOS {
 
 class ValueSymbol : public Symbol {
 public:
     ValueSymbol(const string &name, Type *type) : Symbol(name, type) {}
 };
 
+}
 
 #endif //CSP2SAT_VALUESYMBOL_H

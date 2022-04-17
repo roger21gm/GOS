@@ -7,6 +7,7 @@
 
 #include "ValueSymbol.h"
 
+namespace GOS {
 
 class VariableSymbol: public ValueSymbol {
 public:
@@ -41,5 +42,6 @@ private:
     bool modelValue;
 };
 
+}
 
 #endif //CSP2SAT_VARIABLESYMBOL_H

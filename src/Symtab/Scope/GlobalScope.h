@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_GLOBALSCOPE_H
 #define CSP2SAT_GLOBALSCOPE_H
 
-
 #include "BaseScope.h"
+
+namespace GOS {
 
 class GlobalScope: public BaseScope {
 public:
@@ -22,5 +23,6 @@ public:
 
 };
 
+}
 
 #endif //CSP2SAT_GLOBALSCOPE_H

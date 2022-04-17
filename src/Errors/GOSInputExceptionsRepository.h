@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H
 #define CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H
 
-
 #include "GOSException.h"
+
+namespace GOS {
 
 class CSP2SATBadInputTypeException : public GOSException {
 public:
@@ -40,6 +41,6 @@ public:
             ) {}
 };
 
-
+}
 
 #endif //CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H

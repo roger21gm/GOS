@@ -8,8 +8,7 @@
 #include <string>
 #include "../Symbol/Symbol.h"
 
-using namespace std;
-
+namespace GOS {
 
 class Scope {
 public:
@@ -22,5 +21,6 @@ public:
     virtual map<string, Symbol*> getScopeSymbols() = 0;
 };
 
+}
 
 #endif //CSP2SAT_SCOPE_H

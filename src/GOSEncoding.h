@@ -7,9 +7,21 @@
 
 
 #include <encoding.h>
+#include <string.h>
 #include "Symtab/SymbolTable.h"
 #include "Symtab/Symbol/Scoped/ScopedSymbol.h"
 #include "Symtab/Symbol/Valued/VariableSymbol.h"
+
+// std
+#include <string>
+#include <vector>
+#include <map>
+
+using std::string;
+using std::vector;
+using std::map;
+
+namespace GOS {
 
 class GOSEncoding : public Encoding {
 
@@ -102,5 +114,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_CSP2SATENCODING_H

@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_GOSOUTPUTVISITOR_H
 #define CSP2SAT_GOSOUTPUTVISITOR_H
 
-
 #include "../GOSCustomBaseVisitor.h"
+
+namespace GOS {
 
 class CSP2SATOutputVisitor : public GOSCustomBaseVisitor {
 
@@ -53,7 +54,7 @@ public:
         if(ctx->TK_STRING()){
             string iniText = ctx->TK_STRING()->getText();
             iniText.erase(std::remove(iniText.begin(),iniText.end(),'\"'),iniText.end());
-            result = Helpers::toRawString(iniText);
+            result = GOS::Utils::toRawString(iniText);
 
         }
         else if(ctx->stringTernary()){
@@ -149,6 +150,6 @@ public:
     }
 };
 
-
+}
 
 #endif //CSP2SAT_GOSOUTPUTVISITOR_H

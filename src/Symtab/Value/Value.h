@@ -5,7 +5,7 @@
 #ifndef CSP2SAT_VALUE_H
 #define CSP2SAT_VALUE_H
 
-using namespace std;
+namespace GOS {
 
 class Value {
 public:
@@ -14,5 +14,6 @@ public:
     virtual bool isBoolean() = 0;
 };
 
+}
 
 #endif //CSP2SAT_VALUE_H

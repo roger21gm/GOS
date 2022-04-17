@@ -7,11 +7,9 @@
 
 #include <BUPLexer.h>
 
-using namespace GOS;
-using namespace antlr4;
+namespace GOS {
 
 class GOSErrorListener : public ANTLRErrorListener {
-
 
 public:
     ~GOSErrorListener() override {
@@ -39,5 +37,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_GOSERRORLISTENER_H

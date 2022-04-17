@@ -9,8 +9,7 @@
 #include <utility>
 #include "Symbol/Symbol.h"
 
-using namespace std;
-
+namespace GOS {
 
 class Type : public Symbol {
 public:
@@ -31,5 +30,7 @@ private:
     int typeIndex;
 
 };
+
+}
 
 #endif //CSP2SAT_TYPE_H

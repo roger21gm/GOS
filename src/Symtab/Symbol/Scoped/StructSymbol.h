@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_STRUCTSYMBOL_H
 #define CSP2SAT_STRUCTSYMBOL_H
 
-
 #include "ScopedSymbol.h"
+
+namespace GOS {
 
 class StructSymbol : public ScopedSymbol {
 
@@ -44,5 +45,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_STRUCTSYMBOL_H

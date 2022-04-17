@@ -20,7 +20,6 @@
 #include <controllers/basiccontroller.h>
 #include "Symtab/SymbolTable.h"
 
-
 // custom listener
 #include "Visitors/GOSTypeVarDefinitionVisitor.h"
 #include "Visitors/GOSConstraintsVisitor.h"
@@ -31,9 +30,15 @@
 #include "Visitors/Input/GOSJSONInputVisitor.h"
 #include "Visitors/Output/GOSOutputVisitor.h"
 
-using namespace antlr4;
-using namespace GOS;
-using namespace std;
+// std
+#include <string>
+#include <vector>
+
+using namespace antlr4; // TODO correct?
+using std::string; // TODO correct?
+using std::vector;
+
+namespace GOS {
 
 class GOSCompiler {
 private:
@@ -113,5 +118,6 @@ private:
 
 };
 
+}
 
 #endif //CSP2SAT_CSP2SATCOMPILER_H

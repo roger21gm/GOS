@@ -7,6 +7,8 @@
 
 #include "../Type.h"
 
+namespace GOS {
+
 class BuiltInTypeSymbol: public Type {
 public:
     BuiltInTypeSymbol(const string &name, int typeIndex) : Type(typeIndex, name) {}
@@ -16,5 +18,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_BUILTINTYPESYMBOL_H

@@ -9,9 +9,7 @@
 #include "Param.h"
 #include "../../Errors/GOSInputExceptionsRepository.h"
 
-
-using namespace GOS;
-using namespace std;
+namespace GOS {
 
 class GOSJSONInputVisitor : public JSONBaseVisitor {
 
@@ -49,6 +47,7 @@ public:
         } else if (ctx->value()->arr()) {
             ParamArray *array = new ParamArray(varName);
             current->add(array);
+            // TODO Why not add(visit(ctx->value()->arr()))?? (if visit returned the appropiate object instead of nullptr)
             current = array;
             visit(ctx->value()->arr());
             current = curr;
@@ -123,5 +122,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_GOSJSONINPUTVISITOR_H

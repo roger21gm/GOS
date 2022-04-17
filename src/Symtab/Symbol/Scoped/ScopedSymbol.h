@@ -8,7 +8,7 @@
 
 #include "../../Type.h"
 
-
+namespace GOS {
 
 class ScopedSymbol : public Scope, public Type  {
 
@@ -48,6 +48,6 @@ public:
     }
 };
 
-
+}
 
 #endif //CSP2SAT_SCOPEDSYMBOL_H

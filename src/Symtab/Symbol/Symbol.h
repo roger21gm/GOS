@@ -5,11 +5,9 @@
 #ifndef CSP2SAT_SYMBOL_H
 #define CSP2SAT_SYMBOL_H
 
+namespace GOS {
 
-
-using namespace std;
-
-class Scope;
+class Scope; // TODO redefinition??
 class Type;
 
 class Symbol {
@@ -32,5 +30,6 @@ public:
     Type *type = nullptr;
 };
 
+}
 
 #endif //CSP2SAT_SYMBOL_H

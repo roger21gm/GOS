@@ -1,6 +1,5 @@
 //
 // Created by Roger Generoso Masós on 20/04/2020.
-// Edited by David Pérez Sánchez on 07/04/2022
 //
 
 #ifndef CSP2SAT_PARAM_H
@@ -14,7 +13,7 @@
 #include "../../Errors/GOSException.h"
 #include "../../Errors/GOSInputExceptionsRepository.h"
 
-using namespace std;
+namespace GOS {
 
 class Param {
 public:
@@ -117,7 +116,7 @@ public:
     map<string, Param*> elements;
 
     int resolve(string attrAccess) {
-        vector<string> splitted = Helpers::splitVarAccessNested(attrAccess);
+        vector<string> splitted = Utils::splitVarAccessNested(attrAccess);
 
         string currAccess = "";
 
@@ -147,10 +146,6 @@ public:
     }
 };
 
-
-
-
-
-
+}
 
 #endif //CSP2SAT_PARAM_H

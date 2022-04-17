@@ -5,9 +5,10 @@
 #ifndef CSP2SAT_INTVALUE_H
 #define CSP2SAT_INTVALUE_H
 
-
 #include <string>
 #include "Value.h"
+
+namespace GOS {
 
 class IntValue : public Value {
 
@@ -32,5 +33,6 @@ private:
     int realIntValue;
 };
 
+}
 
 #endif //CSP2SAT_INTVALUE_H

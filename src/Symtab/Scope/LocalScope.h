@@ -7,6 +7,8 @@
 
 #include "BaseScope.h"
 
+namespace GOS {
+
 class LocalScope: public BaseScope {
 
 public:
@@ -25,5 +27,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_LOCALSCOPE_H

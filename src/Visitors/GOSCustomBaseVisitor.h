@@ -10,16 +10,21 @@
 #include "../Symtab/Value/Value.h"
 #include "../Symtab/Value/BoolValue.h"
 #include "../Symtab/Value/IntValue.h"
-#include "../Visitors/Utils.h"
+#include "../Visitors/VisitorsUtils.h"
 #include "../Errors/GOSException.h"
 #include "../Errors/GOSExceptionsRepository.h"
 #include "../Symtab/Scope/LocalScope.h"
 #include "../Symtab/Symbol/StringSymbol.h"
 #include "../Symtab/Symbol/formulaReturn.h"
+#include <string>
+#include <vector>
+#include <map>
 
+using std::string;
+using std::vector;
+using std::map;
 
-using namespace GOS;
-using namespace std;
+namespace GOS {
 
 class GOSCustomBaseVisitor : public BUPBaseVisitor {
 
@@ -109,8 +114,8 @@ public:
                         ctx->start->getStartIndex(),
                         ctx->start->getCharPositionInLine(),
                         ctx->getText(),
-                        "list<" + Utils::getTypeName(list->getElementsType()->getTypeIndex()) + ">",
-                        Utils::getTypeName(SymbolTable::tInt)
+                        "list<" + VisitorsUtils::getTypeName(list->getElementsType()->getTypeIndex()) + ">",
+                        VisitorsUtils::getTypeName(SymbolTable::tInt)
                     );
         }
 
@@ -143,8 +148,8 @@ public:
                             ctx->exprEq(i)->getStart()->getLine(),
                             ctx->exprEq(i)->getStart()->getCharPositionInLine(),
                             ctx->getText(),
-                            Utils::getTypeName(SymbolTable::tInt),
-                            Utils::getTypeName(SymbolTable::tBool)
+                            VisitorsUtils::getTypeName(SymbolTable::tInt),
+                            VisitorsUtils::getTypeName(SymbolTable::tBool)
                     );
                 }
             }
@@ -189,8 +194,8 @@ public:
                         ctx->exprSumDiff(0)->start->getLine(),
                         ctx->exprSumDiff(0)->start->getCharPositionInLine(),
                         ctx->exprSumDiff(0)->getText(),
-                        Utils::getTypeName(SymbolTable::tBool),
-                        Utils::getTypeName(SymbolTable::tInt)
+                        VisitorsUtils::getTypeName(SymbolTable::tBool),
+                        VisitorsUtils::getTypeName(SymbolTable::tInt)
                 );
             }
             if (rVal->isBoolean()) {
@@ -198,8 +203,8 @@ public:
                         ctx->exprSumDiff(1)->start->getLine(),
                         ctx->exprSumDiff(1)->start->getCharPositionInLine(),
                         ctx->exprSumDiff(1)->getText(),
-                        Utils::getTypeName(SymbolTable::tBool),
-                        Utils::getTypeName(SymbolTable::tInt)
+                        VisitorsUtils::getTypeName(SymbolTable::tBool),
+                        VisitorsUtils::getTypeName(SymbolTable::tInt)
                 );
             };
 
@@ -240,8 +245,8 @@ public:
                             ctx->exprMulDivMod(1)->start->getLine(),
                             ctx->exprMulDivMod(1)->start->getCharPositionInLine(),
                             ctx->exprMulDivMod(1)->getText(),
-                            Utils::getTypeName(SymbolTable::tBool),
-                            Utils::getTypeName(SymbolTable::tInt)
+                            VisitorsUtils::getTypeName(SymbolTable::tBool),
+                            VisitorsUtils::getTypeName(SymbolTable::tInt)
                     );
                 }
 
@@ -283,8 +288,8 @@ public:
                         ctx->start->getLine(),
                         ctx->start->getCharPositionInLine(),
                         ctx->getText(),
-                        Utils::getTypeName(SymbolTable::tInt),
-                        Utils::getTypeName(SymbolTable::tBool)
+                        VisitorsUtils::getTypeName(SymbolTable::tInt),
+                        VisitorsUtils::getTypeName(SymbolTable::tBool)
                 );
             }
         }
@@ -303,8 +308,8 @@ public:
                         ctx->getStart()->getLine(),
                         ctx->getStart()->getCharPositionInLine(),
                         ctx->getText(),
-                        Utils::getTypeName(value->type->getTypeIndex()),
-                        Utils::getTypeName(SymbolTable::tInt)
+                        VisitorsUtils::getTypeName(value->type->getTypeIndex()),
+                        VisitorsUtils::getTypeName(SymbolTable::tInt)
                 );
             }
         }
@@ -471,8 +476,8 @@ public:
                             ctx->condExpr->start->getLine(),
                             ctx->condExpr->start->getCharPositionInLine(),
                             ctx->condExpr->getText(),
-                            Utils::getTypeName(SymbolTable::tInt),
-                            Utils::getTypeName(SymbolTable::tBool)
+                            VisitorsUtils::getTypeName(SymbolTable::tInt),
+                            VisitorsUtils::getTypeName(SymbolTable::tBool)
                     );
                 }
                 condition = cond->getRealValue() == 1;
@@ -530,7 +535,7 @@ public:
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
                     ctx->getText(),
-                    Utils::getTypeName(array->type->getTypeIndex()),
+                    VisitorsUtils::getTypeName(array->type->getTypeIndex()),
                     "array"
             );
         }
@@ -571,8 +576,8 @@ public:
                         currVal->start->getLine(),
                         currVal->start->getCharPositionInLine(),
                         currVal->getText(),
-                        Utils::getTypeName(curr->type->getTypeIndex()),
-                        Utils::getTypeName(resultList->getElementsType()->getTypeIndex())
+                        VisitorsUtils::getTypeName(curr->type->getTypeIndex()),
+                        VisitorsUtils::getTypeName(resultList->getElementsType()->getTypeIndex())
                 );
             }
         }
@@ -602,5 +607,6 @@ protected:
     }
 };
 
+}
 
 #endif //CSP2SAT_GOSCUSTOMBASEVISITOR_H

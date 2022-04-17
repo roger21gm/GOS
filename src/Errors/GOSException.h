@@ -8,7 +8,7 @@
 #include <exception>
 #include <string>
 
-using namespace std;
+namespace GOS {
 
 class GOSException : public exception {
 private:
@@ -27,5 +27,6 @@ public:
     }
 };
 
+}
 
 #endif //CSP2SAT_GOSEXCEPTION_H

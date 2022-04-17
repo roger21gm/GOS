@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_GOSEXCEPTIONSREPOSITORY_H
 #define CSP2SAT_GOSEXCEPTIONSREPOSITORY_H
 
-
 #include "GOSException.h"
+
+namespace GOS {
 
 class CSP2SATBadAccessException : public GOSException {
 public:
@@ -111,5 +112,6 @@ public:
             ) {}
 };
 
+}
 
 #endif //CSP2SAT_GOSEXCEPTIONSREPOSITORY_H

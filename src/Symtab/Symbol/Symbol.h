@@ -5,6 +5,9 @@
 #ifndef CSP2SAT_SYMBOL_H
 #define CSP2SAT_SYMBOL_H
 
+#include <string>
+#include <utility>
+
 namespace GOS {
 
 class Scope; // TODO redefinition??
@@ -12,10 +15,10 @@ class Type;
 
 class Symbol {
 public:
-    Symbol(string name) : name(move(name)) {} //For constructing Type symbols
-    Symbol(string name, Type *type) : name(move(name)), type(type) {} //For constructing var/const declarations
+    Symbol(std::string name) : name(std::move(name)) {} //For constructing Type symbols
+    Symbol(std::string name, Type *type) : name(std::move(name)), type(type) {} //For constructing var/const declarations
 
-    string getName() {
+    std::string getName() {
         return this->name;
     }
 
@@ -26,7 +29,7 @@ public:
         return false;
     }
 
-    string name;
+    std::string name;
     Type *type = nullptr;
 };
 

@@ -3,6 +3,7 @@
 #include "GOSCompiler.h"
 
 using namespace std;
+using namespace GOS;
 
 string readFile(string name) {
     ifstream inFile;

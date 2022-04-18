@@ -6,17 +6,18 @@
 #define CSP2SAT_VARIABLESYMBOL_H
 
 #include "ValueSymbol.h"
+#include <string>
 
 namespace GOS {
 
 class VariableSymbol: public ValueSymbol {
 public:
-    VariableSymbol(const string &name, SMTFormula *f) : ValueSymbol(name, SymbolTable::_varbool) {
+    VariableSymbol(const std::string &name, SMTFormula *f) : ValueSymbol(name, SymbolTable::_varbool) {
         if(!SymbolTable::entityDefinitionBlock)
             var = f->newBoolVar();
     }
 
-    VariableSymbol(const string &name, literal lit) : ValueSymbol(name, SymbolTable::_varbool) {
+    VariableSymbol(const std::string &name, literal lit) : ValueSymbol(name, SymbolTable::_varbool) {
         var = lit;
     }
 

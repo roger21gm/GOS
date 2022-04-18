@@ -6,7 +6,7 @@
 #define CSP2SAT_FORMULARETURN_H
 
 
-#include <string>
+#include <vector>
 #include "Symbol.h"
 #include "../SymbolTable.h"
 #include "smtapi.h"
@@ -26,12 +26,12 @@ public:
         clauses.push_back(claus);
     }
 
-    void addClauses(vector<clause> claus) {
+    void addClauses(std::vector<clause> claus) {
         for (clause curr : claus)
             clauses.push_back(curr);
     }
 
-    vector<clause> clauses;
+    std::vector<clause> clauses;
 };
 
 }

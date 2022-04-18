@@ -6,29 +6,32 @@
 #define CSP2SAT_STRUCTSYMBOL_H
 
 #include "ScopedSymbol.h"
+#include <utility>
+#include <map>
+#include <string>
 
 namespace GOS {
 
 class StructSymbol : public ScopedSymbol {
 
 private:
-    map<string, Symbol*> fields = {};
+    std::map<std::string, Symbol*> fields = {};
 
 public:
 
     //Constructor for creating typed constants of this custom type.
-    StructSymbol(string name, Type * type, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {
+    StructSymbol(std::string name, Type * type, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {
         this->type = type;
     }
 
     //Constructor for creating the definition of the custom type.
-    StructSymbol(const string& name, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {}
+    StructSymbol(const std::string& name, Scope * enclosingScope) : ScopedSymbol(SymbolTable::tCustom, name, enclosingScope) {}
 
     void define(Symbol *sym) override {
-        fields.insert(pair<string, Symbol*>(sym->getName(), sym));
+        fields.insert(std::pair<std::string, Symbol*>(sym->getName(), sym));
     }
 
-    Symbol *resolve(const string& name) override {
+    Symbol *resolve(const std::string& name) override {
         if ( fields.find(name) != fields.end() )
             return fields.find(name)->second;
         if ( enclosingScope != nullptr )
@@ -36,11 +39,11 @@ public:
         return nullptr;
     }
 
-    map<string, Symbol*> getScopeSymbols() override {
+    std::map<std::string, Symbol*> getScopeSymbols() override {
         return this->fields;
     }
 
-    bool existsInScope(const string &name) override {
+    bool existsInScope(const std::string &name) override {
         return fields.find(name) != fields.end();
     }
 };

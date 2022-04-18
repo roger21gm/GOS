@@ -6,6 +6,10 @@
 #define CSP2SAT_GOSCONSTRAINTSVISITOR_H
 
 #include "../Symtab/Symbol/formulaReturn.h"
+#include <vector>
+#include <map>
+#include <string>
+#include <iostream>
 
 namespace GOS {
 
@@ -33,7 +37,7 @@ public:
                 visit(constraint);
             }
             catch (GOSException &e) {
-                cerr << e.getErrorMessage() << endl;
+                std::cerr << e.getErrorMessage() << std::endl;
             }
         }
         return nullptr;
@@ -142,10 +146,10 @@ public:
     antlrcpp::Any visitCAndList(BUPParser::CAndListContext *ctx) override {
         ArraySymbol *list = visit(ctx->list());
         formulaReturn *newClauses = new formulaReturn();
-        string a = ctx->getText();
+        std::string a = ctx->getText();
         if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
             || list->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
-            map<string, Symbol *> a = list->getScopeSymbols();
+            std::map<std::string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
                 if (it->second->type->getTypeIndex() == SymbolTable::tVarBool)
@@ -172,7 +176,7 @@ public:
 
 
         if (ctx->constraint_or_2().size() > 1) {
-            vector<formulaReturn *> andClauses;
+            std::vector<formulaReturn *> andClauses;
             formulaReturn *newClauses = new formulaReturn();
             clause orClause;
             for (int i = 0; i < ctx->constraint_or_2().size(); i++) {
@@ -220,7 +224,7 @@ public:
         if (list->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
             || list->getElementsType()->getTypeIndex() == SymbolTable::tFormula
                 ) {
-            map<string, Symbol *> a = list->getScopeSymbols();
+            std::map<std::string, Symbol *> a = list->getScopeSymbols();
             auto it = a.begin();
             while (it != a.end()) {
                 if (it->second->type->getTypeIndex() == SymbolTable::tVarBool)
@@ -365,7 +369,7 @@ public:
 
     antlrcpp::Any visitForall(BUPParser::ForallContext *ctx) override {
         auto *forallLocalScope = new LocalScope(this->currentScope);
-        vector<map<string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
+        std::vector<std::map<std::string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
 
         this->currentScope = forallLocalScope;
         for (const auto &assignation: possibleAssignations) {
@@ -410,7 +414,7 @@ public:
         ArraySymbol *list = visit(ctx->list());
 
         try {
-            vector<literal> literalList = VisitorsUtils::getLiteralVectorFromVariableArraySymbol(list);
+            std::vector<literal> literalList = VisitorsUtils::getLiteralVectorFromVariableArraySymbol(list);
             if (k != nullptr) {
                 if (ctx->aggregate_op()->getText() == "EK") {
                     this->_f->addEK(literalList, k->getRealValue());

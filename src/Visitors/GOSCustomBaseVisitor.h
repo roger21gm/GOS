@@ -19,10 +19,9 @@
 #include <string>
 #include <vector>
 #include <map>
-
-using std::string;
-using std::vector;
-using std::map;
+#include <iostream>
+#include <exception>
+#include <utility>
 
 namespace GOS {
 
@@ -48,10 +47,10 @@ public:
             return BUPBaseVisitor::visitCsp2sat(ctx);
         }
         catch (GOSException & e) {
-            cerr << e.getErrorMessage() << endl;
+            std::cerr << e.getErrorMessage() << std::endl;
         }
-        catch (exception & e) {
-            cerr << e.what() << endl;
+        catch (std::exception & e) {
+            std::cerr << e.what() << std::endl;
         }
         return nullptr;
     }
@@ -79,7 +78,7 @@ public:
 
         if(list->getElementsType()->getTypeIndex() == SymbolTable::tInt){
 
-            vector<Symbol*> elements = list->getSymbolVector();
+            std::vector<Symbol*> elements = list->getSymbolVector();
 
             if(ctx->opAggregateExpr()->getText() == "sum"){
                 int sum = 0;
@@ -325,16 +324,16 @@ public:
             this->currentScope = this->currentLocalScope;
             Value *index = visit(ctx->index);
             this->currentScope = prev;
-            Symbol *res = this->currentScope->resolve(to_string(index->getRealValue()));
-            return (Symbol *) this->currentScope->resolve(to_string(index->getRealValue()));
+            Symbol *res = this->currentScope->resolve(std::to_string(index->getRealValue()));
+            return (Symbol *) this->currentScope->resolve(std::to_string(index->getRealValue()));
         }
         return nullptr;
     }
 
 
     antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override {
-        string a = ctx->TK_IDENT()->getText();
-        string b = ctx->getText();
+        std::string a = ctx->TK_IDENT()->getText();
+        std::string b = ctx->getText();
         Symbol *var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
 
         if (var == nullptr) {
@@ -348,7 +347,7 @@ public:
         if (!ctx->varAccessObjectOrArray().empty()) {
             for (int i = 0; i < ctx->varAccessObjectOrArray().size(); i++) {
                 auto nestedScope = ctx->varAccessObjectOrArray(i);
-                string nest = nestedScope->getText();
+                std::string nest = nestedScope->getText();
                 if (var != nullptr && var->isScoped()) {
                     this->currentLocalScope = this->currentScope;
                     if (!nestedScope->underscore) {
@@ -437,7 +436,7 @@ public:
                     SymbolTable::_integer
             );
             for (int i = 0; i <= (maxValue - minValue); i++) {
-                AssignableSymbol *newValue = new AssignableSymbol(to_string(i), SymbolTable::_integer);
+                AssignableSymbol *newValue = new AssignableSymbol(std::to_string(i), SymbolTable::_integer);
                 newValue->setValue(new IntValue(minValue + i));
                 result->add(newValue);
             }
@@ -453,14 +452,14 @@ public:
 
     antlrcpp::Any visitAuxiliarListAssignation(BUPParser::AuxiliarListAssignationContext *ctx) override {
         ArraySymbol *arrayDefined = visit(ctx->list());
-        return pair<string, ArraySymbol *>(ctx->TK_IDENT()->getText(), arrayDefined);
+        return std::pair<std::string, ArraySymbol *>(ctx->TK_IDENT()->getText(), arrayDefined);
     }
 
 
 
     antlrcpp::Any visitComprehensionList(BUPParser::ComprehensionListContext *ctx) override {
         auto *listLocalScope = new LocalScope(this->currentScope);
-        vector<map<string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
+        std::vector<std::map<std::string, Symbol *>> possibleAssignations = getAllCombinations(ctx->auxiliarListAssignation());
         ArraySymbol *newList = nullptr;
 
         this->currentScope = listLocalScope;
@@ -493,14 +492,14 @@ public:
             else if (ctx->listResultExpr()->resExpr) {
                 Value *val = visit(ctx->listResultExpr()->resExpr);
                 auto *valueResult = new AssignableSymbol(
-                        to_string(rand()),
+                        std::to_string(rand()),
                         val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
                 );
                 valueResult->setValue(val);
                 exprRes = valueResult;
             }
             else if (ctx->listResultExpr()->string()){
-                string currStr = visit(ctx->listResultExpr()->string());
+                std::string currStr = visit(ctx->listResultExpr()->string());
                 exprRes = new StringSymbol(currStr);
             }
             else {
@@ -550,11 +549,11 @@ public:
                 curr = visit(currVal);
             } else if (currVal->resExpr) {
                 Value *exprVal = visit(currVal->resExpr);
-                curr = new AssignableSymbol(to_string(rand()),
+                curr = new AssignableSymbol(std::to_string(rand()),
                                             exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
                 ((AssignableSymbol *) curr)->setValue(exprVal);
             } else if (currVal->string()) {
-                string currStr = visit(currVal->string());
+                std::string currStr = visit(currVal->string());
                 curr = new StringSymbol(currStr);
             } else {
                 formulaReturn * a =  visit(currVal->constraint_expression());
@@ -563,7 +562,7 @@ public:
 
             if (resultList == nullptr) {
                 resultList = new ArraySymbol(
-                        to_string(rand()),
+                        std::to_string(rand()),
                         this->currentScope,
                         curr->type
                 );
@@ -585,22 +584,22 @@ public:
     }
 
 protected:
-    vector<map<string, Symbol *>> getAllCombinations(vector<GOS::BUPParser::AuxiliarListAssignationContext *> aux){
-        vector<map<string, Symbol *>> combinations = vector<map<string, Symbol *>>();
+    std::vector<std::map<std::string, Symbol *>> getAllCombinations(std::vector<GOS::BUPParser::AuxiliarListAssignationContext *> aux){
+        std::vector<std::map<std::string, Symbol *>> combinations = std::vector<std::map<std::string, Symbol *>>();
         LocalScope * combScope = new LocalScope(this->currentScope);
         getAllCombinations(0, aux, combinations, combScope);
         return combinations;
     }
 
-    void getAllCombinations(int idx, vector<GOS::BUPParser::AuxiliarListAssignationContext *> aux, vector<map<string, Symbol *>> & combinations, LocalScope * combinationsScope) {
+    void getAllCombinations(int idx, std::vector<GOS::BUPParser::AuxiliarListAssignationContext *> aux, std::vector<std::map<std::string, Symbol *>> & combinations, LocalScope * combinationsScope) {
         if (idx == aux.size()) {
             combinations.push_back(combinationsScope->getScopeSymbols());
             return;
         }
         this->currentScope = combinationsScope;
-        pair<string, ArraySymbol *> currArr = visit(aux[idx]);
+        std::pair<std::string, ArraySymbol *> currArr = visit(aux[idx]);
         for (int i = 0; i < currArr.second->getSize(); i++) {
-            combinationsScope->define(currArr.first, currArr.second->resolve(to_string(i)));
+            combinationsScope->define(currArr.first, currArr.second->resolve(std::to_string(i)));
             getAllCombinations(idx + 1, aux, combinations, combinationsScope);
         }
         this->currentScope = combinationsScope->getEnclosingScope();

@@ -13,7 +13,7 @@ namespace GOS {
 
 class Type : public Symbol {
 public:
-    Type(int typeIndex, string name) : Symbol(std::move(name)){
+    Type(int typeIndex, std::string name) : Symbol(std::move(name)){
         this->typeIndex = typeIndex;
     }
 

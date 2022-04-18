@@ -8,6 +8,8 @@
 #include <JSONBaseVisitor.h>
 #include "Param.h"
 #include "../../Errors/GOSInputExceptionsRepository.h"
+#include <string>
+#include <utility>
 
 namespace GOS {
 
@@ -26,7 +28,7 @@ public:
 
 
     antlrcpp::Any visitPair(JSONParser::PairContext *ctx) override {
-        string varName = ctx->STRING()->getText();
+        std::string varName = ctx->STRING()->getText();
         varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
 
         ParamScoped *curr = current;
@@ -77,7 +79,7 @@ public:
             if (currVal->NUMBER()) {
                 current->add(
                         new ParamInt(
-                                to_string(index),
+                                std::to_string(index),
                                 stoi(currVal->NUMBER()->getText())
                         )
                 );
@@ -85,12 +87,12 @@ public:
             } else if (currVal->getText() == "true" || currVal->getText() == "false") {
                 current->add(
                         new ParamBool(
-                                to_string(index),
+                                std::to_string(index),
                                 currVal->getText() == "true"
                         )
                 );
             } else if (currVal->arr()) {
-                ParamArray *array = new ParamArray(to_string(index));
+                ParamArray *array = new ParamArray(std::to_string(index));
                 current->add(array);
                 current = array;
                 visit(currVal->arr());
@@ -98,7 +100,7 @@ public:
                 index++;
 
             } else if (currVal->obj()) {
-                ParamJSON *strct = new ParamJSON(to_string(index));
+                ParamJSON *strct = new ParamJSON(std::to_string(index));
                 current->add(strct);
                 current = strct;
                 visit(currVal->obj());
@@ -108,7 +110,7 @@ public:
                 throw CSP2SATBadInputTypeException(
                         ctx->start->getLine(),
                         ctx->start->getCharPositionInLine(),
-                        to_string(index)
+                        std::to_string(index)
                 );
 
             }

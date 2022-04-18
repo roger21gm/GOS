@@ -6,6 +6,8 @@
 #define CSP2SAT_GOSOUTPUTVISITOR_H
 
 #include "../GOSCustomBaseVisitor.h"
+#include <string>
+#include <iostream>
 
 namespace GOS {
 
@@ -38,11 +40,11 @@ public:
     antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
         for(auto str : ctx->string()) {
             try{
-                string out = visit(str);
-                cout << out << endl;
+                std::string out = visit(str);
+                std::cout << out << std::endl;
             }
             catch (GOSException & e) {
-                cerr << e.getErrorMessage() << endl;
+                std::cerr << e.getErrorMessage() << std::endl;
                 return nullptr;
             }
         }
@@ -50,15 +52,15 @@ public:
     }
 
     antlrcpp::Any visitString(BUPParser::StringContext *ctx) override {
-        string result = "";
+        std::string result = "";
         if(ctx->TK_STRING()){
-            string iniText = ctx->TK_STRING()->getText();
+            std::string iniText = ctx->TK_STRING()->getText();
             iniText.erase(std::remove(iniText.begin(),iniText.end(),'\"'),iniText.end());
             result = GOS::Utils::toRawString(iniText);
 
         }
         else if(ctx->stringTernary()){
-            string ternaryResult = visit(ctx->stringTernary());
+            std::string ternaryResult = visit(ctx->stringTernary());
             result = ternaryResult;
         }
         else if(ctx->list()){
@@ -76,20 +78,20 @@ public:
             }
         }
         else if(ctx->concatString()){
-            string lString = visit(ctx->string());
-            string rString = visit(ctx->concatString()->string());
+            std::string lString = visit(ctx->string());
+            std::string rString = visit(ctx->concatString()->string());
             result = lString + rString;
 
             auto currentConcat = ctx->concatString()->concatString();
             while(currentConcat){
-                string current = visit(currentConcat->string());
+                std::string current = visit(currentConcat->string());
                 result += current;
                 currentConcat = currentConcat->concatString();
             }
         }
         else if(ctx->expr()){
             Value * val = visit(ctx->expr());
-            result = to_string(val->getRealValue());
+            result = std::to_string(val->getRealValue());
         }
         else if(ctx->varAccess()){
             accessingNotLeafVariable = true;
@@ -97,7 +99,7 @@ public:
             accessingNotLeafVariable = false;
             if(!var->isScoped()){
                 if(var->isAssignable())
-                    result = to_string(((AssignableSymbol*)var)->getValue()->getRealValue());
+                    result = std::to_string(((AssignableSymbol*)var)->getValue()->getRealValue());
                 else
                     result = ((VariableSymbol*)var)->getModelValue() ? "true" : "false";
             }
@@ -106,7 +108,7 @@ public:
                 result += "[";
                 for(auto elem : arrayAccess->getSymbolVector()){
                     if(elem->isAssignable())
-                        result += to_string(((AssignableSymbol*)elem)->getValue()->getRealValue());
+                        result += std::to_string(((AssignableSymbol*)elem)->getValue()->getRealValue());
                     else
                         result += ((VariableSymbol*)elem)->getModelValue() ? "true" : "false";
 
@@ -118,10 +120,10 @@ public:
 
         }
         else if(ctx->TK_LPAREN()){
-            string innerParen = visit(ctx->string());
+            std::string innerParen = visit(ctx->string());
             result = innerParen;
         }
-        return (string) result;
+        return (std::string) result;
     }
 
     antlrcpp::Any visitStringTernary(BUPParser::StringTernaryContext *ctx) override {

@@ -5,30 +5,30 @@
 #ifndef CSP2SAT_PARAM_H
 #define CSP2SAT_PARAM_H
 
-#include <vector>
-#include <string>
-#include <map>
 #include <regex>
 #include <iostream>
 #include "../../Errors/GOSException.h"
 #include "../../Errors/GOSInputExceptionsRepository.h"
+#include <string>
+#include <vector>
+#include <map>
 
 namespace GOS {
 
 class Param {
 public:
-    Param(const string &name) : name(name) {}
+    Param(const std::string &name) : name(name) {}
     virtual ~Param() {};
 
     virtual bool isValuable() = 0;
 
 public:
-    string name;
+    std::string name;
 };
 
 class ParamValuable : public Param {
 public:
-    ParamValuable(const string &name) : Param(name) {}
+    ParamValuable(const std::string &name) : Param(name) {}
     virtual ~ParamValuable() {};
 
     bool isValuable() override {
@@ -40,7 +40,7 @@ public:
 
 class ParamBool : public ParamValuable {
 public:
-    ParamBool(const string &name, bool val) : ParamValuable(name) {
+    ParamBool(const std::string &name, bool val) : ParamValuable(name) {
         this->value = val;
     }
     int getValue() override {
@@ -52,7 +52,7 @@ public:
 
 class ParamInt : public ParamValuable {
 public:
-    ParamInt(const string &name, int val) : ParamValuable(name) {
+    ParamInt(const std::string &name, int val) : ParamValuable(name) {
         this->value = val;
     }
     int getValue() override {
@@ -63,7 +63,7 @@ public:
 
 class ParamScoped : public Param {
 public:
-    ParamScoped(const string &name) : Param(name) {}
+    ParamScoped(const std::string &name) : Param(name) {}
     virtual ~ParamScoped() {};
     
     bool isValuable() override {
@@ -71,20 +71,20 @@ public:
     }
 
     virtual void add(Param * a) = 0;
-    virtual Param * get(string name) = 0;
+    virtual Param * get(std::string name) = 0;
 };
 
 class ParamArray : public ParamScoped {
 public:
-    ParamArray(const string &name) : ParamScoped(name) {
-        elements = vector<Param*>();
+    ParamArray(const std::string &name) : ParamScoped(name) {
+        elements = std::vector<Param*>();
     }
 
     void add(Param *a) override {
         elements.push_back(a);
     }
 
-    Param *get(string name) override {
+    Param *get(std::string name) override {
 
         int index = stoi(name);
         if(index < elements.size()){
@@ -93,37 +93,37 @@ public:
         return nullptr;
     }
 
-    vector<Param*> elements;
+    std::vector<Param*> elements;
 };
 
 
 class ParamJSON : public ParamScoped {
 public:
-    ParamJSON(const string &name) : ParamScoped(name) {
-        elements = map<string, Param*>();
+    ParamJSON(const std::string &name) : ParamScoped(name) {
+        elements = std::map<std::string, Param*>();
     }
 
     void add(Param *a) override {
         elements[a->name] = a;
     }
 
-    Param *get(string name) override {
+    Param *get(std::string name) override {
         if(elements.find(name) != elements.end())
             return elements[name];
         return nullptr;
     }
 
-    map<string, Param*> elements;
+    std::map<std::string, Param*> elements;
 
-    int resolve(string attrAccess) {
-        vector<string> splitted = Utils::splitVarAccessNested(attrAccess);
+    int resolve(std::string attrAccess) {
+        std::vector<std::string> splitted = Utils::splitVarAccessNested(attrAccess);
 
-        string currAccess = "";
+        std::string currAccess = "";
 
         bool first = true;
 
         ParamScoped * currentScope = this;
-        for(string attr : splitted){
+        for(std::string attr : splitted){
             Param * currentParam = nullptr;
             if(attr.back() == ']'){
                 currentParam = currentScope->get(attr.substr(0, attr.size()-1));

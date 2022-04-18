@@ -7,24 +7,27 @@
 
 #include "../../../GOSUtils.h"
 #include "../../../Errors/GOSExceptionsRepository.h"
+#include <string>
+#include <map>
+#include <vector>
 
 namespace GOS {
 
 class ArraySymbol : public ScopedSymbol {
 
 private:
-    vector<Symbol*> elements;
+    std::vector<Symbol*> elements;
     Type * elementsType;
     int size;
 
 public:
-    ArraySymbol(const string &name, Scope * enclosingScope, Type * arrayElementsType, int size) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
+    ArraySymbol(const std::string &name, Scope * enclosingScope, Type * arrayElementsType, int size) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
         this->size = size;
         this->elementsType = arrayElementsType;
         this->type = this;
     }
 
-    ArraySymbol(const string &name, Scope * enclosingScope, Type * arrayElementsType) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
+    ArraySymbol(const std::string &name, Scope * enclosingScope, Type * arrayElementsType) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
         this->size = 0;
         this->elementsType = arrayElementsType;
         this->type = this;
@@ -36,7 +39,7 @@ public:
         elements.push_back(sym);
     }
 
-    Symbol *resolve(const string& name) override {
+    Symbol *resolve(const std::string& name) override {
         bool isNumber = Utils::check_number(name);
 
         if(isNumber){
@@ -50,7 +53,7 @@ public:
             return enclosingScope->resolve(name);
     }
 
-    bool existsInScope(const string &name) override {
+    bool existsInScope(const std::string &name) override {
         bool isNumber = Utils::check_number(name);
         if(isNumber){
             int index = stoi(name);
@@ -60,15 +63,15 @@ public:
     }
 
 
-    map<string, Symbol*> getScopeSymbols() override {
-        map<string, Symbol*> scopeSymbols;
+    std::map<std::string, Symbol*> getScopeSymbols() override {
+        std::map<std::string, Symbol*> scopeSymbols;
         for (int i = 0; i < size; i++) {
-            scopeSymbols[to_string(i)] = elements[i];
+            scopeSymbols[std::to_string(i)] = elements[i];
         }
         return scopeSymbols;
     }
 
-    vector<Symbol*> getSymbolVector() {
+    std::vector<Symbol*> getSymbolVector() {
         return elements;
     }
 

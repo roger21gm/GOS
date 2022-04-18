@@ -6,6 +6,7 @@
 #define CSP2SAT_GLOBALSCOPE_H
 
 #include "BaseScope.h"
+#include <string>
 
 namespace GOS {
 
@@ -13,11 +14,11 @@ class GlobalScope: public BaseScope {
 public:
     GlobalScope() : BaseScope(nullptr) {}
 
-    string getScopeName() override {
+    std::string getScopeName() override {
         return "global";
     }
 
-    string getFullName() override {
+    std::string getFullName() override {
         return "";
     }
 

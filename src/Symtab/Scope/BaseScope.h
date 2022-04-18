@@ -5,8 +5,9 @@
 #ifndef CSP2SAT_BASESCOPE_H
 #define CSP2SAT_BASESCOPE_H
 
-#include <map>
 #include "Scope.h"
+#include <map>
+#include <string>
 
 namespace GOS {
 
@@ -17,7 +18,7 @@ public:
         symbols[sym->getName()] = sym;
     }
 
-    void define(string name, Symbol *sym) {
+    void define(std::string name, Symbol *sym) {
         symbols[name] = sym;
     }
 
@@ -27,7 +28,7 @@ public:
         return this->enclosingScope;
     }
 
-    Symbol * resolve(const string& name) override {
+    Symbol * resolve(const std::string& name) override {
         if ( symbols.find(name) != symbols.end() )
             return symbols[name];
         if ( enclosingScope != nullptr )
@@ -35,19 +36,19 @@ public:
         return nullptr;
     }
 
-    map<string, Symbol*> getScopeSymbols() override {
+    std::map<std::string, Symbol*> getScopeSymbols() override {
         return this->symbols;
     }
 
 
-    bool existsInScope(const string &name) override {
+    bool existsInScope(const std::string &name) override {
         return symbols.find(name) != symbols.end();
     }
 
 private:
     Scope * enclosingScope;
 protected:
-    map<string, Symbol*> symbols;
+    std::map<std::string, Symbol*> symbols;
 };
 
 }

@@ -5,7 +5,6 @@
 #ifndef CSP2SAT_INTVALUE_H
 #define CSP2SAT_INTVALUE_H
 
-#include <string>
 #include "Value.h"
 
 namespace GOS {

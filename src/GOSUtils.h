@@ -5,20 +5,18 @@
 #ifndef CSP2SAT_GOSUTILS_H
 #define CSP2SAT_GOSUTILS_H
 
-
 // It is better to use namespaces than static class methods
 // https://stackoverflow.com/questions/1434937/namespace-functions-versus-static-methods-on-a-class
 
-#include <string.h>
-
-using std::string;
-using std::vector;
+#include <string>
+#include <sstream> // std::istringstream
+#include <vector>
 
 namespace GOS {
 namespace Utils {
 
-bool check_number(const string & str) {
-    string num = str;
+bool check_number(const std::string & str) {
+    std::string num = str;
     if(num[0] == '-'){
         num.erase(0);
     }
@@ -28,15 +26,15 @@ bool check_number(const string & str) {
     return true;
 }
 
-vector<string> splitVarAccessNested(string a){
-    vector<string> result;
+std::vector<std::string> splitVarAccessNested(std::string a){
+    std::vector<std::string> result;
     size_t pos = 0;
     size_t newpos;
-    while(pos != string::npos) {
+    while(pos != std::string::npos) {
         newpos = a.find_first_of(".[", pos);
-        if(newpos != string::npos){
+        if(newpos != std::string::npos){
             result.push_back(a.substr(pos, newpos-pos));
-            if(pos != string::npos)
+            if(pos != std::string::npos)
                 pos = newpos + 1;
         }else {
             result.push_back(a.substr(pos));
@@ -46,13 +44,13 @@ vector<string> splitVarAccessNested(string a){
     return result;
 }
 
-string toRawString(string const& in)
+std::string toRawString(std::string const& in)
 {
     char c;
-    istringstream s(in);
+    std::istringstream s(in);
     enum { CHARACTER, ESCAPE } state = CHARACTER;
 
-    string result = "";
+    std::string result = "";
     while (s.get(c)) {
         switch (state) {
             case CHARACTER:

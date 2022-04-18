@@ -7,6 +7,8 @@
 
 
 #include "../../Type.h"
+#include <string>
+#include <map>
 
 namespace GOS {
 
@@ -17,10 +19,10 @@ protected:
 
 public:
 
-    ScopedSymbol(int typeIndex, const string &name, Scope *enclosingScope) : Type(typeIndex, name),
+    ScopedSymbol(int typeIndex, const std::string &name, Scope *enclosingScope) : Type(typeIndex, name),
                                                                              enclosingScope(enclosingScope) {}
 
-    string getScopeName() override {
+    std::string getScopeName() override {
         return this->name;
     }
 
@@ -28,7 +30,7 @@ public:
         return this->enclosingScope;
     }
 
-    string getFullName() override {
+    std::string getFullName() override {
         if(isdigit(this->getScopeName()[0]))
             return  this->enclosingScope->getFullName() + "[" + this->getScopeName() + "]";
         else if(this->enclosingScope->getScopeName() != "global")
@@ -39,9 +41,9 @@ public:
 
     virtual void define(Symbol *sym) override = 0;
 
-    virtual Symbol *resolve(const string& name) override = 0;
+    virtual Symbol *resolve(const std::string& name) override = 0;
 
-    virtual map<string, Symbol*> getScopeSymbols() override = 0;
+    virtual std::map<std::string, Symbol*> getScopeSymbols() override = 0;
 
     bool isScoped() override {
         return true;

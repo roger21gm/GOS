@@ -6,12 +6,13 @@
 #define CSP2SAT_GOSINPUTEXCEPTIONSREPOSITORY_H
 
 #include "GOSException.h"
+#include <string>
 
 namespace GOS {
 
 class CSP2SATBadInputTypeException : public GOSException {
 public:
-    CSP2SATBadInputTypeException(int line, int pos, const string &name) :
+    CSP2SATBadInputTypeException(int line, int pos, const std::string &name) :
             GOSException(
                     line,
                     pos,
@@ -22,7 +23,7 @@ public:
 
 class CSP2SATInputNotFoundValue : public GOSException {
 public:
-    CSP2SATInputNotFoundValue(const string &access) :
+    CSP2SATInputNotFoundValue(const std::string &access) :
             GOSException(
                     0,
                     0,
@@ -33,7 +34,7 @@ public:
 
 class CSP2SATBadCardinalityConstraint : public GOSException {
 public:
-    CSP2SATBadCardinalityConstraint(int line, int pos, const string &name) :
+    CSP2SATBadCardinalityConstraint(int line, int pos, const std::string &name) :
             GOSException(
                     line,
                     pos,

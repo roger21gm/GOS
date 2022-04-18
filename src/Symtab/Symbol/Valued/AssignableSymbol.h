@@ -6,12 +6,13 @@
 #define CSP2SAT_ASSIGNABLESYMBOL_H
 
 #include "../Valued/ValueSymbol.h"
+#include <string>
 
 namespace GOS {
 
 class AssignableSymbol: public ValueSymbol {
 public:
-    AssignableSymbol(const string &name, Type *type) : ValueSymbol(name, type) {
+    AssignableSymbol(const std::string &name, Type *type) : ValueSymbol(name, type) {
         this->val = nullptr;
     }
 

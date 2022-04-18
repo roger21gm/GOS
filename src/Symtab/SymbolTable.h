@@ -13,6 +13,9 @@
 #include "Symbol/Scoped/ScopedSymbol.h"
 #include "Value/Value.h"
 #include "Symbol/Valued/AssignableSymbol.h"
+#include <map>
+#include <string>
+#include <utility>
 
 namespace GOS {
 
@@ -54,10 +57,10 @@ public:
     static bool errors;
 
 private:
-    static void iShowAllDefinedVariable(Scope * currentScope, const string& prefix = ""){
-        map<string, Symbol*> currentScopeSymbols = currentScope->getScopeSymbols();
+    static void iShowAllDefinedVariable(Scope * currentScope, const std::string& prefix = ""){
+        std::map<std::string, Symbol*> currentScopeSymbols = currentScope->getScopeSymbols();
 
-        for(pair<string, Symbol *> sym : currentScopeSymbols){
+        for(std::pair<std::string, Symbol *> sym : currentScopeSymbols){
             if(sym.second->type){
                 if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray)
                     if(!isdigit(sym.first[0]))
@@ -65,7 +68,7 @@ private:
                     else
                         iShowAllDefinedVariable( (ScopedSymbol*) sym.second, isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
                 else{
-                    string output = sym.second->type->getTypeIndex() != SymbolTable::tVarBool ?  "param -> " : "var -> ";
+                    std::string output = sym.second->type->getTypeIndex() != SymbolTable::tVarBool ?  "param -> " : "var -> ";
                     if(!prefix.empty() && prefix[0] == '.')
                         output += prefix.substr(1, prefix.length()-1);
                     else
@@ -80,16 +83,16 @@ private:
 
                     if(sym.second->type->getTypeIndex() != SymbolTable::tVarBool){
                         Value * val = ((AssignableSymbol*)sym.second)->getValue();
-                        cout << output  << " -> " << (val ? to_string(val->getRealValue()) : "_") << endl;
+                        std::cout << output  << " -> " << (val ? std::to_string(val->getRealValue()) : "_") << std::endl;
                     }
                     else {
-                        cout << output  << endl;
+                        std::cout << output  << std::endl;
                     }
 
                 }
             }
             else {
-                cout << "defined type -> " << prefix +  sym.first << endl;
+                std::cout << "defined type -> " << prefix +  sym.first << std::endl;
             }
         }
     }

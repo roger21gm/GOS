@@ -15,16 +15,21 @@
 #include "Input/Param.h"
 #include "../Errors/GOSExceptionsRepository.h"
 #include "../Symtab/Symbol/formulaReturn.h"
+#include "../Symtab/Value/BoolValue.h"
+#include "../Symtab/Value/IntValue.h"
 #include <string>
 #include <vector>
 #include <map>
+#include <utility>
+
+namespace GOS {
+namespace VisitorsUtils {
 
 using std::string;
 using std::vector;
 using std::map;
-
-namespace GOS {
-namespace VisitorsUtils {
+using std::to_string;
+using std::pair;
 
 void generateAllPermutations(vector<vector<Symbol *>> input, vector<Symbol *> current, int k,
                                     vector<map<string, Symbol *>> &result, vector<string> names) {
@@ -54,6 +59,84 @@ void printAll(const vector<vector<Symbol*>> & allVecs, const vector<string> & na
         printAll(allVecs, names, result, curr, vecIndex + 1);
     }
 }
+
+vector<map<string, Symbol *>> getAllCombinations(const map<string, ArraySymbol *> &ranges) {
+    vector<vector<Symbol *>> unnamedRanges;
+    vector<string> names;
+
+    for (const auto &localParam : ranges) {
+        names.push_back(localParam.first);
+
+        map<string, Symbol *> currAuxList = localParam.second->getScopeSymbols();
+
+        vector<Symbol *> curr;
+        curr.reserve(currAuxList.size());
+        for (auto const &currElem: currAuxList)
+            curr.push_back(currElem.second);
+
+        unnamedRanges.push_back(curr);
+
+    }
+
+
+    vector<map<string, Symbol *>> result;
+    printAll(unnamedRanges, names, result);
+    //generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
+
+    return result;
+}
+
+string getTypeName(const int tType) {
+    switch (tType) {
+        case SymbolTable::tBool:
+            return "bool";
+        case SymbolTable::tInt:
+            return "int";
+        case SymbolTable::tVarBool:
+            return "variable";
+        case SymbolTable::tArray:
+            return "array";
+        default:
+            return "custom type";
+    }
+}
+
+vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol *variableArray) {
+    vector<literal> result = vector<literal>();
+    map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
+    if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
+        || variableArray->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
+        for (auto currElem : arrayElems) {
+            if(currElem.second->type->getTypeIndex() == SymbolTable::tVarBool){
+                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+            }
+            else {
+                formulaReturn * formula = (formulaReturn *) currElem.second;
+                if(formula->clauses.size() == 1 && formula->clauses.front().v.size() == 1){
+                    result.push_back(formula->clauses.front().v.front());
+                }
+            }
+        }
+    } else {
+        //cerr << "It must be a literal array" << endl;
+        throw GOSException(0, 0, variableArray->getFullName() + " must be a list of literals");
+    }
+    return result;
+}
+
+// Defining before implementing due to cross-call between these functions
+StructSymbol *
+definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, 
+    SMTFormula *formula, ParamJSON *inParams);
+ArraySymbol *
+defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, 
+    Type *elementsType, SMTFormula *formula, ParamJSON *inParams);
+
+ArraySymbol *
+createArrayParamFromArrayType(string name, Scope *enclosingScope, 
+    ArraySymbol *arrayType, SMTFormula *formula, ParamJSON *inParams);
+
+
 
 StructSymbol *
 definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula *formula,
@@ -95,19 +178,6 @@ definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *e
     }
 
     return newCustomTypeConst;
-}
-
-ArraySymbol *
-createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula *formula,
-                                ParamJSON *inParams) {
-    vector<int> dimensions;
-    Symbol *currType = arrayType;
-    while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
-        ArraySymbol *currDimension = (ArraySymbol *) currType;
-        dimensions.push_back(currDimension->getSize());
-        currType = currDimension->resolve("0");
-    }
-    return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType(), formula, inParams);
 }
 
 ArraySymbol *
@@ -162,72 +232,21 @@ defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions
 
 }
 
-
-
-vector<map<string, Symbol *>> getAllCombinations(const map<string, ArraySymbol *> &ranges) {
-    vector<vector<Symbol *>> unnamedRanges;
-    vector<string> names;
-
-    for (const auto &localParam : ranges) {
-        names.push_back(localParam.first);
-
-        map<string, Symbol *> currAuxList = localParam.second->getScopeSymbols();
-
-        vector<Symbol *> curr;
-        curr.reserve(currAuxList.size());
-        for (auto const &currElem: currAuxList)
-            curr.push_back(currElem.second);
-
-        unnamedRanges.push_back(curr);
-
+ArraySymbol *
+createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula *formula,
+                                ParamJSON *inParams) {
+    vector<int> dimensions;
+    Symbol *currType = arrayType;
+    while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
+        ArraySymbol *currDimension = (ArraySymbol *) currType;
+        dimensions.push_back(currDimension->getSize());
+        currType = currDimension->resolve("0");
     }
-
-
-    vector<map<string, Symbol *>> result;
-    printAll(unnamedRanges, names, result);
-    //generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
-
-    return result;
+    return defineNewArray(name, enclosingScope, dimensions, arrayType->getElementsType(), formula, inParams);
 }
 
 
-string getTypeName(const int tType) {
-    switch (tType) {
-        case SymbolTable::tBool:
-            return "bool";
-        case SymbolTable::tInt:
-            return "int";
-        case SymbolTable::tVarBool:
-            return "variable";
-        case SymbolTable::tArray:
-            return "array";
-        default:
-            return "custom type";
-    }
-}
 
-vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol *variableArray) {
-    vector<literal> result = vector<literal>();
-    map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
-    if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
-        || variableArray->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
-        for (auto currElem : arrayElems) {
-            if(currElem.second->type->getTypeIndex() == SymbolTable::tVarBool){
-                result.push_back(((VariableSymbol *) currElem.second)->getVar());
-            }
-            else {
-                formulaReturn * formula = (formulaReturn *) currElem.second;
-                if(formula->clauses.size() == 1 && formula->clauses.front().v.size() == 1){
-                    result.push_back(formula->clauses.front().v.front());
-                }
-            }
-        }
-    } else {
-        //cerr << "It must be a literal array" << endl;
-        throw GOSException(0, 0, variableArray->getFullName() + " must be a list of literals");
-    }
-    return result;
-}
 
 }
 }

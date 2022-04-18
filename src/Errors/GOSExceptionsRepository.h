@@ -6,12 +6,13 @@
 #define CSP2SAT_GOSEXCEPTIONSREPOSITORY_H
 
 #include "GOSException.h"
+#include <string>
 
 namespace GOS {
 
 class CSP2SATBadAccessException : public GOSException {
 public:
-    CSP2SATBadAccessException(int line, int pos, const string &badAccess) :
+    CSP2SATBadAccessException(int line, int pos, const std::string &badAccess) :
             GOSException(
                     line,
                     pos,
@@ -21,7 +22,7 @@ public:
 
 class CSP2SATStringOnlyOutputException : public GOSException {
 public:
-    CSP2SATStringOnlyOutputException(int line, int pos, const string &str) :
+    CSP2SATStringOnlyOutputException(int line, int pos, const std::string &str) :
             GOSException(
                     line,
                     pos,
@@ -31,7 +32,7 @@ public:
 
 class CSP2SATNotExistsException : public GOSException {
 public:
-    CSP2SATNotExistsException(int line, int pos, const string &badAccess) :
+    CSP2SATNotExistsException(int line, int pos, const std::string &badAccess) :
             GOSException(
                     line,
                     pos,
@@ -42,7 +43,7 @@ public:
 
 class CSP2SATInvalidExpressionTypeException : public GOSException {
 public:
-    CSP2SATInvalidExpressionTypeException(int line, int pos, string expr, string typeFound, string typeExpected) :
+    CSP2SATInvalidExpressionTypeException(int line, int pos, std::string expr, std::string typeFound, std::string typeExpected) :
             GOSException(
                     line,
                     pos,
@@ -53,7 +54,7 @@ public:
 
 class CSP2SATParamAsConstraintException : public GOSException {
 public:
-    CSP2SATParamAsConstraintException(int line, int pos, string expr) :
+    CSP2SATParamAsConstraintException(int line, int pos, std::string expr) :
             GOSException(
                     line,
                     pos,
@@ -63,7 +64,7 @@ public:
 
 class CSP2SATAlreadyExistException : public GOSException {
 public:
-    CSP2SATAlreadyExistException(int line, int pos, string expr) :
+    CSP2SATAlreadyExistException(int line, int pos, std::string expr) :
             GOSException(
                     line,
                     pos,
@@ -73,7 +74,7 @@ public:
 
 class CSP2SATOutOfRangeException : public GOSException {
 public:
-    CSP2SATOutOfRangeException(int line, int pos, string expr) :
+    CSP2SATOutOfRangeException(int line, int pos, std::string expr) :
             GOSException(
                     line,
                     pos,
@@ -83,7 +84,7 @@ public:
 
 class CSP2SATTypeNotMatchException : public GOSException {
 public:
-    CSP2SATTypeNotMatchException(int line, int pos, string expr) :
+    CSP2SATTypeNotMatchException(int line, int pos, std::string expr) :
             GOSException(
                     line,
                     pos,
@@ -93,7 +94,7 @@ public:
 
 class CSP2SATInvalidOperationException : public GOSException {
 public:
-    CSP2SATInvalidOperationException(int line, int pos, string expr) :
+    CSP2SATInvalidOperationException(int line, int pos, std::string expr) :
             GOSException(
                     line,
                     pos,
@@ -104,7 +105,7 @@ public:
 
 class CSP2SATInvalidFormulaException : public GOSException {
 public:
-    CSP2SATInvalidFormulaException(int line, int pos, string formula, string message = "") :
+    CSP2SATInvalidFormulaException(int line, int pos, std::string formula, std::string message = "") :
             GOSException(
                     line,
                     pos,

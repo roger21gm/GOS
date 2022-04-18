@@ -14,7 +14,7 @@ namespace GOS {
 
 class StringSymbol : public Symbol {
 public:
-    StringSymbol(const string &str) : Symbol(str, SymbolTable::_string) {}
+    StringSymbol(const std::string &str) : Symbol(str, SymbolTable::_string) {}
 };
 
 }

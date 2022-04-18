@@ -10,9 +10,6 @@
 #include <string>
 #include <vector>
 
-using std::string;
-using std::vector;
-
 namespace GOS {
 
 class GOSTypeVarDefinitionVisitor : public GOSCustomBaseVisitor {
@@ -50,7 +47,7 @@ public:
             return BUPBaseVisitor::visitDefinition(ctx);
         }
         catch (GOSException &e) {
-            cerr << e.getErrorMessage() << endl;
+            std::cerr << e.getErrorMessage() << std::endl;
             return nullptr;
         }
     }
@@ -59,7 +56,7 @@ public:
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
         BUPBaseVisitor::visitVarDefinition(ctx);
         Symbol *newVar;
-        string name = ctx->name->getText();
+        std::string name = ctx->name->getText();
 
         if(this->currentScope->existsInScope(name)) {
             throw CSP2SATAlreadyExistException(
@@ -70,7 +67,7 @@ public:
         }
 
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
-            vector<int> dimentions;
+            std::vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
                 Value *a = visit(expr);
                 dimentions.push_back(a->getRealValue());
@@ -92,7 +89,7 @@ public:
         Type *type = (Type *) currentScope->resolve(ctx->type->getText());
         Symbol *newConst;
 
-        string name = ctx->name->getText();
+        std::string name = ctx->name->getText();
 
         if(this->currentScope->existsInScope(name)) {
             throw CSP2SATAlreadyExistException(
@@ -104,7 +101,7 @@ public:
 
 
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
-            vector<int> dimentions;
+            std::vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
                 Value *a = visit(expr);
                 dimentions.push_back(a->getRealValue());
@@ -121,7 +118,7 @@ public:
                     type
             );
             if (!SymbolTable::entityDefinitionBlock) {
-                string paramFullName = this->currentScope->getFullName() + ctx->name->getText();
+                std::string paramFullName = this->currentScope->getFullName() + ctx->name->getText();
                 int value = this->params->resolve(paramFullName);
                 if (type->getTypeIndex() == SymbolTable::tInt)
                     element->setValue(new IntValue(value));

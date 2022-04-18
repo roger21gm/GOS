@@ -5,7 +5,6 @@
 #ifndef CSP2SAT_BOOLVALUE_H
 #define CSP2SAT_BOOLVALUE_H
 
-#include <string>
 #include "Value.h"
 
 namespace GOS {

@@ -6,12 +6,13 @@
 #define CSP2SAT_VALUESYMBOL_H
 
 #include "../Symbol.h"
+#include <string>
 
 namespace GOS {
 
 class ValueSymbol : public Symbol {
 public:
-    ValueSymbol(const string &name, Type *type) : Symbol(name, type) {}
+    ValueSymbol(const std::string &name, Type *type) : Symbol(name, type) {}
 };
 
 }

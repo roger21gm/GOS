@@ -6,6 +6,7 @@
 #define CSP2SAT_LOCALSCOPE_H
 
 #include "BaseScope.h"
+#include <string>
 
 namespace GOS {
 
@@ -14,15 +15,15 @@ class LocalScope: public BaseScope {
 public:
     explicit LocalScope(Scope *parent) : BaseScope(parent) {}
 
-    void assign(string name, Symbol *sym) {
+    void assign(std::string name, Symbol *sym) {
         symbols[name] = sym;
     }
 
-    string getScopeName() override {
+    std::string getScopeName() override {
         return "local";
     }
 
-    string getFullName() override {
+    std::string getFullName() override {
         return "";
     }
 };

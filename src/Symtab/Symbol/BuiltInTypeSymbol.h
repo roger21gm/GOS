@@ -6,12 +6,13 @@
 #define CSP2SAT_BUILTINTYPESYMBOL_H
 
 #include "../Type.h"
+#include <string>
 
 namespace GOS {
 
 class BuiltInTypeSymbol: public Type {
 public:
-    BuiltInTypeSymbol(const string &name, int typeIndex) : Type(typeIndex, name) {}
+    BuiltInTypeSymbol(const std::string &name, int typeIndex) : Type(typeIndex, name) {}
 
     bool isAssignable() override {
         return false;

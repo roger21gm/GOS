@@ -7,19 +7,14 @@
 
 
 #include <encoding.h>
-#include <string.h>
 #include "Symtab/SymbolTable.h"
 #include "Symtab/Symbol/Scoped/ScopedSymbol.h"
 #include "Symtab/Symbol/Valued/VariableSymbol.h"
-
-// std
 #include <string>
 #include <vector>
 #include <map>
-
-using std::string;
-using std::vector;
-using std::map;
+#include <iostream>
+#include <utility>
 
 namespace GOS {
 
@@ -30,10 +25,10 @@ private:
     SymbolTable *st;
     bool sat = false;
 
-    void fillModelValuesResult(Scope *currentScope, const EncodedFormula formula, const vector<bool> & bmodel) {
-        map<string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
+    void fillModelValuesResult(Scope *currentScope, const EncodedFormula formula, const std::vector<bool> & bmodel) {
+        std::map<std::string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
 
-        for (pair<string, Symbol *> sym : currentScopeSymbols) {
+        for (std::pair<std::string, Symbol *> sym : currentScopeSymbols) {
             if (sym.second->type) {
                 if (sym.second->isScoped())
                     fillModelValuesResult((ScopedSymbol *) sym.second, formula, bmodel);
@@ -48,10 +43,10 @@ private:
         }
     }
 
-    void printModelSolution(Scope *currentScope, ostream &os, string prefix = "") const {
-        map<string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
+    void printModelSolution(Scope *currentScope, std::ostream &os, std::string prefix = "") const {
+        std::map<std::string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
 
-        for(pair<string, Symbol *> sym : currentScopeSymbols){
+        for(std::pair<std::string, Symbol *> sym : currentScopeSymbols){
             if(sym.second->type){
                 if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray) {
                     if (!isdigit(sym.first[0]))
@@ -61,7 +56,7 @@ private:
                                            isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
                 }
                 else{
-                    string output = "var -> ";
+                    std::string output = "var -> ";
                     if(!prefix.empty() && prefix[0] == '.')
                         output += prefix.substr(1, prefix.length()-1);
                     else
@@ -76,7 +71,7 @@ private:
 
                     if(sym.second->type->getTypeIndex() == SymbolTable::tVarBool){
                         VariableSymbol * currentVariable = (VariableSymbol *)sym.second;
-                        os << output  << " -> " << (currentVariable->getModelValue() ? "true" : "false") << endl;
+                        os << output  << " -> " << (currentVariable->getModelValue() ? "true" : "false") << std::endl;
                     }
                 }
             }
@@ -94,17 +89,17 @@ public:
         return f;
     }
 
-    bool printModelSolution(ostream &os) const {
+    bool printModelSolution(std::ostream &os) const {
         printModelSolution(this->st->gloabls, os);
         return true;
     }
 
-    bool printSolution(ostream &os) const override {
+    bool printSolution(std::ostream &os) const override {
         //printModelSolution(this->st->gloabls, os);
         return true;
     }
 
-    void setModel(const EncodedFormula &ef, int lb, int ub, const vector<bool> &bmodel, const vector<int> &imodel) override {
+    void setModel(const EncodedFormula &ef, int lb, int ub, const std::vector<bool> &bmodel, const std::vector<int> &imodel) override {
         sat = true;
         fillModelValuesResult(this->st->gloabls, ef, bmodel);
     }

@@ -1,0 +1,182 @@
+viewpoint:
+    param int rowSize;
+    param int colSize;
+    param int maxNonos;
+
+    param int rowNonos[rowSize][maxNonos];
+    param int colNonos[colSize][maxNonos];
+
+    var x[rowSize][colSize];
+    var xNonoRow[rowSize][maxNonos][colSize];
+    var xNonoCol[colSize][maxNonos][rowSize];
+
+    var hasStartedRow[rowSize][maxNonos][colSize];
+    var hasStartedCol[colSize][maxNonos][rowSize];
+
+constraints:
+
+	//Set to false all unused variables
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] = 0){
+            &&( [!hasStartedRow[i][b][j] | j in 0..colSize-1] );
+            &&( [!xNonoRow[i][b][j] | j in 0..colSize-1] );
+
+        };
+    };
+    forall(i in 0..colSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] = 0){
+            &&( [!hasStartedCol[j][b][i] | i in 0..rowSize-1] );
+            &&( [!xNonoCol[j][b][i] | i in 0..rowSize-1] );
+        };
+    };
+
+
+
+    //Order encoding
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            forall(j in 0..colSize-2){
+                hasStartedRow[i][b][j] -> hasStartedRow[i][b][j+1];
+            };
+        };
+    };
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            forall(i in 0..rowSize-2){
+                hasStartedCol[j][b][i] -> hasStartedCol[j][b][i+1];
+            };
+        };
+    };
+
+
+
+    //Exactly K cells full in row/column
+    forall(i in 0..rowSize-1){
+        EK(x[i], sum(rowNonos[i]));
+    };
+    forall(j in 0..colSize-1){
+        EK(x[_][j], sum(colNonos[j]));
+    };
+
+
+
+    //Set LB on start position
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            hasStartedRow[i][b][colSize-rowNonos[i][b]];
+        };
+    };
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            hasStartedCol[j][b][rowSize-colNonos[j][b]];
+        };
+    };
+
+
+
+
+
+
+    //Channelling between hasStarted and x
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            forall(j in 0..colSize-1){
+                if(j >= rowNonos[i][b]){
+                    xNonoRow[i][b][j] <-> hasStartedRow[i][b][j] & !hasStartedRow[i][b][j-rowNonos[i][b]];
+                }
+                else {
+                    xNonoRow[i][b][j] <-> hasStartedRow[i][b][j];
+                };
+            };
+        };
+    };
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            forall(i in 0..rowSize-1){
+                if(i >= colNonos[j][b]){
+                    xNonoCol[j][b][i] <-> hasStartedCol[j][b][i] & !hasStartedCol[j][b][i-colNonos[j][b]]; 
+                }
+                else {
+                    xNonoCol[j][b][i] <-> hasStartedCol[j][b][i];
+                };
+            };
+        };
+    };
+
+
+    //Chanelling between x and xNono
+    forall(i in 0..rowSize-1, j in 0..colSize-1){
+        x[i][j] <-> ||([xNonoRow[i][b][j]] | b in 0..maxNonos-1 where rowNonos[i][b] != 0);
+        x[i][j] <-> ||([xNonoCol[j][b][i]] | b in 0..maxNonos-1 where colNonos[j][b] != 0);
+    };
+
+
+    //Channelling between hasStarted and x
+    forall(i in 0..rowSize-1, b in 0..maxNonos-1){
+        if(rowNonos[i][b] != 0){
+            forall(j in 0..colSize-1){
+                if(j >= rowNonos[i][b]){
+                    x[i][j] <- hasStartedRow[i][b][j] & !hasStartedRow[i][b][j-rowNonos[i][b]];
+                }
+                else {
+                    x[i][j] <- hasStartedRow[i][b][j];
+                };
+            };
+        };
+    };
+    //Channelling between hasStarted and x
+    forall(j in 0..colSize-1, b in 0..maxNonos-1){
+        if(colNonos[j][b] != 0){
+            forall(i in 0..rowSize-1){
+                if(i >= colNonos[j][b]){
+                    x[i][j] <- hasStartedCol[j][b][i] & !hasStartedCol[j][b][i-colNonos[j][b]]; 
+                }
+                else {
+                    x[i][j] <- hasStartedCol[j][b][i];
+                };
+            };
+        };
+    };
+
+    
+
+    //Nono b abans que b+1.
+	forall(i in 0..rowSize-1, b in 0..maxNonos-2){
+	    if(rowNonos[i][b+1] != 0){
+	        forall(j in 0..colSize-1){
+	            if(j-rowNonos[i][b]-1 >= 0){
+	                hasStartedRow[i][b+1][j] -> hasStartedRow[i][b][j-rowNonos[i][b]-1];
+	            }
+	            else {
+	                !hasStartedRow[i][b+1][j];
+	            };
+	        };
+	    };
+	};
+	forall(j in 0..colSize-1, b in 0..maxNonos-2){
+        if(colNonos[j][b+1] != 0){
+            forall(i in 0..rowSize-1){
+                if(i-colNonos[j][b]-1 >= 0){
+                    hasStartedCol[j][b+1][i] -> hasStartedCol[j][b][i-colNonos[j][b]-1];
+                }
+                else {
+                    !hasStartedCol[j][b+1][i];
+                };
+            };
+        };
+    };
+    
+
+
+
+    
+
+
+    
+
+    
+
+  
+
+output:
+    [ (x[i][j] ? "X" : " ") ++ " " ++ (j==colSize-1 ? "\n" : "") | i in 0..rowSize-1, j in 0..colSize-1];

@@ -2,10 +2,32 @@ project(GOS)
 
 cmake_minimum_required(VERSION 3.5)
 
+# Fix Cygwin paths
+if (CYGWIN)
+    macro (CONVERT_CYGWIN_PATH _path) # https://github.com/jedbrown/cmake-modules/blob/master/CorrectWindowsPaths.cmake
+        EXECUTE_PROCESS(COMMAND cygpath.exe -m ${${_path}}
+                OUTPUT_VARIABLE ${_path})
+        string (STRIP ${${_path}} ${_path})
+    endmacro (CONVERT_CYGWIN_PATH)
+
+    message("Cygwin detected: Converting paths...")
+    CONVERT_CYGWIN_PATH(PROJECT_SOURCE_DIR)
+    CONVERT_CYGWIN_PATH(CMAKE_CURRENT_SOURCE_DIR)
+endif (CYGWIN)
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # C++14
 set(CMAKE_CXX_STANDARD 14)
+
+# Compiler flags
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # set-up ANTLR
 add_definitions(-DANTLR4CPP_STATIC)

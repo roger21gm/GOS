@@ -58,20 +58,20 @@ public:
         return visitor->visit(tree);
     }
 
-    auto runInputVisitor(JSONBaseVisitor * visitor, std::string inStr){
+    ParamJSONRef runInputVisitor(JSONBaseVisitor& visitor, std::string inStr){
         antlr4::ANTLRInputStream input2(inStr);
         JSONLexer lexer2(&input2);
         antlr4::CommonTokenStream tokens2(&lexer2);
         JSONParser parser2(&tokens2);
         JSONParser::JsonContext *tree2 = parser2.json();
-        return visitor->visit(tree2);
+        return visitor.visit(tree2);
     }
 
     void run(){
-        GOSJSONInputVisitor * inputPreJsonVisitor = new GOSJSONInputVisitor();
-        ParamJSON * readParams = runInputVisitor(inputPreJsonVisitor, inStr);
+        GOSJSONInputVisitor inputPreJsonVisitor;
+        ParamJSONRef readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
-        GOSTypeVarDefinitionVisitor * visitor = new GOSTypeVarDefinitionVisitor(symbolTable, _f, readParams);
+        GOSTypeVarDefinitionVisitor * visitor = new GOSTypeVarDefinitionVisitor(symbolTable, _f, readParams.get());
         runVisitor(visitor, modelStr);
 
         if(!symbolTable->errors){

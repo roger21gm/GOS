@@ -16,13 +16,13 @@ namespace GOS {
 class GOSJSONInputVisitor : public JSONBaseVisitor {
 
 private:
-    ParamJSON *base;
-    ParamScoped *current;
+    ParamJSONRef base;
+    ParamScopedRef current;
 
 public:
 
     GOSJSONInputVisitor() {
-        base = new ParamJSON("base");
+        base = ParamJSON::Create("base");
         current = base;
     }
 
@@ -31,23 +31,23 @@ public:
         std::string varName = ctx->STRING()->getText();
         varName.erase(remove(varName.begin(), varName.end(), '"'), varName.end());
 
-        ParamScoped *curr = current;
+        ParamScopedRef curr = current;
         if (ctx->value()->NUMBER()) {
             current->add(
-                    new ParamInt(
+                    ParamInt::Create(
                             varName,
                             stoi(ctx->value()->NUMBER()->getText())
                     )
             );
         } else if (ctx->value()->getText() == "true" || ctx->value()->getText() == "false") {
             current->add(
-                    new ParamBool(
+                    ParamBool::Create(
                             varName,
                             ctx->value()->getText() == "true"
                     )
             );
         } else if (ctx->value()->arr()) {
-            ParamArray *array = new ParamArray(varName);
+            ParamArrayRef array = ParamArray::Create(varName);
             current->add(array);
             // TODO Why not add(visit(ctx->value()->arr()))?? (if visit returned the appropiate object instead of nullptr)
             current = array;
@@ -55,7 +55,7 @@ public:
             current = curr;
 
         } else if (ctx->value()->obj()) {
-            ParamJSON *strct = new ParamJSON(varName);
+            ParamJSONRef strct = ParamJSON::Create(varName);
             current->add(strct);
             current = strct;
             visit(ctx->value()->obj());
@@ -74,11 +74,11 @@ public:
 
     antlrcpp::Any visitArr(JSONParser::ArrContext *ctx) override {
         int index = 0;
-        ParamScoped *curr = current;
+        ParamScopedRef curr = current;
         for (auto currVal : ctx->value()) {
             if (currVal->NUMBER()) {
                 current->add(
-                        new ParamInt(
+                        ParamInt::Create(
                                 std::to_string(index),
                                 stoi(currVal->NUMBER()->getText())
                         )
@@ -86,13 +86,13 @@ public:
                 index++;
             } else if (currVal->getText() == "true" || currVal->getText() == "false") {
                 current->add(
-                        new ParamBool(
+                        ParamBool::Create(
                                 std::to_string(index),
                                 currVal->getText() == "true"
                         )
                 );
             } else if (currVal->arr()) {
-                ParamArray *array = new ParamArray(std::to_string(index));
+                ParamArrayRef array = ParamArray::Create(std::to_string(index));
                 current->add(array);
                 current = array;
                 visit(currVal->arr());
@@ -100,7 +100,7 @@ public:
                 index++;
 
             } else if (currVal->obj()) {
-                ParamJSON *strct = new ParamJSON(std::to_string(index));
+                ParamJSONRef strct = ParamJSON::Create(std::to_string(index));
                 current->add(strct);
                 current = strct;
                 visit(currVal->obj());

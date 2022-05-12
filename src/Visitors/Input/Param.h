@@ -7,6 +7,7 @@
 
 #include <regex>
 #include <iostream>
+#include <memory>
 #include "../../Errors/GOSException.h"
 #include "../../Errors/GOSInputExceptionsRepository.h"
 #include <string>
@@ -25,6 +26,7 @@ public:
 public:
     std::string name;
 };
+typedef std::shared_ptr<Param> ParamRef;
 
 class ParamValuable : public Param {
 public:
@@ -37,28 +39,42 @@ public:
 
     virtual int getValue() = 0;
 };
+typedef std::shared_ptr<ParamValuable> ParamValuableRef;
 
+class ParamBool;
+typedef std::shared_ptr<ParamBool> ParamBoolRef;
 class ParamBool : public ParamValuable {
 public:
+    static ParamBoolRef Create(const std::string &name, bool val) {
+        return std::shared_ptr<ParamBool>(new ParamBool(name, val));
+    }
+    int getValue() override {
+        return value;
+    }
+    bool value; // TODO should be protected/private
+
+protected:
     ParamBool(const std::string &name, bool val) : ParamValuable(name) {
         this->value = val;
     }
+};
+
+class ParamInt;
+typedef std::shared_ptr<ParamInt> ParamIntRef;
+class ParamInt : public ParamValuable {
+public:
+    static ParamIntRef Create(const std::string &name, int val) {
+        return std::shared_ptr<ParamInt>(new ParamInt(name, val));
+    }
     int getValue() override {
         return value;
     }
-    bool value;
-};
+    int value; // TODO should be protected/private
 
-
-class ParamInt : public ParamValuable {
-public:
+protected:
     ParamInt(const std::string &name, int val) : ParamValuable(name) {
         this->value = val;
     }
-    int getValue() override {
-        return value;
-    }
-    int value;
 };
 
 class ParamScoped : public Param {
@@ -70,22 +86,24 @@ public:
         return false;
     }
 
-    virtual void add(Param * a) = 0;
-    virtual Param * get(std::string name) = 0;
+    virtual void add(ParamRef a) = 0;
+    virtual ParamRef get(std::string name) = 0;
 };
+typedef std::shared_ptr<ParamScoped> ParamScopedRef;
 
+class ParamArray;
+typedef std::shared_ptr<ParamArray> ParamArrayRef;
 class ParamArray : public ParamScoped {
 public:
-    ParamArray(const std::string &name) : ParamScoped(name) {
-        elements = std::vector<Param*>();
+    static ParamArrayRef Create(const std::string &name) {
+        return std::shared_ptr<ParamArray>(new ParamArray(name));
     }
 
-    void add(Param *a) override {
+    void add(ParamRef a) override {
         elements.push_back(a);
     }
 
-    Param *get(std::string name) override {
-
+    ParamRef get(std::string name) override {
         int index = stoi(name);
         if(index < elements.size()){
             return elements[index];
@@ -93,27 +111,33 @@ public:
         return nullptr;
     }
 
-    std::vector<Param*> elements;
+    std::vector<ParamRef> elements; // TODO should be protected/private
+
+protected:
+    ParamArray(const std::string &name) : ParamScoped(name) {
+        elements = std::vector<ParamRef>();
+    }
 };
 
-
-class ParamJSON : public ParamScoped {
+class ParamJSON;
+typedef std::shared_ptr<ParamJSON> ParamJSONRef;
+class ParamJSON : public ParamScoped, public std::enable_shared_from_this<ParamJSON> {
 public:
-    ParamJSON(const std::string &name) : ParamScoped(name) {
-        elements = std::map<std::string, Param*>();
+    static ParamJSONRef Create(const std::string &name) {
+        return std::shared_ptr<ParamJSON>(new ParamJSON(name));
     }
 
-    void add(Param *a) override {
+    void add(ParamRef a) override {
         elements[a->name] = a;
     }
 
-    Param *get(std::string name) override {
+    ParamRef get(std::string name) override {
         if(elements.find(name) != elements.end())
             return elements[name];
         return nullptr;
     }
 
-    std::map<std::string, Param*> elements;
+    std::map<std::string, ParamRef> elements;
 
     int resolve(std::string attrAccess) {
         std::vector<std::string> splitted = Utils::splitVarAccessNested(attrAccess);
@@ -122,9 +146,9 @@ public:
 
         bool first = true;
 
-        ParamScoped * currentScope = this;
+        ParamScopedRef currentScope = shared_from_this();
         for(std::string attr : splitted){
-            Param * currentParam = nullptr;
+            ParamRef currentParam;
             if(attr.back() == ']'){
                 currentParam = currentScope->get(attr.substr(0, attr.size()-1));
                 currAccess += "[" + attr.substr(0, attr.size()-1) + "]";
@@ -133,16 +157,22 @@ public:
                 currentParam = currentScope->get(attr);
                 currAccess += (first ? "" : ".") + attr;
             }
+
             if(currentParam == nullptr) {
                 throw CSP2SATInputNotFoundValue(currAccess);
             };
-            if(currentParam->isValuable())
-                return ((ParamValuable*) currentParam)->getValue();
 
-            currentScope = (ParamScoped*) currentParam;
+            if(currentParam->isValuable())
+                return std::dynamic_pointer_cast<ParamValuable>(currentParam)->getValue();
+
+            currentScope = std::dynamic_pointer_cast<ParamScoped>(currentParam);
             first = false;
         }
         return -1;
+    }
+protected:
+    ParamJSON(const std::string &name) : ParamScoped(name) {
+        elements = std::map<std::string, ParamRef>();
     }
 };
 

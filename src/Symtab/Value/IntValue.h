@@ -9,28 +9,6 @@
 
 namespace GOS {
 
-class IntValue : public Value {
-
-public:
-    explicit IntValue(int intVal) {
-        this->realIntValue = intVal;
-    }
-
-    int getRealValue() override {
-        return realIntValue;
-    }
-
-    void setRealValue(int realVal) override {
-        this->realIntValue = realVal;
-    }
-
-    bool isBoolean() override {
-        return false;
-    }
-
-private:
-    int realIntValue;
-};
 
 }
 

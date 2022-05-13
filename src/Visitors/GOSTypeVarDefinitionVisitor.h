@@ -69,7 +69,7 @@ public:
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             std::vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
-                Value *a = visit(expr);
+                ValueRef a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
             newVar = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
@@ -103,7 +103,7 @@ public:
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
             std::vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
-                Value *a = visit(expr);
+                ValueRef a = visit(expr);
                 dimentions.push_back(a->getRealValue());
             }
 
@@ -121,9 +121,9 @@ public:
                 std::string paramFullName = this->currentScope->getFullName() + ctx->name->getText();
                 int value = this->params->resolve(paramFullName);
                 if (type->getTypeIndex() == SymbolTable::tInt)
-                    element->setValue(new IntValue(value));
+                    element->setValue(IntValue::Create(value));
                 else
-                    element->setValue(new BoolValue(value));
+                    element->setValue(BoolValue::Create(value));
             }
             newConst = element;
         }
@@ -146,7 +146,7 @@ public:
         try {
             int value = this->params->resolve(ctx->getText());
             AssignableSymbol *access = new AssignableSymbol(ctx->getText(), SymbolTable::_integer);
-            access->setValue(new IntValue(value));
+            access->setValue(IntValue::Create(value));
             return (Symbol *) access;
         }
         catch (GOSException &e) {

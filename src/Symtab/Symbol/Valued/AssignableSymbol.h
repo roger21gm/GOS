@@ -20,16 +20,16 @@ public:
         return true;
     }
 
-    Value * getValue() {
+    ValueRef getValue() {
         return val;
     }
 
-    void setValue(Value * value) {
+    void setValue(ValueRef value) {
         this->val = value;
     }
 
 private:
-    Value * val;
+    ValueRef val;
 };
 
 }

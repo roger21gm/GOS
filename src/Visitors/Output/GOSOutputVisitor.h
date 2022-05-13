@@ -90,7 +90,7 @@ public:
             }
         }
         else if(ctx->expr()){
-            Value * val = visit(ctx->expr());
+            ValueRef val = visit(ctx->expr());
             result = std::to_string(val->getRealValue());
         }
         else if(ctx->varAccess()){
@@ -127,7 +127,7 @@ public:
     }
 
     antlrcpp::Any visitStringTernary(BUPParser::StringTernaryContext *ctx) override {
-        Value * cond = visit(ctx->condition);
+        ValueRef cond = visit(ctx->condition);
 
         if(cond->getRealValue())
             return visit(ctx->op1);
@@ -141,11 +141,11 @@ public:
         } else if (ctx->varAccess()) {
             Symbol *value = visit(ctx->varAccess());
             if (value->isAssignable()) {
-                return (Value *) ((AssignableSymbol *) value)->getValue();
+                return ((AssignableSymbol *) value)->getValue();
             } else {
                 bool a = ((VariableSymbol*) value)->getModelValue();
-                Value * modelValue = new BoolValue(a);
-                return (Value *) modelValue;
+                ValueRef modelValue = BoolValue::Create(a);
+                return modelValue;
             }
         }
         return BUPBaseVisitor::visitExpr_base(ctx);

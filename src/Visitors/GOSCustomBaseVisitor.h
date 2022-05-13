@@ -65,7 +65,7 @@ public:
     }
 
     antlrcpp::Any visitExprTernary(BUPParser::ExprTernaryContext *ctx) override {
-        Value *condition = visit(ctx->condition);
+        ValueRef condition = visit(ctx->condition);
         if (condition->getRealValue())
             return visit(ctx->op1);
         else
@@ -74,17 +74,16 @@ public:
 
     antlrcpp::Any visitExprListAggregateOp(BUPParser::ExprListAggregateOpContext *ctx) override {
         ArraySymbol * list = visit(ctx->list());
-        Value * result = nullptr;
+        ValueRef result = nullptr;
 
         if(list->getElementsType()->getTypeIndex() == SymbolTable::tInt){
-
             std::vector<Symbol*> elements = list->getSymbolVector();
 
             if(ctx->opAggregateExpr()->getText() == "sum"){
                 int sum = 0;
                 for(auto & element : elements)
                     sum += ((AssignableSymbol*)element)->getValue()->getRealValue();
-                result = new IntValue(sum);
+                result = IntValue::Create(sum);
             }
             else if(ctx->opAggregateExpr()->getText() == "max"){
                 int max = INT_MIN;
@@ -93,7 +92,7 @@ public:
                         max = ((AssignableSymbol*)element)->getValue()->getRealValue();
                     }
                 }
-                result = new IntValue(max);
+                result = IntValue::Create(max);
             }
             else if(ctx->opAggregateExpr()->getText() == "min"){
                 int min = INT_MAX;
@@ -102,10 +101,10 @@ public:
                         min = ((AssignableSymbol*)element)->getValue()->getRealValue();
                     }
                 }
-                result = new IntValue(min);
+                result = IntValue::Create(min);
             }
             else { //Length
-                result = new IntValue(elements.size());
+                result = IntValue::Create(elements.size());
             }
         }
         else{
@@ -122,24 +121,24 @@ public:
     }
 
     antlrcpp::Any visitExprAnd(BUPParser::ExprAndContext *ctx) override {
-        Value *result = visit(ctx->exprOr(0));
+        ValueRef result = visit(ctx->exprOr(0));
         if (ctx->exprOr().size() > 1) {
-            BoolValue *res = new BoolValue(true);
+            ValueRef res = BoolValue::Create(true);
             for (int i = 0; i < ctx->exprOr().size(); i++) {
-                Value *currValue = visit(ctx->exprOr(i));
+                ValueRef currValue = visit(ctx->exprOr(i));
                 res->setRealValue(res->getRealValue() && currValue->getRealValue());
             }
-            return (Value *) res;
+            return res;
         }
         return result;
     }
 
     antlrcpp::Any visitExprOr(BUPParser::ExprOrContext *ctx) override {
-        Value *result = visit(ctx->exprEq(0));
+        ValueRef result = visit(ctx->exprEq(0));
         if (ctx->exprEq().size() > 1) {
-            BoolValue *res = new BoolValue(false);
+            ValueRef res = BoolValue::Create(false);
             for (int i = 0; i < ctx->exprEq().size(); i++) {
-                Value *currValue = visit(ctx->exprEq(i));
+                ValueRef currValue = visit(ctx->exprEq(i));
                 if (currValue->isBoolean())
                     res->setRealValue(res->getRealValue() || currValue->getRealValue());
                 else {
@@ -152,18 +151,18 @@ public:
                     );
                 }
             }
-            return (Value *) res;
+            return res;
         }
         return result;
     }
 
     antlrcpp::Any visitExprEq(BUPParser::ExprEqContext *ctx) override {
-        Value *lVal = visit(ctx->exprRel(0));
+        ValueRef lVal = visit(ctx->exprRel(0));
         if (ctx->exprRel().size() > 1) {
             for (int i = 1; i < ctx->exprRel().size(); i++) {
-                Value *rVal = visit(ctx->exprRel(i));
+                ValueRef rVal = visit(ctx->exprRel(i));
                 if (lVal->isBoolean() == rVal->isBoolean()) {
-                    BoolValue *res = new BoolValue();
+                    ValueRef res = BoolValue::Create();
                     if (ctx->opEquality(0)->getText() == "==")
                         res->setRealValue(lVal->getRealValue() == rVal->getRealValue());
                     else
@@ -184,9 +183,9 @@ public:
     }
 
     antlrcpp::Any visitExprRel(BUPParser::ExprRelContext *ctx) override {
-        Value *lVal = visit(ctx->exprSumDiff(0));
+        ValueRef lVal = visit(ctx->exprSumDiff(0));
         if (ctx->exprSumDiff().size() == 2) {
-            Value *rVal = visit(ctx->exprSumDiff(1));
+            ValueRef rVal = visit(ctx->exprSumDiff(1));
 
             if (lVal->isBoolean()) {
                 throw CSP2SATInvalidExpressionTypeException(
@@ -207,7 +206,7 @@ public:
                 );
             };
 
-            BoolValue *res = new BoolValue();
+            ValueRef res = BoolValue::Create();
             if (ctx->opRelational(0)->getText() == "<")
                 res->setRealValue(lVal->getRealValue() < rVal->getRealValue());
             else if (ctx->opRelational(0)->getText() == ">")
@@ -216,7 +215,7 @@ public:
                 res->setRealValue(lVal->getRealValue() <= rVal->getRealValue());
             else
                 res->setRealValue(lVal->getRealValue() >= rVal->getRealValue());
-            return (Value *) res;
+            return res;
 
         } else if (ctx->exprSumDiff().size() > 2) {
             throw CSP2SATInvalidOperationException(
@@ -229,11 +228,11 @@ public:
     }
 
     antlrcpp::Any visitExprSumDiff(BUPParser::ExprSumDiffContext *ctx) override {
-        Value *result = visit(ctx->exprMulDivMod(0));
+        ValueRef result = visit(ctx->exprMulDivMod(0));
         if (ctx->exprMulDivMod().size() > 1) {
-            IntValue *res = new IntValue(result->getRealValue());
+            ValueRef res = IntValue::Create(result->getRealValue());
             for (int i = 0; i < ctx->opSumDiff().size(); i++) {
-                Value *currValue = visit(ctx->exprMulDivMod(i + 1));
+                ValueRef currValue = visit(ctx->exprMulDivMod(i + 1));
                 if (!currValue->isBoolean()) {
                     if (ctx->opSumDiff(i)->getText() == "+")
                         res->setRealValue(res->getRealValue() + currValue->getRealValue());
@@ -250,17 +249,17 @@ public:
                 }
 
             }
-            return (Value *) res;
+            return res;
         }
         return result;
     }
 
     antlrcpp::Any visitExprMulDivMod(BUPParser::ExprMulDivModContext *ctx) override {
-        Value *result = visit(ctx->exprNot(0));
+        ValueRef result = visit(ctx->exprNot(0));
         if (ctx->exprNot().size() > 1) {
-            IntValue *res = new IntValue(result->getRealValue());
+            ValueRef res = IntValue::Create(result->getRealValue());
             for (int i = 0; i < ctx->opMulDivMod().size(); i++) {
-                Value *currValue = visit(ctx->exprNot(i + 1));
+                ValueRef currValue = visit(ctx->exprNot(i + 1));
                 if (!currValue->isBoolean()) {
                     if (ctx->opMulDivMod(i)->getText() == "*")
                         res->setRealValue(res->getRealValue() * currValue->getRealValue());
@@ -272,16 +271,16 @@ public:
 
                 }
             }
-            return (Value *) res;
+            return res;
         }
         return result;
     }
 
     antlrcpp::Any visitExprNot(BUPParser::ExprNotContext *ctx) override {
-        Value *result = visit(ctx->expr_base());
+        ValueRef result = visit(ctx->expr_base()); // TODO safe cast?
         if (ctx->op) {
             if (result->isBoolean()) {
-                return (Value *) new BoolValue(!result->getRealValue());
+                result = BoolValue::Create(!result->getRealValue());
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
                         ctx->start->getLine(),
@@ -301,7 +300,7 @@ public:
         } else if (ctx->varAccess()) {
             Symbol *value = visit(ctx->varAccess());
             if (value->isAssignable()) {
-                return (Value *) ((AssignableSymbol *) value)->getValue();
+                return ((AssignableSymbol *) value)->getValue();
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
                         ctx->getStart()->getLine(),
@@ -322,7 +321,7 @@ public:
         } else if (ctx->index) {
             Scope *prev = this->currentScope;
             this->currentScope = this->currentLocalScope;
-            Value *index = visit(ctx->index);
+            ValueRef index = visit(ctx->index);
             this->currentScope = prev;
             Symbol *res = this->currentScope->resolve(std::to_string(index->getRealValue()));
             return (Symbol *) this->currentScope->resolve(std::to_string(index->getRealValue()));
@@ -414,17 +413,18 @@ public:
 
 
     antlrcpp::Any visitValueBaseType(BUPParser::ValueBaseTypeContext *ctx) override {
+        ValueRef result;
         if (ctx->integer) {
-            return (Value *) new IntValue(stoi(ctx->integer->getText()));
+            result = IntValue::Create(stoi(ctx->integer->getText()));
         } else {
-            return (Value *) new BoolValue(ctx->boolean->getText() == "true");
+            result = BoolValue::Create(ctx->boolean->getText() == "true");
         }
+        return result;
     }
 
     antlrcpp::Any visitRangList(BUPParser::RangListContext *ctx) override {
-
-        Value *minRange = visit(ctx->min);
-        Value *maxRange = visit(ctx->max);
+        ValueRef minRange = visit(ctx->min);
+        ValueRef maxRange = visit(ctx->max);
 
         int minValue = minRange->getRealValue();
         int maxValue = maxRange->getRealValue();
@@ -437,7 +437,7 @@ public:
             );
             for (int i = 0; i <= (maxValue - minValue); i++) {
                 AssignableSymbol *newValue = new AssignableSymbol(std::to_string(i), SymbolTable::_integer);
-                newValue->setValue(new IntValue(minValue + i));
+                newValue->setValue(IntValue::Create(minValue + i));
                 result->add(newValue);
             }
             return result;
@@ -469,7 +469,7 @@ public:
 
             bool condition = true;
             if (ctx->condExpr) {
-                Value *cond = visit(ctx->condExpr);
+                ValueRef cond = visit(ctx->condExpr);
                 if (!cond->isBoolean()) {
                     throw CSP2SATInvalidExpressionTypeException(
                             ctx->condExpr->start->getLine(),
@@ -490,7 +490,7 @@ public:
                 this->accessingNotLeafVariable = false;
             }
             else if (ctx->listResultExpr()->resExpr) {
-                Value *val = visit(ctx->listResultExpr()->resExpr);
+                ValueRef val = visit(ctx->listResultExpr()->resExpr);
                 auto *valueResult = new AssignableSymbol(
                         std::to_string(rand()),
                         val->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer
@@ -548,7 +548,7 @@ public:
             if (currVal->varAcc) {
                 curr = visit(currVal);
             } else if (currVal->resExpr) {
-                Value *exprVal = visit(currVal->resExpr);
+                ValueRef exprVal = visit(currVal->resExpr);
                 curr = new AssignableSymbol(std::to_string(rand()),
                                             exprVal->isBoolean() ? SymbolTable::_boolean : SymbolTable::_integer);
                 ((AssignableSymbol *) curr)->setValue(exprVal);

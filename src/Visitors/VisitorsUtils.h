@@ -168,9 +168,9 @@ definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *e
                 string fullScopedName = newCustomTypeConst->getFullName() + "." + sym.first;
                 int value = inParams->resolve(fullScopedName);
                 if (sym.second->type->getTypeIndex() == SymbolTable::tInt)
-                    newParam->setValue(new IntValue(value));
+                    newParam->setValue(IntValue::Create(value));
                 else
-                    newParam->setValue(new BoolValue(value));
+                    newParam->setValue(BoolValue::Create(value));
             }
 
             newCustomTypeConst->define(newParam);
@@ -205,9 +205,9 @@ defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions
                     string fullScopedName = newArray->getFullName() + "[" + to_string(i) + "]";
                     int value = inParams->resolve(fullScopedName);
                     if (elementsType->getTypeIndex() == SymbolTable::tInt)
-                        newParam->setValue(new IntValue(value));
+                        newParam->setValue(IntValue::Create(value));
                     else
-                        newParam->setValue(new BoolValue(value));
+                        newParam->setValue(BoolValue::Create(value));
                 }
                 element = newParam;
             }

@@ -385,7 +385,7 @@ public:
 
     antlrcpp::Any visitIfThenElse(BUPParser::IfThenElseContext *ctx) override {
         for (int i = 0; i < ctx->expr().size(); ++i) {
-            Value *condVal = visit(ctx->expr(i));
+            ValueRef condVal = visit(ctx->expr(i));
             if (condVal->isBoolean()) {
                 if (condVal->getRealValue() == 1) {
                     visit(ctx->localConstraintDefinitionBlock(i));
@@ -407,7 +407,7 @@ public:
     }
 
     antlrcpp::Any visitConstraint_aggreggate_op(BUPParser::Constraint_aggreggate_opContext *ctx) override {
-        Value *k = nullptr;
+        ValueRef k = nullptr;
         if (ctx->param) {
             k = visit(ctx->param);
         }

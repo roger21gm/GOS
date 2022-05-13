@@ -82,7 +82,7 @@ private:
                     }
 
                     if(sym.second->type->getTypeIndex() != SymbolTable::tVarBool){
-                        Value * val = ((AssignableSymbol*)sym.second)->getValue();
+                        ValueRef val = ((AssignableSymbol*)sym.second)->getValue();
                         std::cout << output  << " -> " << (val ? std::to_string(val->getRealValue()) : "_") << std::endl;
                     }
                     else {

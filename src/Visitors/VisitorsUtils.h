@@ -15,8 +15,7 @@
 #include "Input/Param.h"
 #include "../Errors/GOSExceptionsRepository.h"
 #include "../Symtab/Symbol/formulaReturn.h"
-#include "../Symtab/Value/BoolValue.h"
-#include "../Symtab/Value/IntValue.h"
+#include "../Symtab/Value.h"
 #include <string>
 #include <vector>
 #include <map>

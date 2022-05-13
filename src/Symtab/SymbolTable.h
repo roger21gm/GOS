@@ -7,11 +7,11 @@
 
 
 #include <iostream>
-#include "Scope/GlobalScope.h"
+#include "Scope.h"
 #include "Symbol/BuiltInTypeSymbol.h"
 #include "smtformula.h"
 #include "Symbol/Scoped/ScopedSymbol.h"
-#include "Value/Value.h"
+#include "Value.h"
 #include "Symbol/Valued/AssignableSymbol.h"
 #include <map>
 #include <string>

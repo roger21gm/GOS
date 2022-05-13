@@ -7,13 +7,11 @@
 
 #include <BUPBaseVisitor.h>
 #include "../Symtab/SymbolTable.h"
-#include "../Symtab/Value/Value.h"
-#include "../Symtab/Value/BoolValue.h"
-#include "../Symtab/Value/IntValue.h"
+#include "../Symtab/Value.h"
 #include "../Visitors/VisitorsUtils.h"
 #include "../Errors/GOSException.h"
 #include "../Errors/GOSExceptionsRepository.h"
-#include "../Symtab/Scope/LocalScope.h"
+#include "../Symtab/Scope.h"
 #include "../Symtab/Symbol/StringSymbol.h"
 #include "../Symtab/Symbol/formulaReturn.h"
 #include <string>

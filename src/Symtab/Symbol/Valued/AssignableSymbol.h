@@ -5,15 +5,17 @@
 #ifndef CSP2SAT_ASSIGNABLESYMBOL_H
 #define CSP2SAT_ASSIGNABLESYMBOL_H
 
-#include "../Valued/ValueSymbol.h"
+#include "ValueSymbol.h"
 #include <string>
 
 namespace GOS {
 
-class AssignableSymbol: public ValueSymbol {
+class AssignableSymbol;
+typedef std::shared_ptr<AssignableSymbol> AssignableSymbolRef;
+class AssignableSymbol : public ValueSymbol {
 public:
-    AssignableSymbol(const std::string &name, Type *type) : ValueSymbol(name, type) {
-        this->val = nullptr;
+    static AssignableSymbolRef Create(const std::string &name, TypeRef type) {
+        return AssignableSymbolRef(new AssignableSymbol(name, type));
     }
 
     bool isAssignable() override {
@@ -26,6 +28,11 @@ public:
 
     void setValue(ValueRef value) {
         this->val = value;
+    }
+
+protected:
+    AssignableSymbol(const std::string &name, TypeRef type) : ValueSymbol(name, type) {
+        this->val = nullptr;
     }
 
 private:

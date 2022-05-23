@@ -12,8 +12,15 @@
 
 namespace GOS {
 
+class StringSymbol;
+typedef std::shared_ptr<StringSymbol> StringSymbolRef;
 class StringSymbol : public Symbol {
 public:
+    static StringSymbolRef Create(const std::string &str) {
+        return StringSymbolRef(new StringSymbol(str));
+    }
+
+protected:
     StringSymbol(const std::string &str) : Symbol(str, SymbolTable::_string) {}
 };
 

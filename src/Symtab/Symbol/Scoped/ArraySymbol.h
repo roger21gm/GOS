@@ -7,39 +7,31 @@
 
 #include "../../../GOSUtils.h"
 #include "../../../Errors/GOSExceptionsRepository.h"
+#include "../../SymbolTable.h"
+#include "ScopedSymbol.h"
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 
 namespace GOS {
 
+class ArraySymbol;
+typedef std::shared_ptr<ArraySymbol> ArraySymbolRef;
 class ArraySymbol : public ScopedSymbol {
-
-private:
-    std::vector<Symbol*> elements;
-    Type * elementsType;
-    int size;
-
 public:
-    ArraySymbol(const std::string &name, Scope * enclosingScope, Type * arrayElementsType, int size) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
-        this->size = size;
-        this->elementsType = arrayElementsType;
-        this->type = this;
+    static ArraySymbolRef Create(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType, int size) {
+        return ArraySymbolRef(new ArraySymbol(name, enclosingScope, arrayElementsType, size));
+    }
+    static ArraySymbolRef Create(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType) {
+        return ArraySymbolRef(new ArraySymbol(name, enclosingScope, arrayElementsType));
     }
 
-    ArraySymbol(const std::string &name, Scope * enclosingScope, Type * arrayElementsType) : ScopedSymbol(SymbolTable::tArray, name, enclosingScope) {
-        this->size = 0;
-        this->elementsType = arrayElementsType;
-        this->type = this;
-    }
-
-
-
-    void define(Symbol *sym) override {
+    void define(SymbolRef sym) override {
         elements.push_back(sym);
     }
 
-    Symbol *resolve(const std::string& name) override {
+    SymbolRef resolve(const std::string& name) override {
         bool isNumber = Utils::check_number(name);
 
         if(isNumber){
@@ -62,16 +54,15 @@ public:
         else return false;
     }
 
-
-    std::map<std::string, Symbol*> getScopeSymbols() override {
-        std::map<std::string, Symbol*> scopeSymbols;
+    std::map<std::string, SymbolRef> getScopeSymbols() override {
+        std::map<std::string, SymbolRef> scopeSymbols;
         for (int i = 0; i < size; i++) {
             scopeSymbols[std::to_string(i)] = elements[i];
         }
         return scopeSymbols;
     }
 
-    std::vector<Symbol*> getSymbolVector() {
+    std::vector<SymbolRef> getSymbolVector() {
         return elements;
     }
 
@@ -83,7 +74,7 @@ public:
         return this->size;
     }
 
-    Type * getElementsType () {
+    TypeRef getElementsType () {
         return this->elementsType;
     }
 
@@ -91,11 +82,32 @@ public:
         return false;
     }
 
-
-    void add(Symbol *sym) {
+    void add(SymbolRef sym) {
         elements.push_back(sym);
         size++;
     }
+
+protected:
+    ArraySymbol(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType, int size) :
+        ScopedSymbol(SymbolTable::tArray, name, enclosingScope)
+    {
+        this->size = size;
+        this->elementsType = arrayElementsType;
+        this->type = Type::Create(SymbolTable::tArray, name); // Trick! creating another instance of Type since shared_from_this cannot be called from a constructor
+    }
+
+    ArraySymbol(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType) : 
+        ScopedSymbol(SymbolTable::tArray, name, enclosingScope) 
+    {
+        this->size = 0;
+        this->elementsType = arrayElementsType;
+        this->type = Type::Create(SymbolTable::tArray, name);
+    }
+
+private:
+    std::vector<SymbolRef> elements;
+    TypeRef elementsType;
+    int size;
 };
 
 }

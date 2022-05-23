@@ -8,37 +8,43 @@
 #include "./Symbol/Symbol.h"
 #include <string>
 #include <map>
+#include <memory>
 
 namespace GOS {
 
+class Scope;
+typedef std::shared_ptr<Scope> ScopeRef;
 class Scope {
 public:
+    virtual ~Scope() {};
     virtual std::string getScopeName() = 0;
     virtual std::string getFullName() = 0;
-    virtual Scope * getEnclosingScope() = 0;
-    virtual void define(Symbol * sym) = 0;
-    virtual Symbol * resolve(const std::string &name) = 0;
+    virtual ScopeRef getEnclosingScope() = 0;
+    virtual void define(SymbolRef sym) = 0;
+    virtual SymbolRef resolve(const std::string &name) = 0;
     virtual bool existsInScope(const std::string &name) = 0;
-    virtual std::map<std::string, Symbol*> getScopeSymbols() = 0;
+    virtual std::map<std::string, SymbolRef> getScopeSymbols() = 0;
 };
 
-class BaseScope: public Scope {
+class BaseScope;
+typedef std::shared_ptr<BaseScope> BaseScopeRef;
+class BaseScope : public Scope {
 public:
-    void define(Symbol *sym) override {
+    virtual ~BaseScope() {}
+
+    void define(SymbolRef sym) override {
         symbols[sym->getName()] = sym;
     }
 
-    void define(std::string name, Symbol *sym) {
+    void define(std::string name, SymbolRef sym) {
         symbols[name] = sym;
     }
 
-    explicit BaseScope(Scope *parent) : enclosingScope(parent) {}
-
-    Scope * getEnclosingScope() override {
+    ScopeRef getEnclosingScope() override {
         return this->enclosingScope;
     }
 
-    Symbol * resolve(const std::string& name) override {
+    SymbolRef resolve(const std::string& name) override {
         if ( symbols.find(name) != symbols.end() )
             return symbols[name];
         if ( enclosingScope != nullptr )
@@ -46,24 +52,30 @@ public:
         return nullptr;
     }
 
-    std::map<std::string, Symbol*> getScopeSymbols() override {
+    std::map<std::string, SymbolRef> getScopeSymbols() override {
         return this->symbols;
     }
-
 
     bool existsInScope(const std::string &name) override {
         return symbols.find(name) != symbols.end();
     }
 
 private:
-    Scope * enclosingScope;
+    ScopeRef enclosingScope;
+    
 protected:
-    std::map<std::string, Symbol*> symbols;
+    explicit BaseScope(ScopeRef parent) : enclosingScope(parent) {}
+
+    std::map<std::string, SymbolRef> symbols;
 };
 
+class GlobalScope;
+typedef std::shared_ptr<GlobalScope> GlobalScopeRef;
 class GlobalScope: public BaseScope {
 public:
-    GlobalScope() : BaseScope(nullptr) {}
+    static GlobalScopeRef Create() {
+        return GlobalScopeRef(new GlobalScope());
+    }
 
     std::string getScopeName() override {
         return "global";
@@ -72,14 +84,19 @@ public:
     std::string getFullName() override {
         return "";
     }
-
+protected:
+    GlobalScope() : BaseScope(nullptr) {}
 };
 
-class LocalScope: public BaseScope {
+class LocalScope;
+typedef std::shared_ptr<LocalScope> LocalScopeRef;
+class LocalScope : public BaseScope {
 public:
-    explicit LocalScope(Scope *parent) : BaseScope(parent) {}
+    static LocalScopeRef Create(ScopeRef parent) {
+        return LocalScopeRef(new LocalScope(parent));
+    }
 
-    void assign(std::string name, Symbol *sym) {
+    void assign(std::string name, SymbolRef sym) {
         symbols[name] = sym;
     }
 
@@ -90,6 +107,9 @@ public:
     std::string getFullName() override {
         return "";
     }
+
+protected:
+    LocalScope(ScopeRef parent) : BaseScope(parent) {}
 };
 
 }

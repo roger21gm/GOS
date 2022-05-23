@@ -7,26 +7,28 @@
 
 
 #include "../../Type.h"
+#include "../../Scope.h"
 #include <string>
 #include <map>
+#include <memory>
 
 namespace GOS {
 
 class ScopedSymbol : public Scope, public Type  {
-
 protected:
-    Scope * enclosingScope;
+    ScopeRef enclosingScope;
 
 public:
-
-    ScopedSymbol(int typeIndex, const std::string &name, Scope *enclosingScope) : Type(typeIndex, name),
+    ScopedSymbol(int typeIndex, const std::string &name, ScopeRef enclosingScope) : Type(typeIndex, name),
                                                                              enclosingScope(enclosingScope) {}
+    
+    virtual ~ScopedSymbol() {}
 
     std::string getScopeName() override {
         return this->name;
     }
 
-    Scope *getEnclosingScope() override {
+    ScopeRef getEnclosingScope() override {
         return this->enclosingScope;
     }
 
@@ -39,16 +41,17 @@ public:
     }
 
 
-    virtual void define(Symbol *sym) override = 0;
+    virtual void define(SymbolRef sym) override = 0;
 
-    virtual Symbol *resolve(const std::string& name) override = 0;
+    virtual SymbolRef resolve(const std::string& name) override = 0;
 
-    virtual std::map<std::string, Symbol*> getScopeSymbols() override = 0;
+    virtual std::map<std::string, SymbolRef> getScopeSymbols() override = 0;
 
     bool isScoped() override {
         return true;
     }
 };
+typedef std::shared_ptr<ScopedSymbol> ScopedSymbolRef;
 
 }
 

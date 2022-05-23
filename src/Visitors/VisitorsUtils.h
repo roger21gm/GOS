@@ -5,17 +5,17 @@
 #ifndef CSP2SAT_VISITORSUTILS_H
 #define CSP2SAT_VISITORSUTILS_H
 
-
+#include "../Symtab/SymbolTable.h"
 #include "../Symtab/Symbol/Symbol.h"
 #include "../Symtab/Symbol/Scoped/StructSymbol.h"
-#include "../Symtab/SymbolTable.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../Symtab/Symbol/Valued/AssignableSymbol.h"
+#include "../Symtab/Symbol/formulaReturn.h"
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
 #include "Input/Param.h"
 #include "../Errors/GOSExceptionsRepository.h"
-#include "../Symtab/Symbol/formulaReturn.h"
 #include "../Symtab/Value.h"
+#include "../GOSUtils.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -30,8 +30,13 @@ using std::map;
 using std::to_string;
 using std::pair;
 
-void generateAllPermutations(vector<vector<Symbol *>> input, vector<Symbol *> current, int k,
-                                    vector<map<string, Symbol *>> &result, vector<string> names) {
+void generateAllPermutations(
+    vector<vector<SymbolRef>> input, 
+    vector<SymbolRef> current, 
+    int k,
+    vector<map<string, SymbolRef>> &result, 
+    vector<string> names) 
+{
     if (k == input.size()) {
         result.emplace_back();
         for (int i = 0; i < k; ++i) {
@@ -45,7 +50,13 @@ void generateAllPermutations(vector<vector<Symbol *>> input, vector<Symbol *> cu
     }
 }
 
-void printAll(const vector<vector<Symbol*>> & allVecs, const vector<string> & names, vector<map<string, Symbol *>> & result, vector<Symbol*> currComb = vector<Symbol*>(), int vecIndex = 0) {
+void printAll(
+    const vector<vector<SymbolRef>> & allVecs, 
+    const vector<string> & names, 
+    vector<map<string, SymbolRef>> & result, 
+    vector<SymbolRef> currComb = vector<SymbolRef>(), 
+    int vecIndex = 0) 
+{
     if (vecIndex >= allVecs.size()) {
         result.emplace_back();
         for(int i = 0; i < currComb.size(); ++i)
@@ -53,22 +64,22 @@ void printAll(const vector<vector<Symbol*>> & allVecs, const vector<string> & na
         return;
     }
     for (size_t i=0; i<allVecs[vecIndex].size(); i++) {
-        vector<Symbol*> curr = vector<Symbol*>(currComb);
+        vector<SymbolRef> curr = vector<SymbolRef>(currComb);
         curr.push_back(allVecs[vecIndex][i]);
         printAll(allVecs, names, result, curr, vecIndex + 1);
     }
 }
 
-vector<map<string, Symbol *>> getAllCombinations(const map<string, ArraySymbol *> &ranges) {
-    vector<vector<Symbol *>> unnamedRanges;
+vector<map<string, SymbolRef>> getAllCombinations(const map<string, ArraySymbolRef> &ranges) {
+    vector<vector<SymbolRef>> unnamedRanges;
     vector<string> names;
 
     for (const auto &localParam : ranges) {
         names.push_back(localParam.first);
 
-        map<string, Symbol *> currAuxList = localParam.second->getScopeSymbols();
+        map<string, SymbolRef> currAuxList = localParam.second->getScopeSymbols();
 
-        vector<Symbol *> curr;
+        vector<SymbolRef> curr;
         curr.reserve(currAuxList.size());
         for (auto const &currElem: currAuxList)
             curr.push_back(currElem.second);
@@ -78,7 +89,7 @@ vector<map<string, Symbol *>> getAllCombinations(const map<string, ArraySymbol *
     }
 
 
-    vector<map<string, Symbol *>> result;
+    vector<map<string, SymbolRef>> result;
     printAll(unnamedRanges, names, result);
     //generateAllPermutations(unnamedRanges, unnamedRanges[0], 0, result, names);
 
@@ -100,17 +111,17 @@ string getTypeName(const int tType) {
     }
 }
 
-vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol *variableArray) {
+vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbolRef variableArray) {
     vector<literal> result = vector<literal>();
-    map<string, Symbol *> arrayElems = variableArray->getScopeSymbols();
+    map<string, SymbolRef> arrayElems = variableArray->getScopeSymbols();
     if (variableArray->getElementsType()->getTypeIndex() == SymbolTable::tVarBool
         || variableArray->getElementsType()->getTypeIndex() == SymbolTable::tFormula) {
         for (auto currElem : arrayElems) {
-            if(currElem.second->type->getTypeIndex() == SymbolTable::tVarBool){
-                result.push_back(((VariableSymbol *) currElem.second)->getVar());
+            if(currElem.second->getType()->getTypeIndex() == SymbolTable::tVarBool){
+                result.push_back(Utils::as<VariableSymbol>(currElem.second)->getVar());
             }
             else {
-                formulaReturn * formula = (formulaReturn *) currElem.second;
+                formulaReturnRef formula = Utils::as<formulaReturn>(currElem.second);
                 if(formula->clauses.size() == 1 && formula->clauses.front().v.size() == 1){
                     result.push_back(formula->clauses.front().v.front());
                 }
@@ -124,49 +135,54 @@ vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbol *variableArr
 }
 
 // Defining before implementing due to cross-call between these functions
-StructSymbol *
-definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, 
-    SMTFormula *formula, ParamJSON *inParams);
-ArraySymbol *
-defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, 
-    Type *elementsType, SMTFormula *formula, ParamJSON *inParams);
+StructSymbolRef
+definewNewCustomTypeParam(const string &name, StructSymbolRef customType, ScopeRef enclosingScope, 
+    SMTFormula *formula, ParamJSONRef inParams);
 
-ArraySymbol *
-createArrayParamFromArrayType(string name, Scope *enclosingScope, 
-    ArraySymbol *arrayType, SMTFormula *formula, ParamJSON *inParams);
+ArraySymbolRef
+defineNewArray(const string &name, ScopeRef enclosingScope, vector<int> dimentions, 
+    TypeRef elementsType, SMTFormula *formula, ParamJSONRef inParams);
+
+ArraySymbolRef 
+createArrayParamFromArrayType(string name, ScopeRef enclosingScope, 
+    ArraySymbolRef arrayType, SMTFormula *formula, ParamJSONRef inParams);
 
 
 
-StructSymbol *
-definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *enclosingScope, SMTFormula *formula,
-                            ParamJSON *inParams) {
-
-    StructSymbol *newCustomTypeConst = new StructSymbol(
+StructSymbolRef
+definewNewCustomTypeParam(
+    const string &name, 
+    StructSymbolRef customType, 
+    ScopeRef enclosingScope, 
+    SMTFormula *formula,
+    ParamJSONRef inParams) 
+{
+    StructSymbolRef newCustomTypeConst = StructSymbol::Create(
             name,
             customType,
             enclosingScope
     );
-    for (pair<string, Symbol *> sym : customType->getScopeSymbols()) {
-        if (sym.second->type->getTypeIndex() == SymbolTable::tCustom) {
-            StructSymbol *customTypeAttribtue = (StructSymbol *) sym.second;
-            StructSymbol *newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst,
+    for (pair<string, SymbolRef> sym : customType->getScopeSymbols()) {
+        if (sym.second->getType()->getTypeIndex() == SymbolTable::tCustom) {
+            StructSymbolRef customTypeAttribtue = Utils::as<StructSymbol>(sym.second);
+            StructSymbolRef newVar = definewNewCustomTypeParam(sym.first, customTypeAttribtue, newCustomTypeConst,
                                                                 formula, inParams);
             newCustomTypeConst->define(newVar);
-        } else if (sym.second->type->getTypeIndex() == SymbolTable::tArray) {
-            ArraySymbol *aSy = (ArraySymbol *) sym.second;
-            ArraySymbol *newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula,
+        } else if (sym.second->getType()->getTypeIndex() == SymbolTable::tArray) {
+            ArraySymbolRef aSy = Utils::as<ArraySymbol>(sym.second);
+            ArraySymbolRef newArrayConst = createArrayParamFromArrayType(sym.first, newCustomTypeConst, aSy, formula,
                                                                         inParams);
             newCustomTypeConst->define(newArrayConst);
-        } else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
-            Symbol *varSym = new VariableSymbol(sym.first, formula);
+        } else if (sym.second->getType()->getTypeIndex() == SymbolTable::tVarBool) {
+            SymbolRef varSym = VariableSymbol::Create(sym.first, formula);
             newCustomTypeConst->define(varSym);
         } else {
-            AssignableSymbol *newParam = new AssignableSymbol(sym.first, sym.second->type);
+            AssignableSymbolRef newParam = AssignableSymbol::Create(sym.first, sym.second->getType());
 
             if (!SymbolTable::entityDefinitionBlock) {
                 string fullScopedName = newCustomTypeConst->getFullName() + "." + sym.first;
                 int value = inParams->resolve(fullScopedName);
-                if (sym.second->type->getTypeIndex() == SymbolTable::tInt)
+                if (sym.second->getType()->getTypeIndex() == SymbolTable::tInt)
                     newParam->setValue(IntValue::Create(value));
                 else
                     newParam->setValue(BoolValue::Create(value));
@@ -179,27 +195,31 @@ definewNewCustomTypeParam(const string &name, StructSymbol *customType, Scope *e
     return newCustomTypeConst;
 }
 
-ArraySymbol *
-defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions, Type *elementsType,
-                SMTFormula *formula, ParamJSON *inParams) {
-
-
+ArraySymbolRef 
+defineNewArray(
+    const string &name, 
+    ScopeRef enclosingScope, 
+    vector<int> dimentions, 
+    TypeRef elementsType,
+    SMTFormula *formula, 
+    ParamJSONRef inParams) 
+{
     if (dimentions.size() == 1) {
-        ArraySymbol *newArray = new ArraySymbol(
+        ArraySymbolRef newArray = ArraySymbol::Create(
                 name,
                 enclosingScope,
                 elementsType,
                 dimentions[0]
         );
         for (int i = 0; i < dimentions[0]; ++i) {
-            Symbol *element;
+            SymbolRef element;
             if (elementsType->getTypeIndex() == SymbolTable::tCustom)
-                element = definewNewCustomTypeParam(to_string(i), (StructSymbol *) elementsType, newArray, formula,
+                element = definewNewCustomTypeParam(to_string(i), Utils::as<StructSymbol>(elementsType), newArray, formula,
                                                     inParams);
             else if (elementsType->getTypeIndex() == SymbolTable::tVarBool) {
-                element = new VariableSymbol(to_string(i), formula);
+                element = VariableSymbol::Create(to_string(i), formula);
             } else {
-                AssignableSymbol *newParam = new AssignableSymbol(to_string(i), elementsType);
+                AssignableSymbolRef newParam = AssignableSymbol::Create(to_string(i), elementsType);
                 if (!SymbolTable::entityDefinitionBlock) {
                     string fullScopedName = newArray->getFullName() + "[" + to_string(i) + "]";
                     int value = inParams->resolve(fullScopedName);
@@ -215,14 +235,14 @@ defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions
         return newArray;
     } else {
         vector<int> restOfDimenstions(dimentions.begin() + 1, dimentions.end());
-        auto *newDimention = new ArraySymbol(
+        ArraySymbolRef newDimention = ArraySymbol::Create(
                 name,
                 enclosingScope,
                 elementsType,
                 dimentions[0]
         );
         for (int i = 0; i < dimentions[0]; i++) {
-            auto *constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType,
+            ArraySymbolRef constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType,
                                                 formula, inParams);
             newDimention->define(constElement);
         }
@@ -231,13 +251,13 @@ defineNewArray(const string &name, Scope *enclosingScope, vector<int> dimentions
 
 }
 
-ArraySymbol *
-createArrayParamFromArrayType(string name, Scope *enclosingScope, ArraySymbol *arrayType, SMTFormula *formula,
-                                ParamJSON *inParams) {
+ArraySymbolRef
+createArrayParamFromArrayType(string name, ScopeRef enclosingScope, ArraySymbolRef arrayType, SMTFormula *formula,
+                                ParamJSONRef inParams) {
     vector<int> dimensions;
-    Symbol *currType = arrayType;
-    while (currType->type && currType->type->getTypeIndex() == SymbolTable::tArray) {
-        ArraySymbol *currDimension = (ArraySymbol *) currType;
+    SymbolRef currType = arrayType;
+    while (currType->getType() && currType->getType()->getTypeIndex() == SymbolTable::tArray) {
+        ArraySymbolRef currDimension = Utils::as<ArraySymbol>(currType);
         dimensions.push_back(currDimension->getSize());
         currType = currDimension->resolve("0");
     }

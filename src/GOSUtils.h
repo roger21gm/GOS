@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream> // std::istringstream
 #include <vector>
+#include <memory>
 
 namespace GOS {
 namespace Utils {
@@ -75,6 +76,11 @@ std::string toRawString(std::string const& in)
         }
     }
     return result;
+}
+
+template<class T, class U>
+std::shared_ptr<T> as(U param) {
+    return std::dynamic_pointer_cast<T>(param);
 }
 
 }

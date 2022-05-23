@@ -71,7 +71,7 @@ public:
         GOSJSONInputVisitor inputPreJsonVisitor;
         ParamJSONRef readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
-        GOSTypeVarDefinitionVisitor * visitor = new GOSTypeVarDefinitionVisitor(symbolTable, _f, readParams.get());
+        GOSTypeVarDefinitionVisitor * visitor = new GOSTypeVarDefinitionVisitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
 
         if(!symbolTable->errors){

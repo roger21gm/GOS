@@ -9,7 +9,7 @@
 #include <encoding.h>
 #include "Symtab/SymbolTable.h"
 #include "Symtab/Symbol/Scoped/ScopedSymbol.h"
-#include "Symtab/Symbol/Valued/VariableSymbol.h"
+#include "Symtab/Symbol/Valued/ValueSymbol.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -25,15 +25,15 @@ private:
     SymbolTable *st;
     bool sat = false;
 
-    void fillModelValuesResult(Scope *currentScope, const EncodedFormula formula, const std::vector<bool> & bmodel) {
-        std::map<std::string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
+    void fillModelValuesResult(ScopeRef currentScope, const EncodedFormula formula, const std::vector<bool> & bmodel) {
+        std::map<std::string, SymbolRef> currentScopeSymbols = currentScope->getScopeSymbols();
 
-        for (std::pair<std::string, Symbol *> sym : currentScopeSymbols) {
-            if (sym.second->type) {
+        for (std::pair<std::string, SymbolRef> sym : currentScopeSymbols) {
+            if (sym.second->getType()) {
                 if (sym.second->isScoped())
-                    fillModelValuesResult((ScopedSymbol *) sym.second, formula, bmodel);
-                else if (sym.second->type->getTypeIndex() == SymbolTable::tVarBool) {
-                    VariableSymbol * currentVariable = (VariableSymbol *)sym.second;
+                    fillModelValuesResult(Utils::as<ScopedSymbol>(sym.second), formula, bmodel);
+                else if (sym.second->getType()->getTypeIndex() == SymbolTable::tVarBool) {
+                    VariableSymbolRef currentVariable = Utils::as<VariableSymbol>(sym.second);
 
                     bool modelValue = SMTFormula::getBValue(currentVariable->getVar().v, bmodel);
 
@@ -43,16 +43,16 @@ private:
         }
     }
 
-    void printModelSolution(Scope *currentScope, std::ostream &os, std::string prefix = "") const {
-        std::map<std::string, Symbol *> currentScopeSymbols = currentScope->getScopeSymbols();
+    void printModelSolution(ScopeRef currentScope, std::ostream &os, std::string prefix = "") const {
+        std::map<std::string, SymbolRef> currentScopeSymbols = currentScope->getScopeSymbols();
 
-        for(std::pair<std::string, Symbol *> sym : currentScopeSymbols){
-            if(sym.second->type){
-                if(sym.second->type->getTypeIndex() == SymbolTable::tCustom || sym.second->type->getTypeIndex() == SymbolTable::tArray) {
+        for(std::pair<std::string, SymbolRef> sym : currentScopeSymbols){
+            if(sym.second->getType()){
+                if(sym.second->getType()->getTypeIndex() == SymbolTable::tCustom || sym.second->getType()->getTypeIndex() == SymbolTable::tArray) {
                     if (!isdigit(sym.first[0]))
-                        printModelSolution((ScopedSymbol *) sym.second, os, prefix + "." + sym.first);
+                        printModelSolution(Utils::as<ScopedSymbol>(sym.second), os, prefix + "." + sym.first);
                     else
-                        printModelSolution((ScopedSymbol *) sym.second, os,
+                        printModelSolution(Utils::as<ScopedSymbol>(sym.second), os,
                                            isdigit(sym.first[0]) ? prefix + "[" + sym.first + "]" : prefix + sym.first);
                 }
                 else{
@@ -69,8 +69,8 @@ private:
                         output += "." + sym.first ;
                     }
 
-                    if(sym.second->type->getTypeIndex() == SymbolTable::tVarBool){
-                        VariableSymbol * currentVariable = (VariableSymbol *)sym.second;
+                    if(sym.second->getType()->getTypeIndex() == SymbolTable::tVarBool){
+                        VariableSymbolRef currentVariable = Utils::as<VariableSymbol>(sym.second);
                         os << output  << " -> " << (currentVariable->getModelValue() ? "true" : "false") << std::endl;
                     }
                 }

@@ -14,10 +14,10 @@ namespace GOS {
 
 class GOSTypeVarDefinitionVisitor : public GOSCustomBaseVisitor {
 private:
-    ParamJSON *params;
+    ParamJSONRef params;
 
 public:
-    explicit GOSTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula *f, ParamJSON *params)
+    explicit GOSTypeVarDefinitionVisitor(SymbolTable *symbolTable, SMTFormula *f, ParamJSONRef params)
             : GOSCustomBaseVisitor(symbolTable, f) {
         this->params = params;
     }
@@ -55,7 +55,7 @@ public:
 
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
         BUPBaseVisitor::visitVarDefinition(ctx);
-        Symbol *newVar;
+        SymbolRef newVar;
         std::string name = ctx->name->getText();
 
         if(this->currentScope->existsInScope(name)) {
@@ -75,7 +75,7 @@ public:
             newVar = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
                                            this->_f, this->params);
         } else {
-            newVar = new VariableSymbol(ctx->name->getText(), this->_f);
+            newVar = VariableSymbol::Create(ctx->name->getText(), this->_f);
         }
         currentScope->define(newVar);
 
@@ -86,8 +86,8 @@ public:
     antlrcpp::Any visitParamDefinition(BUPParser::ParamDefinitionContext *ctx) override {
         BUPBaseVisitor::visitParamDefinition(ctx);
 
-        Type *type = (Type *) currentScope->resolve(ctx->type->getText());
-        Symbol *newConst;
+        TypeRef type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()));
+        SymbolRef newConst;
 
         std::string name = ctx->name->getText();
 
@@ -110,10 +110,10 @@ public:
             newConst = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f,
                                              this->params);
         } else if (type->getTypeIndex() == SymbolTable::tCustom) {
-            newConst = VisitorsUtils::definewNewCustomTypeParam(ctx->name->getText(), (StructSymbol *) type, currentScope,
+            newConst = VisitorsUtils::definewNewCustomTypeParam(ctx->name->getText(), Utils::as<StructSymbol>(type), currentScope,
                                                         this->_f, this->params);
         } else {
-            AssignableSymbol *element = new AssignableSymbol(
+            AssignableSymbolRef element = AssignableSymbol::Create(
                     ctx->name->getText(),
                     type
             );
@@ -132,8 +132,8 @@ public:
     }
 
     antlrcpp::Any visitEntityDefinition(BUPParser::EntityDefinitionContext *ctx) override {
-        StructSymbol *newType;
-        newType = new StructSymbol(ctx->name->getText(), currentScope);
+        StructSymbolRef newType;
+        newType = StructSymbol::Create(ctx->name->getText(), currentScope);
         currentScope->define(newType);
 
         currentScope = newType;
@@ -145,9 +145,9 @@ public:
     antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override {
         try {
             int value = this->params->resolve(ctx->getText());
-            AssignableSymbol *access = new AssignableSymbol(ctx->getText(), SymbolTable::_integer);
+            AssignableSymbolRef access = AssignableSymbol::Create(ctx->getText(), SymbolTable::_integer);
             access->setValue(IntValue::Create(value));
-            return (Symbol *) access;
+            return Utils::as<Symbol>(access);
         }
         catch (GOSException &e) {
             throw CSP2SATNotExistsException(

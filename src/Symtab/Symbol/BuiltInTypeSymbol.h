@@ -7,16 +7,23 @@
 
 #include "../Type.h"
 #include <string>
+#include <memory>
 
 namespace GOS {
 
+class BuiltInTypeSymbol;
+typedef std::shared_ptr<BuiltInTypeSymbol> BuiltInTypeSymbolRef;
 class BuiltInTypeSymbol: public Type {
 public:
-    BuiltInTypeSymbol(const std::string &name, int typeIndex) : Type(typeIndex, name) {}
+    static BuiltInTypeSymbolRef Create(const std::string &name, int typeIndex) {
+        return BuiltInTypeSymbolRef(new BuiltInTypeSymbol(name, typeIndex));
+    }
 
     bool isAssignable() override {
         return false;
     }
+protected:
+    BuiltInTypeSymbol(const std::string &name, int typeIndex) : Type(typeIndex, name) {}
 };
 
 }

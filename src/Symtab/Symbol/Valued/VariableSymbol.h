@@ -10,15 +10,16 @@
 
 namespace GOS {
 
-class VariableSymbol: public ValueSymbol {
+class VariableSymbol;
+typedef std::shared_ptr<VariableSymbol> VariableSymbolRef;
+class VariableSymbol : public ValueSymbol {
 public:
-    VariableSymbol(const std::string &name, SMTFormula *f) : ValueSymbol(name, SymbolTable::_varbool) {
-        if(!SymbolTable::entityDefinitionBlock)
-            var = f->newBoolVar();
+    static VariableSymbolRef Create(const std::string &name, SMTFormula *f) {
+        return VariableSymbolRef(new VariableSymbol(name, f));
     }
-
-    VariableSymbol(const std::string &name, literal lit) : ValueSymbol(name, SymbolTable::_varbool) {
-        var = lit;
+    
+    static VariableSymbolRef Create(const std::string &name, literal lit) {
+        return VariableSymbolRef(new VariableSymbol(name, lit));
     }
 
     bool isAssignable() override {
@@ -37,6 +38,15 @@ public:
         VariableSymbol::modelValue = modelValue;
     }
 
+protected:
+    VariableSymbol(const std::string &name, SMTFormula *f) : ValueSymbol(name, SymbolTable::_varbool) {
+        if(!SymbolTable::entityDefinitionBlock)
+            var = f->newBoolVar();
+    }
+
+    VariableSymbol(const std::string &name, literal lit) : ValueSymbol(name, SymbolTable::_varbool) {
+        var = lit;
+    }
 
 private:
     literal var;

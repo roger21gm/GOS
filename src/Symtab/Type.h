@@ -7,14 +7,17 @@
 
 #include <string>
 #include <utility>
+#include <memory>
 #include "Symbol/Symbol.h"
 
 namespace GOS {
 
+class Type;
+typedef std::shared_ptr<Type> TypeRef;
 class Type : public Symbol {
 public:
-    Type(int typeIndex, std::string name) : Symbol(std::move(name)){
-        this->typeIndex = typeIndex;
+    static TypeRef Create(int typeIndex, std::string name) {
+        return TypeRef(new Type(typeIndex, name));
     }
 
     int getTypeIndex() {
@@ -25,10 +28,13 @@ public:
         return false;
     }
 
+protected:
+    Type(int typeIndex, std::string name) : Symbol(std::move(name)){
+        this->typeIndex = typeIndex;
+    }
 
 private:
     int typeIndex;
-
 };
 
 }

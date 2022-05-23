@@ -13,13 +13,16 @@
 
 namespace GOS {
 
+class formulaReturn;
+typedef std::shared_ptr<formulaReturn> formulaReturnRef;
 class formulaReturn : public Symbol {
-
 public:
-    formulaReturn() : Symbol("", SymbolTable::_formula) {}
-
-    formulaReturn(clause claus) : Symbol("", SymbolTable::_formula) {
-        clauses.push_back(claus);
+    static formulaReturnRef Create() {
+        return formulaReturnRef(new formulaReturn());
+    }
+    
+    static formulaReturnRef Create(clause c) {
+        return formulaReturnRef(new formulaReturn(c));
     }
 
     void addClause(clause claus) {
@@ -32,6 +35,13 @@ public:
     }
 
     std::vector<clause> clauses;
+
+protected:
+    formulaReturn() : Symbol("", SymbolTable::_formula) {}
+
+    formulaReturn(clause claus) : Symbol("", SymbolTable::_formula) {
+        clauses.push_back(claus);
+    }
 };
 
 }

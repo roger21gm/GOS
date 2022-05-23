@@ -64,7 +64,7 @@ public:
             result = ternaryResult;
         }
         else if(ctx->list()){
-            ArraySymbol * str = visit(ctx->list());
+            ArraySymbolRef str = visit(ctx->list());
             if(str->getElementsType()->getTypeIndex() == SymbolTable::tString){
                 for(auto currStr : str->getSymbolVector())
                     result += currStr->getName();
@@ -95,22 +95,22 @@ public:
         }
         else if(ctx->varAccess()){
             accessingNotLeafVariable = true;
-            Symbol * var = visit(ctx->varAccess());
+            SymbolRef var = visit(ctx->varAccess());
             accessingNotLeafVariable = false;
             if(!var->isScoped()){
                 if(var->isAssignable())
-                    result = std::to_string(((AssignableSymbol*)var)->getValue()->getRealValue());
+                    result = std::to_string(Utils::as<AssignableSymbol>(var)->getValue()->getRealValue());
                 else
-                    result = ((VariableSymbol*)var)->getModelValue() ? "true" : "false";
+                    result = Utils::as<VariableSymbol>(var)->getModelValue() ? "true" : "false";
             }
             else {
-                ArraySymbol * arrayAccess = (ArraySymbol*)var;
+                ArraySymbolRef arrayAccess = Utils::as<ArraySymbol>(var);
                 result += "[";
                 for(auto elem : arrayAccess->getSymbolVector()){
                     if(elem->isAssignable())
-                        result += std::to_string(((AssignableSymbol*)elem)->getValue()->getRealValue());
+                        result += std::to_string(Utils::as<AssignableSymbol>(elem)->getValue()->getRealValue());
                     else
-                        result += ((VariableSymbol*)elem)->getModelValue() ? "true" : "false";
+                        result += Utils::as<VariableSymbol>(elem)->getModelValue() ? "true" : "false";
 
                     if(elem != arrayAccess->getSymbolVector().back())
                         result += ", ";
@@ -139,11 +139,11 @@ public:
         if (ctx->expr()) {
             return visit(ctx->expr());
         } else if (ctx->varAccess()) {
-            Symbol *value = visit(ctx->varAccess());
+            SymbolRef value = visit(ctx->varAccess());
             if (value->isAssignable()) {
-                return ((AssignableSymbol *) value)->getValue();
+                return Utils::as<AssignableSymbol>(value)->getValue();
             } else {
-                bool a = ((VariableSymbol*) value)->getModelValue();
+                bool a = Utils::as<VariableSymbol>(value)->getModelValue();
                 ValueRef modelValue = BoolValue::Create(a);
                 return modelValue;
             }

@@ -45,7 +45,7 @@ public:
         _f = new SMTFormula();
     }
 
-    auto runVisitor(BUPBaseVisitor * visitor, std::string inStr, bool showSintaxErrors = true){
+    auto runVisitor(BUPBaseVisitor& visitor, std::string inStr, bool showSintaxErrors = true){
         antlr4::ANTLRInputStream input(inStr);
         BUPLexer lexer(&input);
         antlr4::CommonTokenStream tokens(&lexer);
@@ -55,7 +55,7 @@ public:
         BUPParser::Csp2satContext *tree = parser.csp2sat();
         if(parser.getNumberOfSyntaxErrors() > 0)
             synError = true;
-        return visitor->visit(tree);
+        return visitor.visit(tree);
     }
 
     ParamJSONRef runInputVisitor(JSONBaseVisitor& visitor, std::string inStr){
@@ -71,24 +71,24 @@ public:
         GOSJSONInputVisitor inputPreJsonVisitor;
         ParamJSONRef readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
-        GOSTypeVarDefinitionVisitor * visitor = new GOSTypeVarDefinitionVisitor(symbolTable, _f, readParams);
+        GOSTypeVarDefinitionVisitor visitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
 
         if(!symbolTable->errors){
-            GOSConstraintsVisitor * constraintsVisitor = new GOSConstraintsVisitor(symbolTable, _f);
+            GOSConstraintsVisitor constraintsVisitor(symbolTable, _f);
             runVisitor(constraintsVisitor, modelStr, false);
 
             if(!synError){
                 if(!symbolTable->errors){
-                    GOSEncoding * encoding = new GOSEncoding(_f, symbolTable);
-                    BasicController c(sargs, encoding,false, 0, 0);
+                    GOSEncoding encoding(_f, symbolTable);
+                    BasicController c(sargs, &encoding, false, 0, 0);
                     c.run();
 
-                    if(encoding->isSat()){
-                        CSP2SATOutputVisitor * outputVisitor = new CSP2SATOutputVisitor(symbolTable, _f);
+                    if(encoding.isSat()){
+                        CSP2SATOutputVisitor outputVisitor(symbolTable, _f);
                         bool customOutput = runVisitor(outputVisitor, modelStr, false);
                         if(!customOutput)
-                            encoding->printModelSolution(std::cout);
+                            encoding.printModelSolution(std::cout);
                     }
                 }
                 else {

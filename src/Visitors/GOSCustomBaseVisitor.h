@@ -599,6 +599,12 @@ protected:
             combinations.push_back(combinationsScope->getScopeSymbols());
             return;
         }
+        if (this->currentScope->existsInScope(aux[idx]->name->getText()))
+            throw CSP2SATAlreadyExistException(
+                    aux[idx]->name->getLine(),
+                    aux[idx]->name->getCharPositionInLine(),
+                    aux[idx]->name->getText()
+            );
         this->currentScope = combinationsScope;
         std::pair<std::string, ArraySymbolRef> currArr = visit(aux[idx]);
         for (int i = 0; i < currArr.second->getSize(); i++) {

@@ -1,0 +1,18 @@
+viewpoint:
+    var x;
+    param int n;
+
+predicates:
+    pred(var bool varname, param int paramname) {
+        true;
+    }
+
+    test(param int x) {
+        true;
+    }
+
+constraints:
+    pred(n);
+
+output:
+    "test ";

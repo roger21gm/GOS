@@ -26,7 +26,7 @@ public:
     //Flag to indicate if the flow is defining entities.
     static bool entityDefinitionBlock;
 
-    static const int tCustom = 0;
+    static const int tCustom = 0; // TODO enum?
     static const int tArray = 1;
     static const int tInt = 2;
     static const int tBool = 3;

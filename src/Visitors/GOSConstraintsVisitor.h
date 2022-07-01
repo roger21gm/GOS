@@ -9,6 +9,7 @@
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
 #include "../GOSUtils.h"
+#include "GOSCustomBaseVisitor.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -27,6 +28,10 @@ public:
     }
 
     antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
         return nullptr;
     }
 
@@ -95,6 +100,9 @@ public:
                         ctx->getText()
                 );
             }
+        } else if (ctx->predCall()) {
+            PredSymbolRef predSym = visit(ctx->predCall());
+            clause->addClauses(predSym->getClauses());
         } else if (ctx->TK_BOOLEAN_VALUE()) {
             if (ctx->TK_BOOLEAN_VALUE()->getText() == "true")
                 clause->addClause(this->_f->trueVar());
@@ -456,6 +464,34 @@ public:
             );
         }
     }
+
+    antlrcpp::Any visitPredCall(BUPParser::PredCallContext *ctx) override {
+        std::string name = ctx->name->getText();
+
+        // Get call parameters type
+        PredSymbol::Signature signature;
+        signature.first = name;
+        for (auto expr : ctx->predCallParams()->expr()) {
+            Symbol sym = visit(expr);
+            signature.second.emplace_back(sym.getType());
+        }
+
+        // Check if a predicate with same signature is defined
+        PredSymbolRef pred = PredSymbol::Create(signature, nullptr /*not needed*/);
+        if(!this->currentScope->existsInScope(pred->getName())) {
+            throw CSP2SATNotExistsException(
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine(),
+                    name
+            );
+        }
+        return BUPBaseVisitor::visitPredCall(ctx);
+    }
+
+    antlrcpp::Any visitPredCallParams(BUPParser::PredCallParamsContext *ctx) override {
+        return visitChildren(ctx);
+    }
+
 };
 
 }

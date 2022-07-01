@@ -20,8 +20,9 @@
 #include <controllers/basiccontroller.h>
 #include "Symtab/SymbolTable.h"
 
-// custom listener
+// custom visitor
 #include "Visitors/GOSTypeVarDefinitionVisitor.h"
+#include "Visitors/GOSPredVisitor.h"
 #include "Visitors/GOSConstraintsVisitor.h"
 
 // custom error
@@ -73,6 +74,9 @@ public:
 
         GOSTypeVarDefinitionVisitor visitor(symbolTable, _f, readParams);
         runVisitor(visitor, modelStr);
+
+        GOSPredVisitor predVisitor(symbolTable, _f);
+        runVisitor(predVisitor, modelStr);
 
         if(!symbolTable->errors){
             GOSConstraintsVisitor constraintsVisitor(symbolTable, _f);

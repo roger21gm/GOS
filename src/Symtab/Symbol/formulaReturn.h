@@ -9,7 +9,7 @@
 #include <vector>
 #include "Symbol.h"
 #include "../SymbolTable.h"
-#include "smtapi.h"
+#include "../../api/smtapi.h"
 
 namespace GOS {
 

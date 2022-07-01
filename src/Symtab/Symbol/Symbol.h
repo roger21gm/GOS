@@ -26,7 +26,7 @@ public:
 
     virtual ~Symbol() {}
 
-    std::string getName() {
+    std::string getName() const {
         return this->name;
     }
 

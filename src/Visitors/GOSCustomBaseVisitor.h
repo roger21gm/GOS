@@ -295,7 +295,7 @@ public:
     antlrcpp::Any visitExpr_base(BUPParser::Expr_baseContext *ctx) override {
         if (ctx->expr()) {
             return visit(ctx->expr());
-        } else if (ctx->varAccess()) {
+        } else if (ctx->varAccess()) { // TODO per que les expressions nomes s'evaluen a assignable symbol? (no permeten passar passar parametres varbool a predicats)
             SymbolRef value = visit(ctx->varAccess());
             if (value->isAssignable()) {
                 return Utils::as<AssignableSymbol>(value)->getValue();

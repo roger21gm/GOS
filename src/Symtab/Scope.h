@@ -32,12 +32,12 @@ class BaseScope : public Scope {
 public:
     virtual ~BaseScope() {}
 
-    void define(SymbolRef sym) override {
-        symbols[sym->getName()] = sym;
-    }
-
     void define(std::string name, SymbolRef sym) {
         symbols[name] = sym;
+    }
+
+    void define(SymbolRef sym) override {
+        define(sym->getName(), sym);
     }
 
     ScopeRef getEnclosingScope() override {
@@ -45,7 +45,7 @@ public:
     }
 
     SymbolRef resolve(const std::string& name) override {
-        if ( symbols.find(name) != symbols.end() )
+        if (existsInScope(name))
             return symbols[name];
         if ( enclosingScope != nullptr )
             return enclosingScope->resolve(name);
@@ -66,7 +66,7 @@ private:
 protected:
     explicit BaseScope(ScopeRef parent) : enclosingScope(parent) {}
 
-    std::map<std::string, SymbolRef> symbols;
+    std::map<std::string, SymbolRef> symbols; // TODO why not SymbolTable? SymbolTable class is not actually a symbol table...
 };
 
 class GlobalScope;
@@ -84,6 +84,7 @@ public:
     std::string getFullName() override {
         return "";
     }
+
 protected:
     GlobalScope() : BaseScope(nullptr) {}
 };
@@ -106,6 +107,10 @@ public:
 
     std::string getFullName() override {
         return "";
+    }
+
+    bool existsInScope(const std::string &name) override {
+        return BaseScope::existsInScope(name) && !getEnclosingScope()->existsInScope(name);
     }
 
 protected:

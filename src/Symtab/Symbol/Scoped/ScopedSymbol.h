@@ -40,13 +40,6 @@ public:
         return this->enclosingScope->getFullName() + this->getScopeName();
     }
 
-
-    virtual void define(SymbolRef sym) override = 0;
-
-    virtual SymbolRef resolve(const std::string& name) override = 0;
-
-    virtual std::map<std::string, SymbolRef> getScopeSymbols() override = 0;
-
     bool isScoped() override {
         return true;
     }

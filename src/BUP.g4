@@ -124,7 +124,8 @@ predDefBody: constraintDefinition;
 predCall: name=TK_IDENT TK_LPAREN predCallParams? TK_RPAREN;
 predCallParams: predCallParam (TK_COMMA predCallParam)*;
 predCallParam:
-    expr; // TODO
+    varAccess
+    | expr; // TODO
 
 
 // TODO permetre passar de tot com a parametre

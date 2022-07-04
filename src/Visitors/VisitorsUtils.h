@@ -103,12 +103,32 @@ string getTypeName(const int tType) {
         case SymbolTable::tInt:
             return "int";
         case SymbolTable::tVarBool:
-            return "variable";
+            return "varBool";
         case SymbolTable::tArray:
             return "array";
         default:
-            return "custom type";
+            return "customType";
     }
+}
+
+std::string parsePredicateString(const std::string& predicateSignature) {
+    std::string parsedCandidateName = "";
+    bool isParams = false;
+    for(char c : predicateSignature) {
+        if (std::isdigit(c)) {
+            const int code = c - '0';
+            parsedCandidateName += '<' + GOS::VisitorsUtils::getTypeName(code) + '>' + ',';
+            isParams = true;
+        }
+        else {
+            if (isParams) {
+                parsedCandidateName.pop_back();
+                isParams = false;
+            }
+            parsedCandidateName += c;
+        }
+    }
+    return parsedCandidateName;
 }
 
 vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbolRef variableArray) {

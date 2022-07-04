@@ -469,6 +469,7 @@ public:
         std::vector<SymbolRef> paramsSymbols;
         PredSymbol::Signature signature;
         signature.name = ctx->name->getText();
+        this->accessingNotLeafVariable = true; // TODO ask Mateu if this is correct
         for (auto predCallParamCtx : ctx->predCallParams()->predCallParam()) {
             SymbolRef sym = visit(predCallParamCtx);
             paramsSymbols.emplace_back(sym);
@@ -478,14 +479,26 @@ public:
             };
             signature.params.emplace_back(param);
         }
+        this->accessingNotLeafVariable = false;
 
         // Check if a predicate with same signature is defined
-        SymbolRef predSym = this->currentScope->resolve(PredSymbol::signatureToSymbolTableName(signature));
+        std::string predSignature = PredSymbol::signatureToSymbolTableName(signature);
+        SymbolRef predSym = this->currentScope->resolve(predSignature);
         if (predSym == nullptr) {
-            throw CSP2SATNotExistsException(
+            std::map<std::string, SymbolRef> symbols = this->currentScope->getScopeSymbols();
+            const std::string predName = Utils::string_split(predSignature, '(')[0];
+            std::vector<std::string> candidatesPredStr;
+            for (auto entry : symbols) {
+                if (Utils::string_split(entry.first, '(')[0] == predName) {
+                    std::string candidateName = entry.second->getName();
+                    candidatesPredStr.emplace_back(VisitorsUtils::parsePredicateString(candidateName));
+                }
+            }
+            throw CSP2SATPredNotExistsException(
                 ctx->start->getLine(),
                 ctx->start->getCharPositionInLine(),
-                signature.name
+                VisitorsUtils::parsePredicateString(predSignature),
+                candidatesPredStr
             );
         }
         PredSymbolRef pred = Utils::as<PredSymbol>(predSym);

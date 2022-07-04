@@ -7,6 +7,7 @@
 
 #include "GOSException.h"
 #include <string>
+#include <vector>
 
 namespace GOS {
 
@@ -39,6 +40,26 @@ public:
                     "Invalid: \"" + badAccess + "\" don't exists"
             ) {}
 };
+
+
+class CSP2SATPredNotExistsException : public GOSException {
+    static std::string errorMessage(const std::string& signature, const std::vector<std::string>& candidates){
+        std::string message = "Predicate with signature \"" + signature + "\" is undefined. ";
+        message += candidates.size() > 1 ? "Candidates are" : "Candidate is";
+        message += ":\n";
+        for (auto c : candidates) {
+            message += "\t" + c + "\n";
+        }
+        return message;
+    }
+
+public:
+    CSP2SATPredNotExistsException(int line, int pos, const std::string &message, std::vector<std::string> candidates) :
+            GOSException(line, pos, errorMessage(message, candidates))
+    {
+    }
+};
+
 
 
 class CSP2SATInvalidExpressionTypeException : public GOSException {

@@ -9,6 +9,10 @@ predicates:
         true;
     }
 
+    pred(var bool varName, param int paramName) {
+        true;
+    }
+
     test(param int x) {
         true;
     }
@@ -24,7 +28,7 @@ predicates:
 
 constraints:
     //varboolpred2(a,b);
-    pred(a, n, t);
+    pred(a, t, t);
 
 output:
     "test ";

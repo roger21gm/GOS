@@ -82,7 +82,8 @@ public:
             GOSConstraintsVisitor constraintsVisitor(symbolTable, _f);
             runVisitor(constraintsVisitor, modelStr, false);
 
-            if(!synError){
+            if(false) {
+            //if(!synError){
                 if(!symbolTable->errors){
                     GOSEncoding encoding(_f, symbolTable);
                     BasicController c(sargs, &encoding, false, 0, 0);

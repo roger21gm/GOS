@@ -3,6 +3,7 @@
 
 #include "GOSCustomBaseVisitor.h"
 #include "../Symtab/Symbol/Scoped/PredSymbol.h"
+#include "../Symtab/SymbolTable.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -13,7 +14,7 @@ namespace GOS {
 class GOSPredVisitor : public GOSCustomBaseVisitor {
 public:
     explicit GOSPredVisitor(SymbolTable *symbolTable, SMTFormula *f) :
-        GOSCustomBaseVisitor(symbolTable, f)
+            GOSCustomBaseVisitor(symbolTable, f)
     {
     }
 
@@ -49,17 +50,44 @@ public:
     }
 
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
-        TypeRef type = SymbolTable::_varbool;
-        SymbolRef newVar;
-        std::string name = ctx->name->getText();
-        return type;
+        PredSymbol::ParamRef param(new PredSymbol::Param);
+        param->name = ctx->name->getText();
+
+        if(this->currentScope->existsInScope(param->name)) {
+            throw CSP2SATAlreadyExistException(
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine(),
+                    param->name
+            );
+        }
+
+        const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
+        if (isArray)
+            param->type = SymbolTable::tArray;
+        param->type = SymbolTable::tVarBool;
+
+        return param;
     }
 
     antlrcpp::Any visitParamDefinition(BUPParser::ParamDefinitionContext *ctx) override {
-        TypeRef type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()));
-        SymbolRef newConst;
-        std::string name = ctx->name->getText();
-        return type;
+        PredSymbol::ParamRef param(new PredSymbol::Param);
+        param->name = ctx->name->getText();
+
+        if(this->currentScope->existsInScope(param->name)) {
+            throw CSP2SATAlreadyExistException(
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine(),
+                    param->name
+            );
+        }
+
+        const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
+        if (isArray)
+            param->type = SymbolTable::tArray;
+        else
+            param->type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
+
+        return param;
     }
 
     antlrcpp::Any visitPredDef(BUPParser::PredDefContext *ctx) override {
@@ -67,26 +95,30 @@ public:
 
         // Get whole predicate signature
         PredSymbol::Signature signature;
-        signature.first = name;
-        for(auto def : ctx->predDefParams()->definition()) {
-            // visit definition to define ident in context
-            TypeRef type = visit(def);
-            signature.second.push_back(type);
+        signature.name = name;
+        for(auto defCtx : ctx->predDefParams()->definition()) {
+            PredSymbol::ParamRef param = visit(defCtx);
+            signature.params.push_back(*param);
         }
 
         // Check if a predicate with same signature is already declared
-        PredSymbolRef pred = PredSymbol::Create(signature, this->currentScope);
-        if(this->currentScope->existsInScope(pred->getName())) {
+        if(this->currentScope->existsInScope(PredSymbol::signatureToSymbolTableName(signature))) {
             throw CSP2SATAlreadyExistException(
                     ctx->name->getLine(),
                     ctx->name->getCharPositionInLine(),
                     name
             );
         }
+
+        PredSymbolRef pred = PredSymbol::Create(signature, ctx, this->currentScope);
         currentScope->define(pred);
-        currentScope = pred;
-        BUPBaseVisitor::visitPredDef(ctx);
-        currentScope = currentScope->getEnclosingScope();
+        //currentScope = pred;
+        //SMTFormula* currentFormula = _f;
+        //_f = new SMTFormula(); // TODO fer-ho aixi? o crear un ConstraintVisitor i pasar-li ctx->tree? Tambe pensar com fer la traduccio de clausules del predicat quan es cridi
+        //GOSConstraintsVisitor::visitConstraintDefinition(ctx->predDefBody()->constraintDefinition());
+        //_f = currentFormula;
+        //currentScope = currentScope->getEnclosingScope();
+
         return nullptr;
     }
 
@@ -96,7 +128,7 @@ public:
     }
 
     antlrcpp::Any visitPredDefBody(BUPParser::PredDefBodyContext *ctx) override {
-        return visitChildren(ctx);
+        return BUPBaseVisitor::visitPredDefBody(ctx);
     }
 
 };

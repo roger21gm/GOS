@@ -56,7 +56,7 @@ public:
         return this->symbols;
     }
 
-    bool existsInScope(const std::string &name) override {
+    virtual bool existsInScope(const std::string &name) override {
         return symbols.find(name) != symbols.end();
     }
 

@@ -106,6 +106,13 @@ BuiltInTypeSymbolRef SymbolTable::_string = BuiltInTypeSymbol::Create("string", 
 BuiltInTypeSymbolRef SymbolTable::_formula = BuiltInTypeSymbol::Create("formula", SymbolTable::tFormula);
 bool SymbolTable::entityDefinitionBlock = false;
 bool SymbolTable::errors = false;
+const int SymbolTable::tCustom;
+const int SymbolTable::tArray;
+const int SymbolTable::tInt;
+const int SymbolTable::tBool;
+const int SymbolTable::tVarBool;
+const int SymbolTable::tString;
+const int SymbolTable::tFormula;
 
 }
 

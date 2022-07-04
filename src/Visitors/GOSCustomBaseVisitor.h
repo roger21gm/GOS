@@ -295,7 +295,7 @@ public:
     antlrcpp::Any visitExpr_base(BUPParser::Expr_baseContext *ctx) override {
         if (ctx->expr()) {
             return visit(ctx->expr());
-        } else if (ctx->varAccess()) { // TODO per que les expressions nomes s'evaluen a assignable symbol? (no permeten passar passar parametres varbool a predicats)
+        } else if (ctx->varAccess()) { // TODO per què les expressions nomes s'evaluen a assignable symbol? (no permeten passar passar parametres varbool a predicats)
             SymbolRef value = visit(ctx->varAccess());
             if (value->isAssignable()) {
                 return Utils::as<AssignableSymbol>(value)->getValue();
@@ -327,7 +327,7 @@ public:
     }
 
 
-    antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override {
+    antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override { // TODO revisit this method and check why std::bad_cast (and implement all types of parameters to predicates)
         std::string a = ctx->TK_IDENT()->getText();
         std::string b = ctx->getText();
         SymbolRef var = this->currentScope->resolve(ctx->TK_IDENT()->getText());
@@ -599,12 +599,6 @@ protected:
             combinations.push_back(combinationsScope->getScopeSymbols());
             return;
         }
-        if (this->currentScope->existsInScope(aux[idx]->name->getText()))
-            throw CSP2SATAlreadyExistException(
-                    aux[idx]->name->getLine(),
-                    aux[idx]->name->getCharPositionInLine(),
-                    aux[idx]->name->getText()
-            );
         this->currentScope = combinationsScope;
         std::pair<std::string, ArraySymbolRef> currArr = visit(aux[idx]);
         for (int i = 0; i < currArr.second->getSize(); i++) {

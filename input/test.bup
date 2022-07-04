@@ -1,9 +1,11 @@
 viewpoint:
-    var x;
+    var a;
+    var b;
     param int n;
+    param int t[n];
 
 predicates:
-    pred(var bool varname, param int paramname) {
+    pred(var bool varName, param int paramName, param int paramArray[n]) {
         true;
     }
 
@@ -11,8 +13,18 @@ predicates:
         true;
     }
 
+
+    varboolpred(var bool x) {
+        true;
+    }
+
+    varboolpred2(var bool x, var bool y) {
+        true & true;
+    }
+
 constraints:
-    pred(n);
+    //varboolpred2(a,b);
+    pred(a, n, t);
 
 output:
     "test ";

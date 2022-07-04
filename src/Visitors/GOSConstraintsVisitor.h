@@ -8,8 +8,10 @@
 #include "../Symtab/Symbol/formulaReturn.h"
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
+#include "../Symtab/Symbol/Scoped/PredSymbol.h"
 #include "../GOSUtils.h"
 #include "GOSCustomBaseVisitor.h"
+#include "GOSTypeVarDefinitionVisitor.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -31,7 +33,7 @@ public:
         return nullptr;
     }
 
-    antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
+    virtual antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
         return nullptr;
     }
 
@@ -66,7 +68,6 @@ public:
 
 
     antlrcpp::Any visitConstraintDefinition(BUPParser::ConstraintDefinitionContext *ctx) override {
-
         try {
             BUPBaseVisitor::visitConstraintDefinition(ctx);
         }
@@ -84,7 +85,6 @@ public:
                 this->_f->addClause(clause);
         } else visit(ctx->constraint_aggreggate_op());
         return nullptr;
-
     }
 
     antlrcpp::Any visitConstraint_base(BUPParser::Constraint_baseContext *ctx) override {
@@ -101,8 +101,9 @@ public:
                 );
             }
         } else if (ctx->predCall()) {
-            PredSymbolRef predSym = visit(ctx->predCall());
-            clause->addClauses(predSym->getClauses());
+            SymbolRef predSym = visit(ctx->predCall());
+            //PredSymbolRef predSym = visit(ctx->predCall());
+            //clause->addClauses(predSym->getClauses());
         } else if (ctx->TK_BOOLEAN_VALUE()) {
             if (ctx->TK_BOOLEAN_VALUE()->getText() == "true")
                 clause->addClause(this->_f->trueVar());
@@ -180,7 +181,6 @@ public:
         }
         return newClauses;
     }
-
 
     antlrcpp::Any visitCOrExpression(BUPParser::COrExpressionContext *ctx) override {
         formulaReturnRef result = visit(ctx->constraint_or_2(0));
@@ -261,7 +261,6 @@ public:
 
         return newClauses;
     }
-
 
     antlrcpp::Any visitConstraint_implication(BUPParser::Constraint_implicationContext *ctx) override {
         formulaReturnRef result = visit(ctx->constraint_or(0));
@@ -466,30 +465,51 @@ public:
     }
 
     antlrcpp::Any visitPredCall(BUPParser::PredCallContext *ctx) override {
-        std::string name = ctx->name->getText();
-
-        // Get call parameters type
+        // Get call parameters
+        std::vector<SymbolRef> paramsSymbols;
         PredSymbol::Signature signature;
-        signature.first = name;
-        for (auto expr : ctx->predCallParams()->expr()) {
-            Symbol sym = visit(expr);
-            signature.second.emplace_back(sym.getType());
+        signature.name = ctx->name->getText();
+        for (auto predCallParamCtx : ctx->predCallParams()->predCallParam()) {
+            SymbolRef sym = visit(predCallParamCtx);
+            paramsSymbols.emplace_back(sym);
+            PredSymbol::Param param = {
+                    "", // Not used to lookup the predicate in the symbol table
+                    sym->getType()->getTypeIndex()
+            };
+            signature.params.emplace_back(param);
         }
 
         // Check if a predicate with same signature is defined
-        PredSymbolRef pred = PredSymbol::Create(signature, nullptr /*not needed*/);
-        if(!this->currentScope->existsInScope(pred->getName())) {
+        SymbolRef predSym = this->currentScope->resolve(PredSymbol::signatureToSymbolTableName(signature));
+        if (predSym == nullptr) {
             throw CSP2SATNotExistsException(
-                    ctx->name->getLine(),
-                    ctx->name->getCharPositionInLine(),
-                    name
+                ctx->start->getLine(),
+                ctx->start->getCharPositionInLine(),
+                signature.name
             );
         }
-        return BUPBaseVisitor::visitPredCall(ctx);
+        PredSymbolRef pred = Utils::as<PredSymbol>(predSym);
+
+        // Setup scoped exec environment
+        BUPParser::PredDefContext* predDefCtx = pred->_tree;
+        for (int i = 0; i < paramsSymbols.size(); i++) {
+            SymbolRef sym = paramsSymbols[i];
+            PredSymbol::Param param = pred->getSignature().params[i];
+            assert(param.type == sym->getType()->getTypeIndex());
+            pred->define(param.name, sym);
+        }
+
+        //GOSTypeVarDefinitionVisitor typeVarDefinitionVisitor(st, _f, nullptr);
+
+        return predSym;
     }
 
     antlrcpp::Any visitPredCallParams(BUPParser::PredCallParamsContext *ctx) override {
         return visitChildren(ctx);
+    }
+
+    antlrcpp::Any visitPredCallParam(BUPParser::PredCallParamContext *ctx) override {
+        return BUPBaseVisitor::visitPredCallParam(ctx);
     }
 
 };

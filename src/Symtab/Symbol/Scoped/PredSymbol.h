@@ -8,6 +8,7 @@
 #include "ScopedSymbol.h"
 #include "../../../GOSUtils.h"
 #include "../../SymbolTable.h"
+#include <BUPParser.h>
 #include <utility>
 #include <map>
 #include <string>
@@ -19,11 +20,28 @@ class PredSymbol;
 typedef std::shared_ptr<PredSymbol> PredSymbolRef;
 class PredSymbol : public LocalScope, public Symbol {
 public:
-    typedef std::pair<std::string, std::vector<TypeRef>> Signature;
+    struct Param {
+        std::string name;
+        int type;
+    };
+    typedef std::shared_ptr<Param> ParamRef;
 
-    static PredSymbolRef Create(Signature sig, ScopeRef enclosingScope)
+    struct Signature {
+        std::string name;
+        std::vector<Param> params;
+    };
+    typedef std::shared_ptr<Signature> SignatureRef;
+
+    static std::string signatureToSymbolTableName(Signature sig) {
+        std::string paramsStr = "";
+        for (Param p : sig.params)
+            paramsStr += std::to_string(p.type);
+        return sig.name + '(' + paramsStr + ')';
+    }
+
+    static PredSymbolRef Create(Signature sig, BUPParser::PredDefContext* predDefTree, ScopeRef enclosingScope)
     {
-        return PredSymbolRef(new PredSymbol(sig, enclosingScope));
+        return PredSymbolRef(new PredSymbol(sig, predDefTree, enclosingScope));
     }
 
     std::vector<clause> getClauses() const {
@@ -41,24 +59,23 @@ public:
         return splitted[0] + std::to_string(type->getTypeIndex());
     }
 
+    Signature getSignature() const {
+        return _signature;
+    }
+
+    BUPParser::PredDefContext* _tree;
+
 protected:
-    PredSymbol(Signature sig,  ScopeRef enclosingScope) :
+    PredSymbol(Signature sig, BUPParser::PredDefContext* predDefTree, ScopeRef enclosingScope) :
         LocalScope(enclosingScope),
-        Symbol(signature2string(sig), SymbolTable::_varbool),
-        _paramTypes(sig.second)
+        Symbol(signatureToSymbolTableName(sig), SymbolTable::_varbool),
+        _signature(sig), _tree(predDefTree)
     {
     }
 
 private:
-    std::vector<TypeRef> _paramTypes;
+    Signature _signature;
     std::vector<clause> _clauses;
-
-    static std::string signature2string(Signature sig) {
-        std::string paramsStr = "";
-        for(TypeRef t : sig.second)
-            paramsStr += std::to_string(t->getTypeIndex());
-        return sig.first + '(' + paramsStr + ')';
-    }
 };
 
 }

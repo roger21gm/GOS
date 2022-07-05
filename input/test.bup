@@ -32,6 +32,11 @@ predicates:
         x & !x;
     }
 
+    unsatCore2() {
+        var bool x;
+        x & !x;
+    }
+
 constraints:
     //varboolpred2(a,b);
     //pred(a, t, t);
@@ -39,8 +44,9 @@ constraints:
     //test(a,b,c);
     //a | b | !c;
     //!b | c;
-    unsatCore(a) | true;
+    //unsatCore(a) | true; // TODO not working
     //(!a & a) | true;
+    unsatCore2();
 
 output:
     "test ";

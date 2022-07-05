@@ -452,17 +452,19 @@ public:
         std::vector<SymbolRef> paramsSymbols;
         PredSymbol::Signature signature;
         signature.name = ctx->name->getText();
-        this->accessingNotLeafVariable = true; // TODO ask Mateu if this is correct
-        for (auto predCallParamCtx : ctx->predCallParams()->predCallParam()) {
-            SymbolRef sym = visit(predCallParamCtx);
-            paramsSymbols.emplace_back(sym);
-            PredSymbol::Param param = {
-                    "", // Not used to lookup the predicate in the symbol table
-                    sym->getType()->getTypeIndex()
-            };
-            signature.params.emplace_back(param);
+        if (ctx->predCallParams()) {
+            this->accessingNotLeafVariable = true; // TODO ask Mateu if this is correct
+            for (auto predCallParamCtx: ctx->predCallParams()->predCallParam()) {
+                SymbolRef sym = visit(predCallParamCtx);
+                paramsSymbols.emplace_back(sym);
+                PredSymbol::Param param = {
+                        "", // Not used to lookup the predicate in the symbol table
+                        sym->getType()->getTypeIndex()
+                };
+                signature.params.emplace_back(param);
+            }
+            this->accessingNotLeafVariable = false;
         }
-        this->accessingNotLeafVariable = false;
 
         // Check if a predicate with same signature is defined
         std::string predSignature = PredSymbol::signatureToSymbolTableName(signature);
@@ -501,6 +503,36 @@ public:
         //GOSTypeVarDefinitionVisitor typeVarDefinitionVisitor(st, _f, nullptr);
 
         return predSym;
+    }
+
+    antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override { // TODO copied from TypeVarDefinitionVisitor
+        BUPBaseVisitor::visitVarDefinition(ctx);
+        SymbolRef newVar;
+        std::string name = ctx->name->getText();
+
+        if(this->currentScope->existsInScope(name)) {
+            throw CSP2SATAlreadyExistException(
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine(),
+                    name
+            );
+        }
+
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
+            std::vector<int> dimentions;
+            for (auto expr : ctx->arrayDefinition()->expr()) {
+                ValueRef a = visit(expr);
+                dimentions.push_back(a->getRealValue());
+            }
+            newVar = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, SymbolTable::_varbool,
+                                                   this->_f, nullptr /* never used since not param*/);
+        } else {
+            newVar = VariableSymbol::Create(ctx->name->getText(), this->_f);
+        }
+        currentScope->define(newVar);
+
+        return nullptr;
+
     }
 
     antlrcpp::Any visitPredCallParams(BUPParser::PredCallParamsContext *ctx) override {

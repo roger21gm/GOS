@@ -69,9 +69,11 @@ public:
         // Get whole predicate signature
         PredSymbol::Signature signature;
         signature.name = name;
-        for(auto defCtx : ctx->predDefParams()->definition()) {
-            PredSymbol::ParamRef param = visit(defCtx);
-            signature.params.push_back(*param);
+        if(ctx->predDefParams()) {
+            for (auto defCtx: ctx->predDefParams()->definition()) {
+                PredSymbol::ParamRef param = visit(defCtx);
+                signature.params.push_back(*param);
+            }
         }
 
         // Check if a predicate with same signature is already declared

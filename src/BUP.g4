@@ -120,12 +120,13 @@ viewpointBlock: TK_VIEWPOINT TK_COLON (definition TK_SEMICOLON)*;
 predDefBlock: TK_PREDICATES TK_COLON predDef*;
 predDef: name=TK_IDENT TK_LPAREN predDefParams? TK_RPAREN TK_LBRACKET predDefBody TK_RBRACKET;
 predDefParams: definition (TK_COMMA definition)*; // TODO permetre passar estructures (llistes) Cal pensar si passar entities
-predDefBody: constraintDefinition;
+predDefBody: predVarDefinitionBlock constraintDefinition;
 predCall: name=TK_IDENT TK_LPAREN predCallParams? TK_RPAREN;
 predCallParams: predCallParam (TK_COMMA predCallParam)*;
 predCallParam:
     varAccess
     | expr; // TODO
+predVarDefinitionBlock: (varDefinition TK_SEMICOLON)*;
 
 
 // TODO permetre passar de tot com a parametre

@@ -1,6 +1,8 @@
 viewpoint:
     var a;
     var b;
+    var c;
+    //var x[5][10];
     param int n;
     param int t[n];
 
@@ -13,8 +15,8 @@ predicates:
         true;
     }
 
-    test(param int x) {
-        true;
+    test(var x, var y, var z) {
+        x | y | !z;
     }
 
 
@@ -23,12 +25,22 @@ predicates:
     }
 
     varboolpred2(var bool x, var bool y) {
-        true & true;
+        x ;
+    }
+
+    unsatCore(var bool x) {
+        x & !x;
     }
 
 constraints:
     //varboolpred2(a,b);
-    pred(a, t, t);
+    //pred(a, t, t);
+    //pred(a, n, t);
+    //test(a,b,c);
+    //a | b | !c;
+    //!b | c;
+    unsatCore(a) | true;
+    //(!a & a) | true;
 
 output:
     "test ";

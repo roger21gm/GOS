@@ -24,23 +24,6 @@ public:
     explicit GOSConstraintsVisitor(SymbolTable *symbolTable, SMTFormula *f) : GOSCustomBaseVisitor(symbolTable,
                                                                                                    f) {}
 
-
-    antlrcpp::Any visitEntityDefinitionBlock(BUPParser::EntityDefinitionBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    virtual antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
-        return nullptr;
-    }
-
     antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
         for (auto constraint : ctx->constraintDefinition()) {
             try {
@@ -102,7 +85,7 @@ public:
             }
         } else if (ctx->predCall()) {
             SymbolRef predSym = visit(ctx->predCall());
-            //PredSymbolRef predSym = visit(ctx->predCall());
+            //PredSymbolRef predSym = visit(ctx->predCall()); TODO
             //clause->addClauses(predSym->getClauses());
         } else if (ctx->TK_BOOLEAN_VALUE()) {
             if (ctx->TK_BOOLEAN_VALUE()->getText() == "true")
@@ -504,13 +487,16 @@ public:
         PredSymbolRef pred = Utils::as<PredSymbol>(predSym);
 
         // Setup scoped exec environment
-        BUPParser::PredDefContext* predDefCtx = pred->_tree;
         for (int i = 0; i < paramsSymbols.size(); i++) {
             SymbolRef sym = paramsSymbols[i];
             PredSymbol::Param param = pred->getSignature().params[i];
             assert(param.type == sym->getType()->getTypeIndex());
             pred->define(param.name, sym);
         }
+        this->currentScope = pred;
+        visit(pred->getPredDefTree()->predDefBody());
+        this->currentScope = this->currentScope->getEnclosingScope();
+        pred->resetDefinitions();
 
         //GOSTypeVarDefinitionVisitor typeVarDefinitionVisitor(st, _f, nullptr);
 

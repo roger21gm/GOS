@@ -24,19 +24,6 @@ public:
         return false;
     }
 
-
-    antlrcpp::Any visitEntityDefinitionBlock(BUPParser::EntityDefinitionBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
-        return nullptr;
-    }
-
     antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
         for(auto str : ctx->string()) {
             try{

@@ -33,18 +33,6 @@ public:
         return BUPBaseVisitor::visitViewpointBlock(ctx);
     }
 
-    antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
-        return nullptr;
-    }
-
 
     antlrcpp::Any visitDefinition(BUPParser::DefinitionContext *ctx) override {
         try {

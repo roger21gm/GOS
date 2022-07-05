@@ -18,27 +18,16 @@ public:
     {
     }
 
-    antlrcpp::Any visitEntityDefinitionBlock(BUPParser::EntityDefinitionBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
-        return nullptr;
-    }
-
-    antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
-        return nullptr;
-    }
-
     antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
 
+        int i = 0;
         for (auto pred : ctx->predDef()) {
             try {
+                if (i == 0) {
+                    globalCtx = ctx;
+                }
                 visit(pred);
+                i++;
             } catch (GOSException &e) {
                 std::cerr << e.getErrorMessage() << std::endl;
             }
@@ -53,14 +42,6 @@ public:
         PredSymbol::ParamRef param(new PredSymbol::Param);
         param->name = ctx->name->getText();
 
-        if(this->currentScope->existsInScope(param->name)) {
-            throw CSP2SATAlreadyExistException(
-                    ctx->name->getLine(),
-                    ctx->name->getCharPositionInLine(),
-                    param->name
-            );
-        }
-
         const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
         if (isArray)
             param->type = SymbolTable::tArray;
@@ -72,14 +53,6 @@ public:
     antlrcpp::Any visitParamDefinition(BUPParser::ParamDefinitionContext *ctx) override {
         PredSymbol::ParamRef param(new PredSymbol::Param);
         param->name = ctx->name->getText();
-
-        if(this->currentScope->existsInScope(param->name)) {
-            throw CSP2SATAlreadyExistException(
-                    ctx->name->getLine(),
-                    ctx->name->getCharPositionInLine(),
-                    param->name
-            );
-        }
 
         const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
         if (isArray)
@@ -114,7 +87,7 @@ public:
         currentScope->define(pred);
         //currentScope = pred;
         //SMTFormula* currentFormula = _f;
-        //_f = new SMTFormula(); // TODO fer-ho aixi? o crear un ConstraintVisitor i pasar-li ctx->tree? Tambe pensar com fer la traduccio de clausules del predicat quan es cridi
+        //_f = new SMTFormula();
         //GOSConstraintsVisitor::visitConstraintDefinition(ctx->predDefBody()->constraintDefinition());
         //_f = currentFormula;
         //currentScope = currentScope->getEnclosingScope();

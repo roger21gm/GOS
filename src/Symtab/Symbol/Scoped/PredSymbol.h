@@ -63,19 +63,22 @@ public:
         return _signature;
     }
 
-    BUPParser::PredDefContext* _tree;
+    BUPParser::PredDefContext* getPredDefTree() {
+        return _predDefTree;
+    }
 
 protected:
     PredSymbol(Signature sig, BUPParser::PredDefContext* predDefTree, ScopeRef enclosingScope) :
         LocalScope(enclosingScope),
         Symbol(signatureToSymbolTableName(sig), SymbolTable::_varbool),
-        _signature(sig), _tree(predDefTree)
+        _signature(sig), _predDefTree(predDefTree)
     {
     }
 
 private:
     Signature _signature;
     std::vector<clause> _clauses;
+    BUPParser::PredDefContext* _predDefTree;
 };
 
 }

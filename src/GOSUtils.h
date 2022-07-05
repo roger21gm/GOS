@@ -83,6 +83,11 @@ std::shared_ptr<T> as(U param) {
     return std::dynamic_pointer_cast<T>(param);
 }
 
+template<class T, class U>
+bool is(U param) {
+    return std::dynamic_pointer_cast<T>(param) != nullptr;
+}
+
 std::vector<std::string> string_split(std::string s, const char delimiter)
 {
     size_t start=0;

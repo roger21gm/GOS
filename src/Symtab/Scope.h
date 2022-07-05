@@ -56,7 +56,11 @@ public:
         return this->symbols;
     }
 
-    virtual bool existsInScope(const std::string &name) override {
+    void resetDefinitions() {
+        symbols.clear();
+    }
+
+    bool existsInScope(const std::string &name) override {
         return symbols.find(name) != symbols.end();
     }
 
@@ -109,9 +113,9 @@ public:
         return "";
     }
 
-    bool existsInScope(const std::string &name) override {
-        return BaseScope::existsInScope(name) && !getEnclosingScope()->existsInScope(name);
-    }
+    //bool existsInScope(const std::string &name) override {
+    //    return BaseScope::existsInScope(name) && !getEnclosingScope()->existsInScope(name);
+    //}
 
 protected:
     LocalScope(ScopeRef parent) : BaseScope(parent) {}

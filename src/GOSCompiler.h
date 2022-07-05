@@ -72,18 +72,31 @@ public:
         GOSJSONInputVisitor inputPreJsonVisitor;
         ParamJSONRef readParams = runInputVisitor(inputPreJsonVisitor, inStr);
 
+        antlr4::ANTLRInputStream input(modelStr);
+        BUPLexer lexer(&input);
+        antlr4::CommonTokenStream tokens(&lexer);
+        BUPParser parser(&tokens);
+        //if(!showSintaxErrors)
+        //    parser.removeErrorListeners();
+        BUPParser::Csp2satContext *tree = parser.csp2sat();
+        if(parser.getNumberOfSyntaxErrors() > 0)
+            synError = true;
+        //return visitor.visit(tree);
+
         GOSTypeVarDefinitionVisitor visitor(symbolTable, _f, readParams);
-        runVisitor(visitor, modelStr);
+        //runVisitor(visitor, modelStr);
+        visitor.visit(tree);
 
         GOSPredVisitor predVisitor(symbolTable, _f);
-        runVisitor(predVisitor, modelStr);
+        //runVisitor(predVisitor, modelStr);
+        predVisitor.visit(tree);
 
         if(!symbolTable->errors){
             GOSConstraintsVisitor constraintsVisitor(symbolTable, _f);
-            runVisitor(constraintsVisitor, modelStr, false);
+            //runVisitor(constraintsVisitor, modelStr, false);
+            constraintsVisitor.visit(tree);
 
-            if(false) {
-            //if(!synError){
+            if(!synError){
                 if(!symbolTable->errors){
                     GOSEncoding encoding(_f, symbolTable);
                     BasicController c(sargs, &encoding, false, 0, 0);
@@ -91,7 +104,8 @@ public:
 
                     if(encoding.isSat()){
                         CSP2SATOutputVisitor outputVisitor(symbolTable, _f);
-                        bool customOutput = runVisitor(outputVisitor, modelStr, false);
+                        //bool customOutput = runVisitor(outputVisitor, modelStr, false);
+                        bool customOutput = outputVisitor.visit(tree);
                         if(!customOutput)
                             encoding.printModelSolution(std::cout);
                     }

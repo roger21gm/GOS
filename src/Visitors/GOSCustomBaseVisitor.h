@@ -21,6 +21,8 @@
 #include <exception>
 #include <utility>
 
+antlr4::ParserRuleContext* globalCtx;
+
 namespace GOS {
 
 class GOSCustomBaseVisitor : public BUPBaseVisitor {
@@ -52,6 +54,28 @@ public:
         }
         return nullptr;
     }
+
+
+    virtual antlrcpp::Any visitEntityDefinitionBlock(BUPParser::EntityDefinitionBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    virtual antlrcpp::Any visitViewpointBlock(BUPParser::ViewpointBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    virtual antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    virtual antlrcpp::Any visitOutputBlock(BUPParser::OutputBlockContext *ctx) override {
+        return nullptr;
+    }
+
+    virtual antlrcpp::Any visitConstraintDefinitionBlock(BUPParser::ConstraintDefinitionBlockContext *ctx) override {
+        return nullptr;
+    }
+
 
 
     antlrcpp::Any visitExprTop(BUPParser::ExprTopContext *ctx) override {

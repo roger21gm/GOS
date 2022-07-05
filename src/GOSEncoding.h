@@ -9,7 +9,10 @@
 #include <encoding.h>
 #include "Symtab/SymbolTable.h"
 #include "Symtab/Symbol/Scoped/ScopedSymbol.h"
+#include "Symtab/Symbol/Scoped/PredSymbol.h"
 #include "Symtab/Symbol/Valued/ValueSymbol.h"
+#include "Symtab/Symbol/Valued/VariableSymbol.h"
+#include "GOSUtils.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -29,7 +32,7 @@ private:
         std::map<std::string, SymbolRef> currentScopeSymbols = currentScope->getScopeSymbols();
 
         for (std::pair<std::string, SymbolRef> sym : currentScopeSymbols) {
-            if (sym.second->getType()) {
+            if (sym.second->getType() && !Utils::is<PredSymbol>(sym.second)) {
                 if (sym.second->isScoped())
                     fillModelValuesResult(Utils::as<ScopedSymbol>(sym.second), formula, bmodel);
                 else if (sym.second->getType()->getTypeIndex() == SymbolTable::tVarBool) {

@@ -9,7 +9,7 @@
 #include <encoding.h>
 #include "Symtab/SymbolTable.h"
 #include "Symtab/Symbol/Scoped/ScopedSymbol.h"
-#include "Symtab/Symbol/Scoped/PredSymbol.h"
+#include "Symtab/Symbol/PredSymbol.h"
 #include "Symtab/Symbol/Valued/ValueSymbol.h"
 #include "Symtab/Symbol/Valued/VariableSymbol.h"
 #include "GOSUtils.h"

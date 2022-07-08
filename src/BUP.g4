@@ -120,7 +120,7 @@ viewpointBlock: TK_VIEWPOINT TK_COLON (definition TK_SEMICOLON)*;
 predDefBlock: TK_PREDICATES TK_COLON predDef*;
 predDef: name=TK_IDENT TK_LPAREN predDefParams? TK_RPAREN TK_LBRACKET predDefBody TK_RBRACKET;
 predDefParams: definition (TK_COMMA definition)*; // TODO permetre passar estructures (llistes) Cal pensar si passar entities
-predDefBody: predVarDefinitionBlock constraintDefinition;
+predDefBody: predVarDefinitionBlock constraintDefinition+;
 predCall: name=TK_IDENT TK_LPAREN predCallParams? TK_RPAREN;
 predCallParams: predCallParam (TK_COMMA predCallParam)*;
 predCallParam:
@@ -172,7 +172,7 @@ exprSumDiff: exprMulDivMod (opSumDiff exprMulDivMod)*;
 opMulDivMod: TK_OP_ARIT_MULT | TK_OP_ARIT_DIV | TK_OP_ARIT_MOD;
 exprMulDivMod: exprNot (opMulDivMod exprNot)*;
 
-exprNot: op=TK_OP_LOGIC_NOT? expr_base;
+exprNot: op=TK_CONSTRAINT_NOT? expr_base;
 
 expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess;
 

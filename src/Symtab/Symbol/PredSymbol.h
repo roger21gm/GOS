@@ -5,9 +5,9 @@
 #ifndef GOS_PREDSYMBOL_H
 #define GOS_PREDSYMBOL_H
 
-#include "ScopedSymbol.h"
-#include "../../../GOSUtils.h"
-#include "../../SymbolTable.h"
+#include "../../GOSUtils.h"
+#include "../SymbolTable.h"
+#include "Symbol.h"
 #include <BUPParser.h>
 #include <utility>
 #include <map>
@@ -18,7 +18,7 @@ namespace GOS {
 
 class PredSymbol;
 typedef std::shared_ptr<PredSymbol> PredSymbolRef;
-class PredSymbol : public LocalScope, public Symbol {
+class PredSymbol : public Symbol {
 public:
     struct Param {
         std::string name;
@@ -39,9 +39,9 @@ public:
         return sig.name + '(' + paramsStr + ')';
     }
 
-    static PredSymbolRef Create(Signature sig, BUPParser::PredDefContext* predDefTree, ScopeRef enclosingScope)
+    static PredSymbolRef Create(Signature sig, BUPParser::PredDefContext* predDefTree)
     {
-        return PredSymbolRef(new PredSymbol(sig, predDefTree, enclosingScope));
+        return PredSymbolRef(new PredSymbol(sig, predDefTree));
     }
 
     std::vector<clause> getClauses() const {
@@ -68,8 +68,7 @@ public:
     }
 
 protected:
-    PredSymbol(Signature sig, BUPParser::PredDefContext* predDefTree, ScopeRef enclosingScope) :
-        LocalScope(enclosingScope),
+    PredSymbol(Signature sig, BUPParser::PredDefContext* predDefTree) :
         Symbol(signatureToSymbolTableName(sig), SymbolTable::_varbool),
         _signature(sig), _predDefTree(predDefTree)
     {

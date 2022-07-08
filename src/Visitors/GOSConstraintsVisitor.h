@@ -8,7 +8,7 @@
 #include "../Symtab/Symbol/formulaReturn.h"
 #include "../Symtab/Symbol/Valued/VariableSymbol.h"
 #include "../Symtab/Symbol/Scoped/ArraySymbol.h"
-#include "../Symtab/Symbol/Scoped/PredSymbol.h"
+#include "../Symtab/Symbol/PredSymbol.h"
 #include "../GOSUtils.h"
 #include "GOSCustomBaseVisitor.h"
 #include "GOSTypeVarDefinitionVisitor.h"
@@ -455,7 +455,18 @@ public:
         if (ctx->predCallParams()) {
             this->accessingNotLeafVariable = true; // TODO ask Mateu if this is correct
             for (auto predCallParamCtx: ctx->predCallParams()->predCallParam()) {
-                SymbolRef sym = visit(predCallParamCtx);
+                SymbolRef sym;
+                antlrcpp::Any res = visit(predCallParamCtx);
+                if (res.is<ValueRef>()) {
+                    ValueRef val = res.as<ValueRef>();
+                    AssignableSymbolRef assignableSym;
+                    if(val->isBoolean())
+                        assignableSym = AssignableSymbol::Create("",SymbolTable::_boolean);
+                    else assignableSym = AssignableSymbol::Create("",SymbolTable::_integer);
+                    assignableSym->setValue(val);
+                    sym = assignableSym;
+                }
+                else sym = res;
                 paramsSymbols.emplace_back(sym);
                 PredSymbol::Param param = {
                         "", // Not used to lookup the predicate in the symbol table
@@ -488,17 +499,16 @@ public:
         }
         PredSymbolRef pred = Utils::as<PredSymbol>(predSym);
 
-        // Setup scoped exec environment
+        // Setup scoped exec environment and compile predicate body
+        this->currentScope = LocalScope::Create(this->currentScope);
         for (int i = 0; i < paramsSymbols.size(); i++) {
             SymbolRef sym = paramsSymbols[i];
             PredSymbol::Param param = pred->getSignature().params[i];
             assert(param.type == sym->getType()->getTypeIndex());
-            pred->define(param.name, sym);
+            Utils::as<BaseScope>(this->currentScope)->define(param.name, sym);
         }
-        this->currentScope = pred;
         visit(pred->getPredDefTree()->predDefBody());
         this->currentScope = this->currentScope->getEnclosingScope();
-        pred->resetDefinitions();
 
         //GOSTypeVarDefinitionVisitor typeVarDefinitionVisitor(st, _f, nullptr);
 

@@ -2,7 +2,7 @@
 #define CSP2SAT_GOSPREDVISITOR_H
 
 #include "GOSCustomBaseVisitor.h"
-#include "../Symtab/Symbol/Scoped/PredSymbol.h"
+#include "../Symtab/Symbol/PredSymbol.h"
 #include "../Symtab/SymbolTable.h"
 #include <vector>
 #include <map>
@@ -85,7 +85,7 @@ public:
             );
         }
 
-        PredSymbolRef pred = PredSymbol::Create(signature, ctx, this->currentScope);
+        PredSymbolRef pred = PredSymbol::Create(signature, ctx);
         currentScope->define(pred);
         //currentScope = pred;
         //SMTFormula* currentFormula = _f;

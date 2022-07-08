@@ -351,7 +351,7 @@ public:
     }
 
 
-    antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override { // TODO revisit this method and check why std::bad_cast (and implement all types of parameters to predicates)
+    antlrcpp::Any visitVarAccess(BUPParser::VarAccessContext *ctx) override {
         std::string a = ctx->TK_IDENT()->getText();
         std::string b = ctx->getText();
         SymbolRef var = this->currentScope->resolve(ctx->TK_IDENT()->getText());

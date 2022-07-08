@@ -33,8 +33,38 @@ predicates:
     }
 
     unsatCore2() {
-        var bool x;
+        var bool x; // TODO test all types of var
         x & !x;
+    }
+
+    recursive(var bool x, param int cnt) { // TODO params not allowed on constraints
+        var bool newVar;
+        if(cnt != 0) {
+            newVar;
+            recursive(x, cnt-1);
+        }
+        else {
+            !x;
+        };
+    }
+
+
+    A(var bool x, param bool y) {
+        if (y) {
+            !x;
+            B(x, y);
+        }
+        else {
+            x;
+        };
+    }
+
+    B(var bool x, param bool y) {
+        A(x, !y);
+    }
+
+    testArray(param int array[n]) { // TODO array dimension size?
+        true;
     }
 
 constraints:
@@ -46,7 +76,11 @@ constraints:
     //!b | c;
     //unsatCore(a) | true; // TODO not working
     //(!a & a) | true;
-    unsatCore2();
+    //unsatCore2();
+    //recursive(a, 4);
+    A(a, true);
+    //pred(true, n);
+    //testArray(t);
 
 output:
     "test ";

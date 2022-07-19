@@ -18,7 +18,7 @@ endif (CYGWIN)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # C++14
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17) # std::filesystem
 
 # Compiler flags
 if(NOT CMAKE_BUILD_TYPE)

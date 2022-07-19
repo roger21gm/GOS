@@ -15,9 +15,11 @@
 #include "Value.h"
 #include "Symbol/Symbol.h"
 #include "../GOSUtils.h"
+#include "../BUPFile.h"
 #include <map>
 #include <string>
 #include <utility>
+#include <filesystem>
 
 namespace GOS {
 
@@ -48,6 +50,7 @@ public:
         this->gloabls->define(_varbool);
         this->gloabls->define(_string);
         this->gloabls->define(_formula);
+        parsedFiles = std::map<std::filesystem::path, BUPFileRef>();
     }
 
     void showAllDefinedVariables(){
@@ -55,6 +58,8 @@ public:
     }
 
     static bool errors;
+
+    std::map<std::filesystem::path, BUPFileRef> parsedFiles;
 
 private:
     static void iShowAllDefinedVariable(ScopeRef currentScope, const std::string& prefix = ""){

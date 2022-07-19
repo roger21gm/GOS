@@ -55,6 +55,7 @@ TK_WHERE: 'where';
 
 TK_FORALL: 'forall';
 
+TK_INCLUDE: 'include';
 
 //EXPRESSIONS
 TK_OP_AGG_SUM: 'sum';
@@ -117,7 +118,8 @@ viewpointBlock: TK_VIEWPOINT TK_COLON (definition TK_SEMICOLON)*;
 // TODO Parlar sobre com implementar els predicats per poder fer <constraint: XOR(a,b) -> XOR(c,b);>
 // Mirar si podem resoldre les funcions en temps de compilacio, llavors no podrien rebre variables de decisió
 // En canvi els predicats sí (pensar com)
-predDefBlock: TK_PREDICATES TK_COLON predDef*;
+predDefBlock: TK_PREDICATES TK_COLON predDefBlockBody;
+predDefBlockBody: (predDef | predInclude)*;
 predDef: name=TK_IDENT TK_LPAREN predDefParams? TK_RPAREN TK_LBRACKET predDefBody TK_RBRACKET;
 predDefParams: definition (TK_COMMA definition)*; // TODO permetre passar estructures (llistes) Cal pensar si passar entities
 predDefBody: predVarDefinitionBlock constraintDefinition+;
@@ -127,6 +129,7 @@ predCallParam:
     varAccess
     | expr; // TODO
 predVarDefinitionBlock: (varDefinition TK_SEMICOLON)*;
+predInclude: TK_INCLUDE TK_STRING TK_SEMICOLON;
 
 
 // TODO permetre passar de tot com a parametre

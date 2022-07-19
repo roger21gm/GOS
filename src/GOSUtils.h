@@ -10,11 +10,22 @@
 
 #include <string>
 #include <sstream> // std::istringstream
+#include <fstream>
 #include <vector>
 #include <memory>
 
 namespace GOS {
 namespace Utils {
+
+std::string readFile(const std::string& name) {
+    std::ifstream inFile;
+    inFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    inFile.open(name); //open the input file
+    std::stringstream inputStream;
+    inputStream << inFile.rdbuf(); //read the file
+    std::string inputStr = inputStream.str(); //str holds the content of the file
+    return inputStr;
+}
 
 bool check_number(const std::string & str) {
     std::string num = str;

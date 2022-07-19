@@ -5,16 +5,6 @@
 using namespace std;
 using namespace GOS;
 
-string readFile(string name) {
-    ifstream inFile;
-    inFile.open(name); //open the input file
-    stringstream inputStream;
-    inputStream << inFile.rdbuf(); //read the file
-    string inputStr = inputStream.str(); //str holds the content of the file
-    return inputStr;
-}
-
-
 enum ProgramArg {
     SHOWFORMULA
 };
@@ -51,10 +41,9 @@ int main(int argc, char **argv) {
         sargs->setOption(format, (string) "dimacs");
     }
 
-    string inputStr = readFile(pargs->getArgument(1));
-    string modelStr = readFile(pargs->getArgument(0));
-
-    GOSCompiler *compiler = new GOSCompiler(inputStr, modelStr, sargs);
+    const std::string modelFilename = pargs->getArgument(0);
+    const std::string inputFilename = pargs->getArgument(1);
+    GOSCompiler *compiler = new GOSCompiler(inputFilename, modelFilename, sargs);
     compiler->run();
 
     delete pargs, sargs, compiler;

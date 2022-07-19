@@ -37,7 +37,7 @@ public:
             GOSException(
                     line,
                     pos,
-                    "Invalid: \"" + badAccess + "\" don't exists"
+                    "Invalid: \"" + badAccess + "\" doesn't exist"
             ) {}
 };
 
@@ -90,6 +90,13 @@ public:
                     line,
                     pos,
                     "\"" + expr + "\" already exists"
+            ) {}
+
+    CSP2SATAlreadyExistException(int line, int pos, const std::string& expr, const std::string& filename) :
+            GOSException(
+                    line,
+                    pos,
+                    "In file " + filename + ": \"" + expr + "\" already exists"
             ) {}
 };
 

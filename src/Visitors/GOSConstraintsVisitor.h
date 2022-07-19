@@ -84,9 +84,7 @@ public:
                 );
             }
         } else if (ctx->predCall()) {
-            SymbolRef predSym = visit(ctx->predCall());
-            //PredSymbolRef predSym = visit(ctx->predCall()); TODO
-            //clause->addClauses(predSym->getClauses());
+            visit(ctx->predCall());
         } else if (ctx->TK_BOOLEAN_VALUE()) {
             if (ctx->TK_BOOLEAN_VALUE()->getText() == "true")
                 clause->addClause(this->_f->trueVar());
@@ -457,7 +455,7 @@ public:
             for (auto predCallParamCtx: ctx->predCallParams()->predCallParam()) {
                 SymbolRef sym;
                 antlrcpp::Any res = visit(predCallParamCtx);
-                if (res.is<ValueRef>()) {
+                if (res.is<ValueRef>()) { // Anonymous constant
                     ValueRef val = res.as<ValueRef>();
                     AssignableSymbolRef assignableSym;
                     if(val->isBoolean())
@@ -512,7 +510,7 @@ public:
 
         //GOSTypeVarDefinitionVisitor typeVarDefinitionVisitor(st, _f, nullptr);
 
-        return predSym;
+        return nullptr;
     }
 
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override { // TODO copied from TypeVarDefinitionVisitor

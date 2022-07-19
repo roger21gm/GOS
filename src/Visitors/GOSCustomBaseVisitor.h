@@ -21,8 +21,6 @@
 #include <exception>
 #include <utility>
 
-antlr4::ParserRuleContext* globalCtx;
-
 namespace GOS {
 
 class GOSCustomBaseVisitor : public BUPBaseVisitor {

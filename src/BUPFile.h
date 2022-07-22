@@ -32,6 +32,10 @@ public:
         return _parser.get();
     };
 
+    std::filesystem::path getPath() {
+        return _path;
+    }
+
 private:
     typedef std::shared_ptr<antlr4::CommonTokenStream> TokenStreamRef;
     typedef std::shared_ptr<antlr4::ANTLRInputStream> InputStreamRef;

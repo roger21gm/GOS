@@ -20,9 +20,16 @@ class PredSymbol;
 typedef std::shared_ptr<PredSymbol> PredSymbolRef;
 class PredSymbol : public Symbol {
 public:
+    struct Location {
+        std::filesystem::path file;
+        size_t line;
+        size_t col;
+    };
+
     struct Param {
         std::string name;
         int type;
+        int elemType = -1;
     };
     typedef std::shared_ptr<Param> ParamRef;
 
@@ -39,9 +46,9 @@ public:
         return sig.name + '(' + paramsStr + ')';
     }
 
-    static PredSymbolRef Create(Signature sig, BUPParser::PredDefContext* predDefTree)
+    static PredSymbolRef Create(Signature sig, Location loc, BUPParser::PredDefContext* predDefTree)
     {
-        return PredSymbolRef(new PredSymbol(sig, predDefTree));
+        return PredSymbolRef(new PredSymbol(sig, loc, predDefTree));
     }
 
     std::vector<clause> getClauses() const {
@@ -67,14 +74,19 @@ public:
         return _predDefTree;
     }
 
+    Location getLocation() const {
+        return _loc;
+    }
+
 protected:
-    PredSymbol(Signature sig, BUPParser::PredDefContext* predDefTree) :
+    PredSymbol(Signature sig, Location loc, BUPParser::PredDefContext* predDefTree) :
         Symbol(signatureToSymbolTableName(sig), SymbolTable::_varbool),
-        _signature(sig), _predDefTree(predDefTree)
+        _signature(sig), _predDefTree(predDefTree), _loc(loc)
     {
     }
 
 private:
+    Location _loc;
     Signature _signature;
     std::vector<clause> _clauses;
     BUPParser::PredDefContext* _predDefTree;

@@ -12,10 +12,9 @@ namespace GOS {
 
 class CSP2SATBadInputTypeException : public GOSException {
 public:
-    CSP2SATBadInputTypeException(int line, int pos, const std::string &name) :
+    CSP2SATBadInputTypeException(ExceptionLocation location, const std::string &name) :
             GOSException(
-                    line,
-                    pos,
+                    location,
                     "\"" + name + "\":" + "Only int and bool values allowed as params"
             ) {}
 };
@@ -25,8 +24,7 @@ class CSP2SATInputNotFoundValue : public GOSException {
 public:
     CSP2SATInputNotFoundValue(const std::string &access) :
             GOSException(
-                    0,
-                    0,
+                    {"", 0, 0},
                     "\"" + access + "\":" + " Not found in input file"
             ) {}
 };
@@ -34,10 +32,9 @@ public:
 
 class CSP2SATBadCardinalityConstraint : public GOSException {
 public:
-    CSP2SATBadCardinalityConstraint(int line, int pos, const std::string &name) :
+    CSP2SATBadCardinalityConstraint(ExceptionLocation location, const std::string &name) :
             GOSException(
-                    line,
-                    pos,
+                    location,
                     name + ": Bad cardinality input"
             ) {}
 };

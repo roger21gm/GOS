@@ -54,7 +54,7 @@ public:
         bool synError = false;
         // Create model file parse tree
         BUPFileRef modelFile = BUPFile::Create(_modelFilename);
-        symbolTable->parsedFiles[_modelFilename] = modelFile;
+        symbolTable->parsedFiles.emplace_back(modelFile);
         BUPParser::Csp2satContext *tree = modelFile->getParser()->csp2sat();
         if( modelFile->getParser()->getNumberOfSyntaxErrors() > 0)
             synError = true;
@@ -68,7 +68,8 @@ public:
         //runVisitor(predVisitor, modelStr);
         predVisitor.visit(tree);
 
-        if(!symbolTable->errors){
+        //if(!symbolTable->errors){
+        if(true) {
             GOSConstraintsVisitor constraintsVisitor(symbolTable, _f);
             //runVisitor(constraintsVisitor, modelStr, false);
             constraintsVisitor.visit(tree);
@@ -115,7 +116,7 @@ private:
             std::cerr << "Error reading file: " << _inputFilename << std::endl;
             abort();
         }
-        GOSJSONInputVisitor visitor;
+        GOSJSONInputVisitor visitor(_inputFilename);
         antlr4::ANTLRInputStream input(inStr);
         JSONLexer lexer(&input);
         antlr4::CommonTokenStream tokens(&lexer);

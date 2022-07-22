@@ -129,12 +129,15 @@ public:
         }
         else{
             throw CSP2SATInvalidExpressionTypeException(
-                        ctx->start->getStartIndex(),
-                        ctx->start->getCharPositionInLine(),
-                        ctx->getText(),
-                        "list<" + VisitorsUtils::getTypeName(list->getElementsType()->getTypeIndex()) + ">",
-                        VisitorsUtils::getTypeName(SymbolTable::tInt)
-                    );
+                {
+                    st->parsedFiles.front()->getPath(),
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText(),
+                "list<" + VisitorsUtils::getTypeName(list->getElementsType()->getTypeIndex()) + ">",
+                VisitorsUtils::getTypeName(SymbolTable::tInt)
+            );
         }
 
         return result;
@@ -163,11 +166,14 @@ public:
                     res->setRealValue(res->getRealValue() || currValue->getRealValue());
                 else {
                     throw CSP2SATInvalidExpressionTypeException(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->exprEq(i)->getStart()->getLine(),
-                            ctx->exprEq(i)->getStart()->getCharPositionInLine(),
-                            ctx->getText(),
-                            VisitorsUtils::getTypeName(SymbolTable::tInt),
-                            VisitorsUtils::getTypeName(SymbolTable::tBool)
+                            ctx->exprEq(i)->getStart()->getCharPositionInLine()
+                        },
+                        ctx->getText(),
+                        VisitorsUtils::getTypeName(SymbolTable::tInt),
+                        VisitorsUtils::getTypeName(SymbolTable::tBool)
                     );
                 }
             }
@@ -190,9 +196,12 @@ public:
                     lVal = res;
                 } else {
                     throw CSP2SATTypeNotMatchException(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->opEquality(0)->start->getLine(),
-                            ctx->opEquality(0)->start->getCharPositionInLine(),
-                            ctx->getText()
+                            ctx->opEquality(0)->start->getCharPositionInLine()
+                        },
+                        ctx->getText()
                     );
                 }
 
@@ -209,20 +218,26 @@ public:
 
             if (lVal->isBoolean()) {
                 throw CSP2SATInvalidExpressionTypeException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->exprSumDiff(0)->start->getLine(),
-                        ctx->exprSumDiff(0)->start->getCharPositionInLine(),
-                        ctx->exprSumDiff(0)->getText(),
-                        VisitorsUtils::getTypeName(SymbolTable::tBool),
-                        VisitorsUtils::getTypeName(SymbolTable::tInt)
+                        ctx->exprSumDiff(0)->start->getCharPositionInLine()
+                    },
+                    ctx->exprSumDiff(0)->getText(),
+                    VisitorsUtils::getTypeName(SymbolTable::tBool),
+                    VisitorsUtils::getTypeName(SymbolTable::tInt)
                 );
             }
             if (rVal->isBoolean()) {
                 throw CSP2SATInvalidExpressionTypeException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->exprSumDiff(1)->start->getLine(),
-                        ctx->exprSumDiff(1)->start->getCharPositionInLine(),
-                        ctx->exprSumDiff(1)->getText(),
-                        VisitorsUtils::getTypeName(SymbolTable::tBool),
-                        VisitorsUtils::getTypeName(SymbolTable::tInt)
+                        ctx->exprSumDiff(1)->start->getCharPositionInLine()
+                    },
+                    ctx->exprSumDiff(1)->getText(),
+                    VisitorsUtils::getTypeName(SymbolTable::tBool),
+                    VisitorsUtils::getTypeName(SymbolTable::tInt)
                 );
             };
 
@@ -239,9 +254,12 @@ public:
 
         } else if (ctx->exprSumDiff().size() > 2) {
             throw CSP2SATInvalidOperationException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText()
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText()
             );
         }
         return lVal;
@@ -260,11 +278,14 @@ public:
                         res->setRealValue(res->getRealValue() - currValue->getRealValue());
                 } else {
                     throw CSP2SATInvalidExpressionTypeException(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->exprMulDivMod(1)->start->getLine(),
-                            ctx->exprMulDivMod(1)->start->getCharPositionInLine(),
-                            ctx->exprMulDivMod(1)->getText(),
-                            VisitorsUtils::getTypeName(SymbolTable::tBool),
-                            VisitorsUtils::getTypeName(SymbolTable::tInt)
+                            ctx->exprMulDivMod(1)->start->getCharPositionInLine()
+                        },
+                        ctx->exprMulDivMod(1)->getText(),
+                        VisitorsUtils::getTypeName(SymbolTable::tBool),
+                        VisitorsUtils::getTypeName(SymbolTable::tInt)
                     );
                 }
 
@@ -303,11 +324,14 @@ public:
                 result = BoolValue::Create(!result->getRealValue());
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->start->getLine(),
-                        ctx->start->getCharPositionInLine(),
-                        ctx->getText(),
-                        VisitorsUtils::getTypeName(SymbolTable::tInt),
-                        VisitorsUtils::getTypeName(SymbolTable::tBool)
+                        ctx->start->getCharPositionInLine()
+                    },
+                    ctx->getText(),
+                    VisitorsUtils::getTypeName(SymbolTable::tInt),
+                    VisitorsUtils::getTypeName(SymbolTable::tBool)
                 );
             }
         }
@@ -317,17 +341,20 @@ public:
     antlrcpp::Any visitExpr_base(BUPParser::Expr_baseContext *ctx) override {
         if (ctx->expr()) {
             return visit(ctx->expr());
-        } else if (ctx->varAccess()) { // TODO per què les expressions nomes s'evaluen a assignable symbol? (no permeten passar passar parametres varbool a predicats)
+        } else if (ctx->varAccess()) {
             SymbolRef value = visit(ctx->varAccess());
             if (value->isAssignable()) {
                 return Utils::as<AssignableSymbol>(value)->getValue();
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->getStart()->getLine(),
-                        ctx->getStart()->getCharPositionInLine(),
-                        ctx->getText(),
-                        VisitorsUtils::getTypeName(value->getType()->getTypeIndex()),
-                        VisitorsUtils::getTypeName(SymbolTable::tInt)
+                        ctx->getStart()->getCharPositionInLine()
+                    },
+                    ctx->getText(),
+                    VisitorsUtils::getTypeName(value->getType()->getTypeIndex()),
+                    VisitorsUtils::getTypeName(SymbolTable::tInt)
                 );
             }
         }
@@ -356,9 +383,12 @@ public:
 
         if (var == nullptr) {
             throw CSP2SATNotExistsException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText()
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText()
             );
         }
 
@@ -376,11 +406,14 @@ public:
                         for (int j = i + 1; j < ctx->varAccessObjectOrArray().size(); j++) {
                             if (ctx->varAccessObjectOrArray(j)->underscore) {
                                 throw CSP2SATInvalidExpressionTypeException(
+                                    {
+                                        st->parsedFiles.front()->getPath(),
                                         ctx->start->getLine(),
-                                        ctx->start->getCharPositionInLine(),
-                                        ctx->getText(),
-                                        "matrix",
-                                        "list"
+                                        ctx->start->getCharPositionInLine()
+                                    },
+                                    ctx->getText(),
+                                    "matrix",
+                                    "list"
                                 );
                             }
                             ArraySymbolRef aux = ArraySymbol::Create(
@@ -395,9 +428,12 @@ public:
                                     aux->add(currDimSymElem);
                                 } else {
                                     throw CSP2SATBadAccessException(
+                                        {
+                                            st->parsedFiles.front()->getPath(),
                                             ctx->start->getLine(),
-                                            ctx->start->getCharPositionInLine(),
-                                            ctx->getText()
+                                            ctx->start->getCharPositionInLine()
+                                        },
+                                        ctx->getText()
                                     );
                                 }
                             }
@@ -410,9 +446,12 @@ public:
                     this->currentScope = this->currentLocalScope;
                 } else {
                     throw CSP2SATBadAccessException(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->start->getLine(),
-                            ctx->start->getCharPositionInLine(),
-                            ctx->getText()
+                            ctx->start->getCharPositionInLine()
+                        },
+                        ctx->getText()
                     );
                 }
             }
@@ -420,9 +459,12 @@ public:
 
         if (var == nullptr || (!this->accessingNotLeafVariable && var->isScoped())) {
             throw CSP2SATBadAccessException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText()
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText()
             );
         }
         return var;
@@ -460,9 +502,12 @@ public:
             return result;
         } else {
             throw GOSException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
-                    "Range must be ascendant"
+                },
+                "Range must be ascendant"
             );
         }
     }
@@ -489,11 +534,14 @@ public:
                 ValueRef cond = visit(ctx->condExpr);
                 if (!cond->isBoolean()) {
                     throw CSP2SATInvalidExpressionTypeException(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->condExpr->start->getLine(),
-                            ctx->condExpr->start->getCharPositionInLine(),
-                            ctx->condExpr->getText(),
-                            VisitorsUtils::getTypeName(SymbolTable::tInt),
-                            VisitorsUtils::getTypeName(SymbolTable::tBool)
+                            ctx->condExpr->start->getCharPositionInLine()
+                        },
+                        ctx->condExpr->getText(),
+                        VisitorsUtils::getTypeName(SymbolTable::tInt),
+                        VisitorsUtils::getTypeName(SymbolTable::tBool)
                     );
                 }
                 condition = cond->getRealValue() == 1;
@@ -548,11 +596,14 @@ public:
             return Utils::as<ArraySymbol>(array);
         } else {
             throw CSP2SATInvalidExpressionTypeException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText(),
-                    VisitorsUtils::getTypeName(array->getType()->getTypeIndex()),
-                    "array"
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText(),
+                VisitorsUtils::getTypeName(array->getType()->getTypeIndex()),
+                "array"
             );
         }
     }
@@ -589,11 +640,14 @@ public:
                 resultList->add(curr);
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         currVal->start->getLine(),
-                        currVal->start->getCharPositionInLine(),
-                        currVal->getText(),
-                        VisitorsUtils::getTypeName(curr->getType()->getTypeIndex()),
-                        VisitorsUtils::getTypeName(resultList->getElementsType()->getTypeIndex())
+                        currVal->start->getCharPositionInLine()
+                    },
+                    currVal->getText(),
+                    VisitorsUtils::getTypeName(curr->getType()->getTypeIndex()),
+                    VisitorsUtils::getTypeName(resultList->getElementsType()->getTypeIndex())
                 );
             }
         }

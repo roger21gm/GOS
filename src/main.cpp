@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
 
     const std::string modelFilename = pargs->getArgument(0);
     const std::string inputFilename = pargs->getArgument(1);
+    ExceptionLocation::rootPath = modelFilename;
     GOSCompiler *compiler = new GOSCompiler(inputFilename, modelFilename, sargs);
     compiler->run();
 

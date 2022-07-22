@@ -30,6 +30,7 @@ public:
         signature.name = ctx->name->getText();
         if (ctx->predCallParams()) {
             this->accessingNotLeafVariable = true; // TODO ask Mateu if this is correct
+            // Evaluate all parameters from call
             for (auto predCallParamCtx: ctx->predCallParams()->predCallParam()) {
                 SymbolRef sym;
                 antlrcpp::Any res = visit(predCallParamCtx);
@@ -42,11 +43,18 @@ public:
                     assignableSym->setValue(val);
                     sym = assignableSym;
                 }
-                else sym = res;
+                else sym = res; // Defined symbol
                 paramsSymbols.emplace_back(sym);
+
+                // Construct signature to lookup the predicate in the symbol table
+                const int type = sym->getType()->getTypeIndex();
+                int elemType = -1;
+                if (type == SymbolTable::tArray)
+                    elemType = Utils::as<ArraySymbol>(sym)->getElementsType()->getTypeIndex();
                 PredSymbol::Param param = {
-                        "", // Not used to lookup the predicate in the symbol table
-                        sym->getType()->getTypeIndex()
+                        sym->getName(),
+                        type,
+                        elemType
                 };
                 signature.params.emplace_back(param);
             }
@@ -57,24 +65,91 @@ public:
         std::string predSignature = PredSymbol::signatureToSymbolTableName(signature);
         SymbolRef predSym = this->currentScope->resolve(predSignature);
         if (predSym == nullptr) {
-            std::map<std::string, SymbolRef> symbols = this->currentScope->getScopeSymbols();
+            std::map<std::string, SymbolRef> symbols = st->gloabls->getScopeSymbols(); // pred definitions are global
             const std::string predName = Utils::string_split(predSignature, '(')[0];
-            std::vector<std::string> candidatesPredStr;
+            std::vector<std::pair<std::string, ExceptionLocation>> candidates;
             for (auto entry : symbols) {
-                if (Utils::string_split(entry.first, '(')[0] == predName) {
-                    std::string candidateName = entry.second->getName();
-                    candidatesPredStr.emplace_back(VisitorsUtils::parsePredicateString(candidateName));
+                if (Utils::is<PredSymbol>(entry.second)) {
+                    PredSymbolRef pred = Utils::as<PredSymbol>(entry.second);
+                    const bool predHasSameName = Utils::string_split(entry.first, '(')[0] == predName;
+                    if (predHasSameName) {
+                        const std::string candName = VisitorsUtils::parsePredicateString(pred->getName());
+                        ExceptionLocation candLoc = {
+                                pred->getLocation().file,
+                                pred->getLocation().line,
+                                pred->getLocation().col
+                        };
+                        candidates.emplace_back(std::make_pair(candName, candLoc));
+                    }
                 }
             }
+            const std::string predNameParsed = VisitorsUtils::parsePredicateString(predName);
+            ExceptionLocation predLoc = {
+                _includes.back(),
+                ctx->name->getLine(),
+                ctx->name->getCharPositionInLine()
+            };
             throw CSP2SATPredNotExistsException(
-                    ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    VisitorsUtils::parsePredicateString(predSignature),
-                    candidatesPredStr
+                {
+                    _includes.back(),
+                    ctx->name->getLine(),
+                    ctx->name->getCharPositionInLine()
+                },
+                predNameParsed,
+                candidates
             );
         }
 
         return nullptr;
+    }
+
+    void checkPredCalls(BUPParser::PredDefBlockContext *ctx) {
+        for (auto entry : st->gloabls->getScopeSymbols()) { // Assumes symbol table is ordered
+            SymbolRef sym = entry.second;
+            if (Utils::is<PredSymbol>(sym)) {
+                PredSymbolRef predSym = Utils::as<PredSymbol>(sym);
+                auto predCallsCtxs = VisitorsUtils::getRuleContextsRecursive<BUPParser::PredCallContext>(
+                        predSym->getPredDefTree()->predDefBody());
+
+                // Setup a mock environment to check if all predCalls are correct.
+                // This is achieved declaring all parameters as dummy symbols in a new temporary local scope
+                this->currentScope = LocalScope::Create(this->currentScope);
+                for (PredSymbol::Param p : predSym->getSignature().params) {
+                    SymbolRef dummySym;
+                    switch (p.type) {
+                        case SymbolTable::tInt: {
+                            auto assignableSym = AssignableSymbol::Create(p.name, Type::Create(SymbolTable::tInt, ""));
+                            assignableSym->setValue(IntValue::Create(0));
+                            dummySym = assignableSym;
+                            break;
+                        }
+                        case SymbolTable::tBool: {
+                            auto assignableSym = AssignableSymbol::Create(p.name, Type::Create(SymbolTable::tBool, ""));
+                            assignableSym->setValue(BoolValue::Create());
+                            dummySym = assignableSym;
+                            break;
+                        }
+                        case SymbolTable::tVarBool:
+                            dummySym = VariableSymbol::Create(p.name, literal());
+                            break;
+                        case SymbolTable::tArray:
+                            dummySym = ArraySymbol::Create(p.name, this->currentScope, Type::Create(p.elemType, ""));
+                            break;
+                        default:
+                            throw std::invalid_argument("Type " + std::to_string(p.type) + " not supported");
+                    }
+                    Utils::as<BaseScope>(this->currentScope)->define(dummySym);
+                }
+                for (auto predCall : predCallsCtxs) {
+                    try {
+                        visit(predCall);
+                    } catch (GOSException &e) {
+                        std::cerr << e.getErrorMessage() << std::endl;
+                    }
+                }
+                this->currentScope = this->currentScope->getEnclosingScope();
+            }
+        }
     }
 
     antlrcpp::Any visitPredDefBlock(BUPParser::PredDefBlockContext *ctx) override {
@@ -84,15 +159,7 @@ public:
 
             // Check predCalls inside predBodies (not compiling them, just checking correct predCalls). Otherwise, only
             // those predicates that happen to be called would be checked and compiled (due to the on-demand compilation)
-            for (auto entry : st->gloabls->getScopeSymbols()) {
-                SymbolRef sym = entry.second;
-                if (Utils::is<PredSymbol>(sym)) {
-                    PredSymbolRef predSym = Utils::as<PredSymbol>(sym);
-                    for (auto constraintDef : predSym->getPredDefTree()->predDefBody()->constraintDefinition()) {
-                        visit(constraintDef); // TODO visit only predcalls
-                    }
-                }
-            }
+            checkPredCalls(ctx);
         } catch (GOSException &e) {
             std::cerr << e.getErrorMessage() << std::endl;
         }
@@ -104,9 +171,12 @@ public:
         param->name = ctx->name->getText();
 
         const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
-        if (isArray)
+        if (isArray) {
             param->type = SymbolTable::tArray;
-        param->type = SymbolTable::tVarBool;
+            param->elemType = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
+        }
+        else
+            param->type = SymbolTable::tVarBool;
 
         return param;
     }
@@ -116,16 +186,21 @@ public:
         param->name = ctx->name->getText();
 
         const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
-        if (isArray)
+        const int type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
+        if (isArray) {
             param->type = SymbolTable::tArray;
+            param->elemType = type;
+        }
         else
-            param->type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
+            param->type = type;
 
         return param;
     }
 
     antlrcpp::Any visitPredDef(BUPParser::PredDefContext *ctx) override {
         std::string name = ctx->name->getText();
+        const size_t line = ctx->name->getLine();
+        const size_t col = ctx->name->getCharPositionInLine();
 
         // Get whole predicate signature
         PredSymbol::Signature signature;
@@ -140,32 +215,21 @@ public:
         // Check if a predicate with same signature is already declared
         if(this->currentScope->existsInScope(PredSymbol::signatureToSymbolTableName(signature))) {
             throw CSP2SATAlreadyExistException(
-                ctx->name->getLine(),
-                ctx->name->getCharPositionInLine(),
-                name,
-                _includes.back()
+                {
+                    _includes.back(),
+                    line,
+                    col
+                },
+                name
             );
         }
 
-        PredSymbolRef pred = PredSymbol::Create(signature, ctx);
-        currentScope->define(pred);
-        //currentScope = pred;
-        //SMTFormula* currentFormula = _f;
-        //_f = new SMTFormula();
-        //GOSConstraintsVisitor::visitConstraintDefinition(ctx->predDefBody()->constraintDefinition());
-        //_f = currentFormula;
-        //currentScope = currentScope->getEnclosingScope();
+        // Define predicate symbol as global
+        PredSymbol::Location loc = {_includes.back(), line, col};
+        PredSymbolRef pred = PredSymbol::Create(signature, loc, ctx);
+        st->gloabls->define(pred);
 
         return nullptr;
-    }
-
-    antlrcpp::Any visitPredDefParams(BUPParser::PredDefParamsContext *ctx) override {
-        std::cout << "visitPredDefParams" << std::endl;
-        return BUPBaseVisitor::visitPredDefParams(ctx);
-    }
-
-    antlrcpp::Any visitPredDefBody(BUPParser::PredDefBodyContext *ctx) override {
-        return BUPBaseVisitor::visitPredDefBody(ctx);
     }
 
     antlrcpp::Any visitPredInclude(BUPParser::PredIncludeContext *ctx) override {
@@ -179,12 +243,13 @@ public:
         wholePath /= filePath.filename();
 
         // Discard those files already included
-        const bool isFileAlreadyIncluded = st->parsedFiles.find(wholePath) != st->parsedFiles.end();
+        auto conditionFunc = [&] (const BUPFileRef& file) { return equivalent(file->getPath(),wholePath); };
+        const bool isFileAlreadyIncluded = std::find_if(st->parsedFiles.begin(), st->parsedFiles.end(), conditionFunc) != st->parsedFiles.end();
         if (!isFileAlreadyIncluded) {
             try {
                 // Parse file and visit its subtree
                 BUPFileRef file = BUPFile::Create(wholePath);
-                st->parsedFiles[wholePath] = file;
+                st->parsedFiles.emplace_back(file);
                 visit(file->getParser()->predDefBlockBody());
             } catch (std::ifstream::failure e) {
                 std::cerr << "Error reading file: " << filePath.filename() << std::endl; // TODO GOSException

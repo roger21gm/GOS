@@ -20,9 +20,13 @@ class Symbol;
 typedef std::shared_ptr<Symbol> SymbolRef;
 class Symbol {
 public:
-    Symbol(std::string name) : name(std::move(name)) {} //For constructing Type symbols
-    
-    Symbol(std::string name, TypeRef type) : name(std::move(name)), type(type) {} //For constructing var/const declarations
+    static SymbolRef Create(const std::string &name) {
+        return SymbolRef(new Symbol(name));
+    }
+
+    static SymbolRef Create(const std::string &name, TypeRef type) {
+        return SymbolRef(new Symbol(name, type));
+    }
 
     virtual ~Symbol() {}
 
@@ -41,8 +45,11 @@ public:
         return false;
     }
 
-
 protected:
+    Symbol(std::string name) : name(std::move(name)) {} //For constructing Type symbols
+
+    Symbol(std::string name, TypeRef type) : name(std::move(name)), type(type) {} //For constructing var/const declarations
+
     TypeRef type = nullptr;
     std::string name;
 };

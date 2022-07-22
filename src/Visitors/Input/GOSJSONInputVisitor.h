@@ -18,10 +18,11 @@ class GOSJSONInputVisitor : public JSONBaseVisitor {
 private:
     ParamJSONRef base;
     ParamScopedRef current;
+    std::filesystem::path _file;
 
 public:
 
-    GOSJSONInputVisitor() {
+    GOSJSONInputVisitor(const std::filesystem::path& file) : _file(file) {
         base = ParamJSON::Create("base");
         current = base;
     }
@@ -62,9 +63,12 @@ public:
             current = curr;
         } else {
             throw CSP2SATBadInputTypeException(
+                {
+                    _file,
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine(),
-                    varName
+                },
+                varName
             );
         }
 
@@ -108,9 +112,12 @@ public:
                 index++;
             } else {
                 throw CSP2SATBadInputTypeException(
+                    {
+                        _file,
                         ctx->start->getLine(),
                         ctx->start->getCharPositionInLine(),
-                        std::to_string(index)
+                    },
+                    std::to_string(index)
                 );
 
             }

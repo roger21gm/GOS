@@ -50,7 +50,7 @@ public:
         this->gloabls->define(_varbool);
         this->gloabls->define(_string);
         this->gloabls->define(_formula);
-        parsedFiles = std::map<std::filesystem::path, BUPFileRef>();
+        parsedFiles = std::vector<BUPFileRef>();
     }
 
     void showAllDefinedVariables(){
@@ -59,7 +59,7 @@ public:
 
     static bool errors;
 
-    std::map<std::filesystem::path, BUPFileRef> parsedFiles;
+    std::vector<BUPFileRef> parsedFiles;
 
 private:
     static void iShowAllDefinedVariable(ScopeRef currentScope, const std::string& prefix = ""){

@@ -39,7 +39,7 @@ public:
             if(index < size && index >= 0){
                 return elements[index];
             }
-            throw CSP2SATOutOfRangeException(0, 0, getFullName() + "[" + name + "]");
+            throw CSP2SATOutOfRangeException({"", 0, 0}, getFullName() + "[" + name + "]");
         }
         else
             return enclosingScope->resolve(name);

@@ -58,7 +58,7 @@ predicates:
     A(var bool x, param bool y) {
         if (y) {
             !x;
-            B(x, y); // TODO la primera passada de compilació per guardar la signatura dels predicats a la TS. Un cop llegits tots, compilar els cossos dels predicats però només per verificar les signatures de les crides a predicats
+            B(x, x); // TODO la primera passada de compilació per guardar la signatura dels predicats a la TS. Un cop llegits tots, compilar els cossos dels predicats però només per verificar les signatures de les crides a predicats
         }
         else {
             x;
@@ -66,7 +66,7 @@ predicates:
     }
 
     B(var bool x, param bool y) {
-        A(x, !y);
+        A(x, x);
     }
 
     testArray(param int array[n]) { // TODO array dimension size? Implementar primitiva sizeof()
@@ -87,7 +87,7 @@ constraints:
     //A(a, true);
     //pred(true, n);
     //testArray(t);
-    predInclude2(a);
+    predInclude2(true);
     true;
 
 output:

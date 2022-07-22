@@ -78,9 +78,12 @@ public:
                 clause->addClause(Utils::as<VariableSymbol>(valSym)->getVar());
             } else {
                 throw CSP2SATParamAsConstraintException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->start->getLine(),
-                        ctx->start->getCharPositionInLine(),
-                        ctx->getText()
+                        ctx->start->getCharPositionInLine()
+                    },
+                    ctx->getText()
                 );
             }
         } else if (ctx->predCall()) {
@@ -113,10 +116,13 @@ public:
                         clauResult |= !currClause.v.front();
                     else {
                         throw CSP2SATInvalidFormulaException(
+                            {
+                                st->parsedFiles.front()->getPath(),
                                 ctx->start->getLine(),
-                                ctx->start->getCharPositionInLine(),
-                                ctx->getText(),
-                                "You can only negate literals or AND lists"
+                                ctx->start->getCharPositionInLine()
+                            },
+                            ctx->getText(),
+                            "You can only negate literals or AND lists"
                         );
                     }
                 }
@@ -154,10 +160,13 @@ public:
             }
         } else {
             throw CSP2SATInvalidFormulaException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText(),
-                    "Invalid Constraint AND"
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText(),
+                "Invalid Constraint AND"
             );
         }
         return newClauses;
@@ -187,19 +196,25 @@ public:
                         newClauses->addClause(orClause | andClause);
                     else {
                         throw CSP2SATInvalidFormulaException(
+                            {
+                                st->parsedFiles.front()->getPath(),
                                 ctx->start->getLine(),
-                                ctx->start->getCharPositionInLine(),
-                                ctx->getText(),
-                                "AND_CLAUSULES | AND_LITERALS not allowed"
+                                ctx->start->getCharPositionInLine()
+                            },
+                            ctx->getText(),
+                            "AND_CLAUSULES | AND_LITERALS not allowed"
                         );
                     }
                 }
             } else {
                 throw CSP2SATInvalidFormulaException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->start->getLine(),
-                        ctx->start->getCharPositionInLine(),
-                        ctx->getText(),
-                        "AND_CLAUSULES | AND_LITERALS not allowed"
+                        ctx->start->getCharPositionInLine()
+                    },
+                    ctx->getText(),
+                    "AND_CLAUSULES | AND_LITERALS not allowed"
                 );
             }
 
@@ -230,10 +245,13 @@ public:
             }
         } else {
             throw CSP2SATInvalidFormulaException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText(),
-                    "Constraint OR list elements must be propositional formulas"
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText(),
+                "Constraint OR list elements must be propositional formulas"
             );
         }
 
@@ -264,10 +282,13 @@ public:
                             result |= !currLeft.v.front();
                         } else {
                             throw CSP2SATInvalidFormulaException(
+                                {
+                                    st->parsedFiles.front()->getPath(),
                                     ctx->start->getLine(),
-                                    ctx->start->getCharPositionInLine(),
-                                    ctx->getText(),
-                                    "Only allowed AND_LITERALS => OR_LITERALS"
+                                    ctx->start->getCharPositionInLine()
+                                },
+                                ctx->getText(),
+                                "Only allowed AND_LITERALS => OR_LITERALS"
                             );
                         }
                     }
@@ -279,19 +300,25 @@ public:
                             res->addClause(andLiteral | !leftExpr->clauses.front().v.front());
                         } else
                             throw CSP2SATInvalidFormulaException(
+                                {
+                                    st->parsedFiles.front()->getPath(),
                                     ctx->start->getLine(),
-                                    ctx->start->getCharPositionInLine(),
-                                    ctx->getText(),
-                                    "Only allowed AND_LITERALS => OR_LITERALS"
+                                    ctx->start->getCharPositionInLine()
+                                },
+                                ctx->getText(),
+                                "Only allowed AND_LITERALS => OR_LITERALS"
                             );
                     }
                     leftExpr = res;
                 } else {
                     throw CSP2SATInvalidFormulaException(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->start->getLine(),
-                            ctx->start->getCharPositionInLine(),
-                            ctx->getText(),
-                            "Only allowed AND_LITERALS => OR_LITERALS"
+                            ctx->start->getCharPositionInLine()
+                        },
+                        ctx->getText(),
+                        "Only allowed AND_LITERALS => OR_LITERALS"
                     );
                 }
             }
@@ -338,18 +365,24 @@ public:
                 res = result;
             } else {
                 throw CSP2SATInvalidFormulaException(
+                    {
+                        st->parsedFiles.front()->getPath(),
                         ctx->start->getLine(),
-                        ctx->start->getCharPositionInLine(),
-                        ctx->getText(),
-                        "Only allowed LITERAL <=> OR_LITERALS and LITERAL <=> AND_LITERALS"
+                        ctx->start->getCharPositionInLine()
+                    },
+                    ctx->getText(),
+                    "Only allowed LITERAL <=> OR_LITERALS and LITERAL <=> AND_LITERALS"
                 );
             }
         } else if (ctx->constraint_implication().size() != 1) {
             throw CSP2SATInvalidFormulaException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText(),
-                    "Only allowed LITERAL <=> OR_LITERALS and LITERAL <=> AND_LITERALS"
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText(),
+                "Only allowed LITERAL <=> OR_LITERALS and LITERAL <=> AND_LITERALS"
             );
         }
 
@@ -382,8 +415,11 @@ public:
                 }
             } else {
                 throw CSP2SATInvalidExpressionTypeException(
-                        ctx->expr(i)->start->getLine(),
-                        ctx->expr(i)->start->getCharPositionInLine(),
+                        {
+                                st->parsedFiles.front()->getPath(),
+                                ctx->expr(i)->start->getLine(),
+                                ctx->expr(i)->start->getCharPositionInLine()
+                        },
                         ctx->expr(i)->getText(),
                         VisitorsUtils::getTypeName(SymbolTable::tInt),
                         VisitorsUtils::getTypeName(SymbolTable::tBool)
@@ -413,9 +449,12 @@ public:
                     this->_f->addAMK(literalList, k->getRealValue());
                 } else {
                     throw CSP2SATBadCardinalityConstraint(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->start->getLine(),
-                            ctx->start->getCharPositionInLine(),
-                            ctx->getText()
+                            ctx->start->getCharPositionInLine()
+                        },
+                        ctx->getText()
                     );
                 }
             } else {
@@ -427,9 +466,12 @@ public:
                     this->_f->addAMO(literalList);
                 } else {
                     throw CSP2SATBadCardinalityConstraint(
+                        {
+                            st->parsedFiles.front()->getPath(),
                             ctx->start->getLine(),
-                            ctx->start->getCharPositionInLine(),
-                            ctx->getText()
+                            ctx->start->getCharPositionInLine()
+                        },
+                        ctx->getText()
                     );
                 }
             }
@@ -438,9 +480,12 @@ public:
         }
         catch (GOSException &e) {
             throw GOSException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->list()->getText() + " must be a list of literals"
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->list()->getText() + " must be a list of literals"
             );
         }
     }
@@ -479,20 +524,32 @@ public:
         std::string predSignature = PredSymbol::signatureToSymbolTableName(signature);
         SymbolRef predSym = this->currentScope->resolve(predSignature);
         if (predSym == nullptr) {
-            std::map<std::string, SymbolRef> symbols = this->currentScope->getScopeSymbols();
+            std::map<std::string, SymbolRef> symbols = st->gloabls->getScopeSymbols(); // pred definitions are global
             const std::string predName = Utils::string_split(predSignature, '(')[0];
-            std::vector<std::string> candidatesPredStr;
+            std::vector<std::pair<std::string, ExceptionLocation>> candidates;
             for (auto entry : symbols) {
-                if (Utils::string_split(entry.first, '(')[0] == predName) {
-                    std::string candidateName = entry.second->getName();
-                    candidatesPredStr.emplace_back(VisitorsUtils::parsePredicateString(candidateName));
+                if (Utils::is<PredSymbol>(entry.second)) {
+                    PredSymbolRef pred = Utils::as<PredSymbol>(entry.second);
+                    const bool predHasSameName = Utils::string_split(entry.first, '(')[0] == predName;
+                    if (predHasSameName) {
+                        const std::string candName = VisitorsUtils::parsePredicateString(pred->getName());
+                        ExceptionLocation candLoc = {
+                                pred->getLocation().file,
+                                pred->getLocation().line,
+                                pred->getLocation().col
+                        };
+                        candidates.emplace_back(std::make_pair(candName, candLoc));
+                    }
                 }
             }
             throw CSP2SATPredNotExistsException(
-                ctx->start->getLine(),
-                ctx->start->getCharPositionInLine(),
-                VisitorsUtils::parsePredicateString(predSignature),
-                candidatesPredStr
+                {
+                    st->parsedFiles.front()->getPath(),
+                    ctx->start->getLine(),
+                    ctx->start->getCharPositionInLine()
+                },
+                VisitorsUtils::parsePredicateString(predName),
+                candidates
             );
         }
         PredSymbolRef pred = Utils::as<PredSymbol>(predSym);
@@ -508,8 +565,6 @@ public:
         visit(pred->getPredDefTree()->predDefBody());
         this->currentScope = this->currentScope->getEnclosingScope();
 
-        //GOSTypeVarDefinitionVisitor typeVarDefinitionVisitor(st, _f, nullptr);
-
         return nullptr;
     }
 
@@ -520,9 +575,12 @@ public:
 
         if(this->currentScope->existsInScope(name)) {
             throw CSP2SATAlreadyExistException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->name->getLine(),
-                    ctx->name->getCharPositionInLine(),
-                    name
+                    ctx->name->getCharPositionInLine()
+                },
+                name
             );
         }
 

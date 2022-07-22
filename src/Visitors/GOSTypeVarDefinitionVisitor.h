@@ -52,9 +52,12 @@ public:
 
         if(this->currentScope->existsInScope(name)) {
             throw CSP2SATAlreadyExistException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->name->getLine(),
-                    ctx->name->getCharPositionInLine(),
-                    name
+                    ctx->name->getCharPositionInLine()
+                },
+                name
             );
         }
 
@@ -85,9 +88,12 @@ public:
 
         if(this->currentScope->existsInScope(name)) {
             throw CSP2SATAlreadyExistException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->name->getLine(),
-                    ctx->name->getCharPositionInLine(),
-                    name
+                    ctx->name->getCharPositionInLine()
+                },
+                name
             );
         }
 
@@ -143,9 +149,12 @@ public:
         }
         catch (GOSException &e) {
             throw CSP2SATNotExistsException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText()
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText()
             );
         }
     }
@@ -155,9 +164,12 @@ public:
             return GOSCustomBaseVisitor::visitListResultExpr(ctx);
         } else {
             throw CSP2SATStringOnlyOutputException(
+                {
+                    st->parsedFiles.front()->getPath(),
                     ctx->start->getLine(),
-                    ctx->start->getCharPositionInLine(),
-                    ctx->getText()
+                    ctx->start->getCharPositionInLine()
+                },
+                ctx->getText()
             );
         }
     }

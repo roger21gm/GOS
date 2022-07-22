@@ -70,7 +70,7 @@ private:
 protected:
     explicit BaseScope(ScopeRef parent) : enclosingScope(parent) {}
 
-    std::map<std::string, SymbolRef> symbols; // TODO why not SymbolTable? SymbolTable class is not actually a symbol table...
+    std::map<std::string, SymbolRef> symbols;
 };
 
 class GlobalScope;
@@ -112,10 +112,6 @@ public:
     std::string getFullName() override {
         return "";
     }
-
-    //bool existsInScope(const std::string &name) override {
-    //    return BaseScope::existsInScope(name) && !getEnclosingScope()->existsInScope(name);
-    //}
 
 protected:
     LocalScope(ScopeRef parent) : BaseScope(parent) {}

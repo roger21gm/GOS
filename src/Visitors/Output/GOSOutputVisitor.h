@@ -58,8 +58,11 @@ public:
             }
             else {
                 throw CSP2SATStringOnlyOutputException(
-                    ctx->list()->start->getLine(),
-                    ctx->list()->start->getCharPositionInLine(),
+                    {
+                        st->parsedFiles.front()->getPath(),
+                        ctx->list()->start->getLine(),
+                        ctx->list()->start->getCharPositionInLine()
+                    },
                     ctx->list()->getText()
                 );
             }

@@ -61,7 +61,16 @@ public:
             );
         }
 
-        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->children.empty()) {
+            if(ctx->arrayDefinition()->expr().empty())
+                throw CSP2SATArrayBoundsException(
+                    {
+                        st->parsedFiles.front()->getPath(),
+                        ctx->name->getLine(),
+                        ctx->name->getCharPositionInLine()
+                    }, true
+                );
+
             std::vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
                 ValueRef a = visit(expr);
@@ -98,7 +107,15 @@ public:
         }
 
 
-        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty()) {
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->children.empty()) {
+            if(ctx->arrayDefinition()->expr().empty())
+                throw CSP2SATArrayBoundsException(
+                        {
+                                st->parsedFiles.front()->getPath(),
+                                ctx->name->getLine(),
+                                ctx->name->getCharPositionInLine()
+                        }, true
+                );
             std::vector<int> dimentions;
             for (auto expr : ctx->arrayDefinition()->expr()) {
                 ValueRef a = visit(expr);

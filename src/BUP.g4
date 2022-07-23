@@ -147,7 +147,7 @@ paramDefinition: (
         TK_PARAM type=(TK_BASE_TYPE_BOOL | TK_BASE_TYPE_INT)
         | type=TK_IDENT
     ) name=TK_IDENT arrayDefinition;
-arrayDefinition: (TK_LCLAUDATOR arraySize=expr TK_RCLAUDATOR)*;
+arrayDefinition: (TK_LCLAUDATOR arraySize=expr? TK_RCLAUDATOR)*;
 
 // EXPRESSIONS
 

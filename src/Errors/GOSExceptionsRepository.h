@@ -38,6 +38,16 @@ public:
             ) {}
 };
 
+class CSP2SATArrayBoundsException : public GOSException {
+public:
+    CSP2SATArrayBoundsException(ExceptionLocation location, bool shouldBeBounded) :
+        GOSException(
+                location,
+                shouldBeBounded ? "Invalid array definition: Bounded arrays as predicate parameters are not allowed"
+                                : "Invalid array definition: Unbounded dimensions in array definitions are not allowed."
+        ) {}
+};
+
 class CSP2SATPredNotExistsException : public GOSException {
 public:
     CSP2SATPredNotExistsException(ExceptionLocation location, const std::string& signature,

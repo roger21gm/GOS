@@ -5,10 +5,11 @@ viewpoint:
     //var x[5][10];
     param int n;
     param int t[n];
+    var d[n];
 
 predicates:
 
-    pred(var bool varName, param int paramName, param int paramArray[n]) {
+    pred(var bool varName, param int paramName, param int paramArray[]) {
         true;
     }
 
@@ -69,7 +70,7 @@ predicates:
         A(x, !y);
     }
 
-    testArray(param int array[n]) { // TODO array dimension size? Implementar primitiva sizeof()
+    testArray(param int array[]) { // TODO array dimension size? Implementar primitiva sizeof()
         true;
     }
 

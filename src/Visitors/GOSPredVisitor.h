@@ -163,12 +163,27 @@ public:
         return nullptr;
     }
 
+    antlrcpp::Any visitPredDefBlockBody(BUPParser::PredDefBlockBodyContext *ctx) override {
+        try {
+            return BUPBaseVisitor::visitPredDefBlockBody(ctx);
+        } catch (GOSException &e) {
+            std::cerr << e.getErrorMessage() << std::endl;
+        }
+    }
+
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
         PredSymbol::ParamRef param(new PredSymbol::Param);
         param->name = ctx->name->getText();
 
-        const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
-        if (isArray) {
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->children.empty()) {
+            if(!ctx->arrayDefinition()->expr().empty())
+                throw CSP2SATArrayBoundsException(
+                        {
+                                st->parsedFiles.front()->getPath(),
+                                ctx->name->getLine(),
+                                ctx->name->getCharPositionInLine()
+                        }, false
+                );
             param->type = SymbolTable::tArray;
             param->elemType = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
         }
@@ -182,9 +197,16 @@ public:
         PredSymbol::ParamRef param(new PredSymbol::Param);
         param->name = ctx->name->getText();
 
-        const bool isArray = ctx->arrayDefinition() && !ctx->arrayDefinition()->expr().empty();
         const int type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
-        if (isArray) {
+        if (ctx->arrayDefinition() && !ctx->arrayDefinition()->children.empty()) {
+            if(!ctx->arrayDefinition()->expr().empty())
+                throw CSP2SATArrayBoundsException(
+                        {
+                                st->parsedFiles.front()->getPath(),
+                                ctx->name->getLine(),
+                                ctx->name->getCharPositionInLine()
+                        }, false
+                );
             param->type = SymbolTable::tArray;
             param->elemType = type;
         }
@@ -204,8 +226,12 @@ public:
         signature.name = name;
         if(ctx->predDefParams()) {
             for (auto defCtx: ctx->predDefParams()->definition()) {
-                PredSymbol::ParamRef param = visit(defCtx);
-                signature.params.push_back(*param);
+                try {
+                    PredSymbol::ParamRef param = visit(defCtx);
+                    signature.params.push_back(*param);
+                } catch (GOSException &e) {
+                    std::cerr << e.getErrorMessage() << std::endl;
+                }
             }
         }
 

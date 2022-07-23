@@ -54,7 +54,9 @@ private:
         message += (candidates.size() > 1 ? "Candidates are" : "Candidate is") ;
         message += ":\n";
         for (auto c : candidates) {
-            message += "\t" + c.first + "\t" + c.second.toString() + "\n";
+            std::string modifiedLocStr = c.second.toString().erase(0,1);
+            modifiedLocStr.pop_back();
+            message += "\t" + c.first + "\t" + "Defined i" + modifiedLocStr + "\n";
         }
         return message;
     }

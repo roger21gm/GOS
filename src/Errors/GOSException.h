@@ -15,16 +15,11 @@ struct ExceptionLocation {
     std::filesystem::path file;
     size_t line;
     size_t pos;
-    static std::filesystem::path rootPath;
 
     std::string toString() const {
-        if(rootPath.empty())
-            throw std::invalid_argument("Root path not defined");
-        const std::filesystem::path filePath = relative(file,rootPath) / file.filename();
-        return "In file \"" + filePath.string() + "\" (" + std::to_string(line) + ":" + std::to_string(pos) + "):";
+        return "In file \"" + file.string() + "\" (" + std::to_string(line) + ":" + std::to_string(pos) + "):";
     }
 };
-std::filesystem::path ExceptionLocation::rootPath = "";
 
 class GOSException : public std::exception {
 private:

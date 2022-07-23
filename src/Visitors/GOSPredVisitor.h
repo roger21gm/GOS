@@ -20,7 +20,7 @@ public:
     explicit GOSPredVisitor(SymbolTable *symbolTable, SMTFormula *f, const std::string& filename) :
             GOSCustomBaseVisitor(symbolTable, f)
     {
-        _includes.push_back(filename);
+        _includes.push(std::filesystem::canonical(filename));
     }
 
     antlrcpp::Any visitPredCall(BUPParser::PredCallContext *ctx) override { // TODO copied from GOSConstraintsVisitor. Maybe put in BUPBaseVisitor the common part?
@@ -83,19 +83,14 @@ public:
                     }
                 }
             }
-            const std::string predNameParsed = VisitorsUtils::parsePredicateString(predName);
-            ExceptionLocation predLoc = {
-                _includes.back(),
-                ctx->name->getLine(),
-                ctx->name->getCharPositionInLine()
-            };
+            const std::string predSignatureParsed = VisitorsUtils::parsePredicateString(predSignature);
             throw CSP2SATPredNotExistsException(
                 {
-                    _includes.back(),
+                    _includes.top(),
                     ctx->name->getLine(),
                     ctx->name->getCharPositionInLine()
                 },
-                predNameParsed,
+                predSignatureParsed,
                 candidates
             );
         }
@@ -103,7 +98,7 @@ public:
         return nullptr;
     }
 
-    void checkPredCalls(BUPParser::PredDefBlockContext *ctx) {
+    void checkPredCalls() {
         for (auto entry : st->gloabls->getScopeSymbols()) { // Assumes symbol table is ordered
             SymbolRef sym = entry.second;
             if (Utils::is<PredSymbol>(sym)) {
@@ -142,7 +137,9 @@ public:
                 }
                 for (auto predCall : predCallsCtxs) {
                     try {
+                        _includes.push(predSym->getLocation().file);
                         visit(predCall);
+                        _includes.pop();
                     } catch (GOSException &e) {
                         std::cerr << e.getErrorMessage() << std::endl;
                     }
@@ -159,7 +156,7 @@ public:
 
             // Check predCalls inside predBodies (not compiling them, just checking correct predCalls). Otherwise, only
             // those predicates that happen to be called would be checked and compiled (due to the on-demand compilation)
-            checkPredCalls(ctx);
+            checkPredCalls();
         } catch (GOSException &e) {
             std::cerr << e.getErrorMessage() << std::endl;
         }
@@ -216,7 +213,7 @@ public:
         if(this->currentScope->existsInScope(PredSymbol::signatureToSymbolTableName(signature))) {
             throw CSP2SATAlreadyExistException(
                 {
-                    _includes.back(),
+                        _includes.top(),
                     line,
                     col
                 },
@@ -225,7 +222,7 @@ public:
         }
 
         // Define predicate symbol as global
-        PredSymbol::Location loc = {_includes.back(), line, col};
+        PredSymbol::Location loc = {_includes.top(), line, col};
         PredSymbolRef pred = PredSymbol::Create(signature, loc, ctx);
         st->gloabls->define(pred);
 
@@ -233,24 +230,23 @@ public:
     }
 
     antlrcpp::Any visitPredInclude(BUPParser::PredIncludeContext *ctx) override {
-        const std::string name = ctx->TK_STRING()->getText();
-        const std::filesystem::path filePath = name.substr(1, name.length()-2); // Trim double quotes
-        _includes.push_back(filePath);
-
         // Compute the path of the included file
-        std::filesystem::path wholePath;
-        for (auto e : _includes) wholePath /= e.parent_path();
-        wholePath /= filePath.filename();
+        const std::string name = ctx->TK_STRING()->getText();
+        std::filesystem::path filePath = name.substr(1, name.length()-2); // Trim double quotes
+        if (filePath.is_relative())
+            filePath = canonical(_includes.top().parent_path() / filePath);
 
         // Discard those files already included
-        auto conditionFunc = [&] (const BUPFileRef& file) { return equivalent(file->getPath(),wholePath); };
+        auto conditionFunc = [&] (const BUPFileRef& file) { return equivalent(file->getPath(),filePath); };
         const bool isFileAlreadyIncluded = std::find_if(st->parsedFiles.begin(), st->parsedFiles.end(), conditionFunc) != st->parsedFiles.end();
         if (!isFileAlreadyIncluded) {
             try {
                 // Parse file and visit its subtree
-                BUPFileRef file = BUPFile::Create(wholePath);
+                BUPFileRef file = BUPFile::Create(filePath);
                 st->parsedFiles.emplace_back(file);
+                _includes.push(filePath);
                 visit(file->getParser()->predDefBlockBody());
+                _includes.pop();
             } catch (std::ifstream::failure e) {
                 std::cerr << "Error reading file: " << filePath.filename() << std::endl; // TODO GOSException
             }
@@ -258,13 +254,12 @@ public:
         else {
             std::cerr << "Warning: file " << filePath.filename() << " already included, parsing omitted" << std::endl;
         }
-        _includes.pop_back();
 
         return nullptr;
     }
 
 private:
-    std::vector<std::filesystem::path> _includes; // Included filenames stack, _includes.back() is the current include level
+    std::stack<std::filesystem::path> _includes;
 };
 
 }

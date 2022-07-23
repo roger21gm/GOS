@@ -68,8 +68,7 @@ public:
         //runVisitor(predVisitor, modelStr);
         predVisitor.visit(tree);
 
-        //if(!symbolTable->errors){
-        if(true) {
+        if(!symbolTable->errors){
             GOSConstraintsVisitor constraintsVisitor(symbolTable, _f);
             //runVisitor(constraintsVisitor, modelStr, false);
             constraintsVisitor.visit(tree);

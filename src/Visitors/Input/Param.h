@@ -160,7 +160,7 @@ public:
 
             if(currentParam == nullptr) {
                 throw CSP2SATInputNotFoundValue(currAccess);
-            };
+            }
 
             if(currentParam->isValuable())
                 return std::dynamic_pointer_cast<ParamValuable>(currentParam)->getValue();

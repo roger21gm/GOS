@@ -24,7 +24,6 @@ class CSP2SATInputNotFoundValue : public GOSException {
 public:
     CSP2SATInputNotFoundValue(const std::string &access) :
             GOSException(
-                    {"", 0, 0},
                     "\"" + access + "\":" + " Not found in input file"
             ) {}
 };

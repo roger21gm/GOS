@@ -122,8 +122,17 @@ public:
                 dimentions.push_back(a->getRealValue());
             }
 
-            newConst = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f,
-                                             this->params);
+            try {
+                newConst = VisitorsUtils::defineNewArray(ctx->name->getText(), currentScope, dimentions, type, this->_f,
+                                                         this->params);
+            } catch (CSP2SATInputNotFoundValue e) {
+                e.setLocation({
+                st->parsedFiles.front()->getPath(),
+                ctx->name->getLine(),
+                ctx->name->getCharPositionInLine()
+                });
+                throw e;
+            }
         } else if (type->getTypeIndex() == SymbolTable::tCustom) {
             newConst = VisitorsUtils::definewNewCustomTypeParam(ctx->name->getText(), Utils::as<StructSymbol>(type), currentScope,
                                                         this->_f, this->params);

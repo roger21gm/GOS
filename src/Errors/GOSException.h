@@ -22,8 +22,8 @@ struct ExceptionLocation {
 };
 
 class GOSException : public std::exception {
-private:
-    ExceptionLocation _location;
+protected:
+    std::optional<ExceptionLocation> _location;
     std::string _message;
 
 public:
@@ -31,8 +31,19 @@ public:
         SymbolTable::errors = true;
     }
 
-    std::string getErrorMessage(){
-        std::string error = _location.toString() + " ERROR: " + _message;
+    GOSException(const std::string &message) : _message(message) {
+        SymbolTable::errors = true;
+    }
+
+    void setLocation(ExceptionLocation location) {
+        _location = location;
+    }
+
+    std::string getErrorMessage() {
+        std::string error;
+        if(_location.has_value())
+            error += _location.value().toString() + " ";
+        error += "ERROR: " + _message;
         return error;
     }
 };

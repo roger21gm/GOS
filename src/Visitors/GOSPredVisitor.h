@@ -169,6 +169,7 @@ public:
         } catch (GOSException &e) {
             std::cerr << e.getErrorMessage() << std::endl;
         }
+        return nullptr;
     }
 
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {

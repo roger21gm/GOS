@@ -58,6 +58,7 @@ TK_FORALL: 'forall';
 TK_INCLUDE: 'include';
 
 //EXPRESSIONS
+TK_OP_AGG_SIZEOF: 'sizeof';
 TK_OP_AGG_SUM: 'sum';
 TK_OP_AGG_LENGTH: 'length';
 TK_OP_AGG_MAX: 'max';
@@ -155,7 +156,7 @@ expr:
     exprListAgg #exprTop
     | condition=exprAnd TK_INTERROGANT op1=expr TK_COLON op2=expr #exprTernary;
 
-opAggregateExpr: TK_OP_AGG_LENGTH | TK_OP_AGG_MAX | TK_OP_AGG_MIN | TK_OP_AGG_SUM;
+opAggregateExpr: TK_OP_AGG_LENGTH | TK_OP_AGG_MAX | TK_OP_AGG_MIN | TK_OP_AGG_SUM | TK_OP_AGG_SIZEOF;
 exprListAgg:
     opAggregateExpr TK_LPAREN list TK_RPAREN #exprListAggregateOp
     | exprAnd #exprAnd2;

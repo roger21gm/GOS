@@ -127,6 +127,10 @@ public:
                 result = IntValue::Create(elements.size());
             }
         }
+        else if(ctx->opAggregateExpr()->getText() == "sizeof") {
+            const int size = list->getSymbolVector().size();
+            result = IntValue::Create(size);
+        }
         else{
             throw CSP2SATInvalidExpressionTypeException(
                 {

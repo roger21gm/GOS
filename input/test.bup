@@ -5,7 +5,8 @@ viewpoint:
     //var x[5][10];
     param int n;
     param int t[n];
-    var d[n];
+    var t2[n][n*2];
+    //var d[n];
 
 predicates:
 
@@ -92,4 +93,4 @@ constraints:
     true;
 
 output:
-    "test ";
+    "sizeof(t2) " ++ sizeof(t2[1]);

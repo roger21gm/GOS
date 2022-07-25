@@ -61,6 +61,23 @@ public:
 
     std::vector<BUPFileRef> parsedFiles;
 
+    static std::string typeToString(int tType) {
+        switch (tType) {
+            case SymbolTable::tBool:
+                return "bool";
+            case SymbolTable::tInt:
+                return "int";
+            case SymbolTable::tVarBool:
+                return "varBool";
+            case SymbolTable::tArray:
+                return "array";
+            case SymbolTable::tCustom:
+                return "customType";
+            default:
+                throw std::invalid_argument("Type " + std::to_string(tType) + " not supported");
+        }
+    }
+
 private:
     static void iShowAllDefinedVariable(ScopeRef currentScope, const std::string& prefix = ""){
         std::map<std::string, SymbolRef> currentScopeSymbols = currentScope->getScopeSymbols();

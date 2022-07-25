@@ -111,26 +111,6 @@ string getTypeName(const int tType) {
     }
 }
 
-std::string parsePredicateString(const std::string& predicateSignature) {
-    std::string parsedCandidateName = "";
-    bool isParams = false;
-    for(char c : predicateSignature) {
-        if (std::isdigit(c)) {
-            const int code = c - '0';
-            parsedCandidateName += '<' + GOS::VisitorsUtils::getTypeName(code) + '>' + ',';
-            isParams = true;
-        }
-        else {
-            if (isParams) {
-                parsedCandidateName.pop_back();
-                isParams = false;
-            }
-            parsedCandidateName += c;
-        }
-    }
-    return parsedCandidateName;
-}
-
 vector<literal> getLiteralVectorFromVariableArraySymbol(ArraySymbolRef variableArray) {
     vector<literal> result = vector<literal>();
     map<string, SymbolRef> arrayElems = variableArray->getScopeSymbols();
@@ -229,7 +209,8 @@ defineNewArray(
                 name,
                 enclosingScope,
                 elementsType,
-                dimentions[0]
+                dimentions[0],
+                dimentions.size()
         );
         for (int i = 0; i < dimentions[0]; ++i) {
             SymbolRef element;
@@ -259,7 +240,8 @@ defineNewArray(
                 name,
                 enclosingScope,
                 elementsType,
-                dimentions[0]
+                dimentions[0],
+                dimentions.size()
         );
         for (int i = 0; i < dimentions[0]; i++) {
             ArraySymbolRef constElement = defineNewArray(to_string(i), newDimention, restOfDimenstions, elementsType,

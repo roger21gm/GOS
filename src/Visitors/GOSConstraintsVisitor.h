@@ -497,6 +497,7 @@ public:
         signature.name = ctx->name->getText();
         if (ctx->predCallParams()) {
             this->accessingNotLeafVariable = true; // TODO ask Mateu if this is correct
+            // Evaluate all parameters from call
             for (auto predCallParamCtx: ctx->predCallParams()->predCallParam()) {
                 SymbolRef sym;
                 antlrcpp::Any res = visit(predCallParamCtx);
@@ -509,30 +510,37 @@ public:
                     assignableSym->setValue(val);
                     sym = assignableSym;
                 }
-                else sym = res;
-                paramsSymbols.emplace_back(sym);
-                PredSymbol::Param param = {
-                        "", // Not used to lookup the predicate in the symbol table
-                        sym->getType()->getTypeIndex()
-                };
+                else sym = res; // Defined symbol
+
+                // Construct signature to lookup the predicate in the symbol table
+                const int type = sym->getType()->getTypeIndex();
+                PredSymbol::ParamRef param;
+                if (type == SymbolTable::tArray) {
+                    ArraySymbolRef arraySym = Utils::as<ArraySymbol>(sym);
+                    PredSymbol::ParamArrayRef paramArray(new PredSymbol::ParamArray);
+                    paramArray->elemType = arraySym->getElementsType()->getTypeIndex();
+                    paramArray->nDimensions = arraySym->getNDimensions();
+                    param = paramArray;
+                }
+                else param.reset(new PredSymbol::Param);
+                param->name = sym->getName();
+                param->type = type;
                 signature.params.emplace_back(param);
             }
             this->accessingNotLeafVariable = false;
         }
 
         // Check if a predicate with same signature is defined
-        std::string predSignature = PredSymbol::signatureToSymbolTableName(signature);
-        SymbolRef predSym = this->currentScope->resolve(predSignature);
+        SymbolRef predSym = this->currentScope->resolve(signature.toStringSymTable());
         if (predSym == nullptr) {
             std::map<std::string, SymbolRef> symbols = st->gloabls->getScopeSymbols(); // pred definitions are global
-            const std::string predName = Utils::string_split(predSignature, '(')[0];
             std::vector<std::pair<std::string, ExceptionLocation>> candidates;
             for (auto entry : symbols) {
                 if (Utils::is<PredSymbol>(entry.second)) {
                     PredSymbolRef pred = Utils::as<PredSymbol>(entry.second);
-                    const bool predHasSameName = Utils::string_split(entry.first, '(')[0] == predName;
+                    const bool predHasSameName = Utils::string_split(entry.first, '(')[0] == signature.name;
                     if (predHasSameName) {
-                        const std::string candName = VisitorsUtils::parsePredicateString(pred->getName());
+                        const std::string candName = pred->getSignature().toString();
                         ExceptionLocation candLoc = {
                                 pred->getLocation().file,
                                 pred->getLocation().line,
@@ -548,7 +556,7 @@ public:
                     ctx->start->getLine(),
                     ctx->start->getCharPositionInLine()
                 },
-                VisitorsUtils::parsePredicateString(predName),
+                signature.toString(),
                 candidates
             );
         }
@@ -558,9 +566,9 @@ public:
         this->currentScope = LocalScope::Create(this->currentScope);
         for (int i = 0; i < paramsSymbols.size(); i++) {
             SymbolRef sym = paramsSymbols[i];
-            PredSymbol::Param param = pred->getSignature().params[i];
-            assert(param.type == sym->getType()->getTypeIndex());
-            Utils::as<BaseScope>(this->currentScope)->define(param.name, sym);
+            PredSymbol::ParamRef param = pred->getSignature().params[i];
+            assert(param->type == sym->getType()->getTypeIndex());
+            Utils::as<BaseScope>(this->currentScope)->define(param->name, sym);
         }
         visit(pred->getPredDefTree()->predDefBody());
         this->currentScope = this->currentScope->getEnclosingScope();

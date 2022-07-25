@@ -20,31 +20,68 @@ class PredSymbol;
 typedef std::shared_ptr<PredSymbol> PredSymbolRef;
 class PredSymbol : public Symbol {
 public:
+    // Signature
+    struct Param {
+        Param() = default;
+        Param(const std::string& name, int type) : name(name), type(type) {}
+        virtual ~Param() {}
+        virtual std::string toStringSymTable() {
+            return std::to_string(type);
+        }
+        virtual std::string toString() {
+            return SymbolTable::typeToString(type);
+        }
+
+        std::string name;
+        int type;
+    };
+    typedef std::shared_ptr<Param> ParamRef;
+    struct ParamArray : public Param {
+        ParamArray() : Param() {}
+        ParamArray(const std::string& name, int type, int elemType, int nDimensions) :
+            Param(name,type), elemType(elemType), nDimensions(nDimensions) {}
+        std::string toStringSymTable() override {
+            std::string res = std::to_string(elemType);
+            for(int i = 0; i < nDimensions; i++) res += "[]";
+            return res;
+        }
+        std::string toString() override {
+            std::string res = SymbolTable::typeToString(elemType);
+            for(int i = 0; i < nDimensions; i++) res += "[]";
+            return res;
+        }
+
+        int elemType;
+        int nDimensions;
+    };
+    typedef std::shared_ptr<ParamArray> ParamArrayRef;
+    struct Signature {
+        const std::string toStringSymTable() {
+            std::string res = name + "(";
+            for (ParamRef p : params)  res += p->toStringSymTable();
+            res += ")";
+            return res;
+        }
+        const std::string toString() {
+            std::string res = name + "(";
+            for (int i = 0; i < params.size()-1; i++)
+                res += params[i]->toString() + ", ";
+            res += params[params.size()-1]->toString() + ")";
+            return res;
+        }
+
+        std::string name;
+        std::vector<ParamRef> params;
+
+    };
+    typedef std::shared_ptr<Signature> SignatureRef;
+
+    // PredSymbol
     struct Location {
         std::filesystem::path file;
         size_t line;
         size_t col;
     };
-
-    struct Param {
-        std::string name;
-        int type;
-        int elemType = -1;
-    };
-    typedef std::shared_ptr<Param> ParamRef;
-
-    struct Signature {
-        std::string name;
-        std::vector<Param> params;
-    };
-    typedef std::shared_ptr<Signature> SignatureRef;
-
-    static std::string signatureToSymbolTableName(Signature sig) {
-        std::string paramsStr = "";
-        for (Param p : sig.params)
-            paramsStr += std::to_string(p.type);
-        return sig.name + '(' + paramsStr + ')';
-    }
 
     static PredSymbolRef Create(Signature sig, Location loc, BUPParser::PredDefContext* predDefTree)
     {
@@ -80,7 +117,7 @@ public:
 
 protected:
     PredSymbol(Signature sig, Location loc, BUPParser::PredDefContext* predDefTree) :
-        Symbol(signatureToSymbolTableName(sig), SymbolTable::_varbool),
+        Symbol(sig.toStringSymTable(), SymbolTable::_varbool),
         _signature(sig), _predDefTree(predDefTree), _loc(loc)
     {
     }

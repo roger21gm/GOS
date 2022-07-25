@@ -128,7 +128,7 @@ predCall: name=TK_IDENT TK_LPAREN predCallParams? TK_RPAREN;
 predCallParams: predCallParam (TK_COMMA predCallParam)*;
 predCallParam:
     varAccess
-    | expr; // TODO
+    | expr;
 predVarDefinitionBlock: (varDefinition TK_SEMICOLON)*;
 predInclude: TK_INCLUDE TK_STRING TK_SEMICOLON;
 
@@ -176,7 +176,7 @@ exprSumDiff: exprMulDivMod (opSumDiff exprMulDivMod)*;
 opMulDivMod: TK_OP_ARIT_MULT | TK_OP_ARIT_DIV | TK_OP_ARIT_MOD;
 exprMulDivMod: exprNot (opMulDivMod exprNot)*;
 
-exprNot: op=TK_CONSTRAINT_NOT? expr_base;
+exprNot: op=TK_OP_LOGIC_NOT? expr_base;
 
 expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess;
 

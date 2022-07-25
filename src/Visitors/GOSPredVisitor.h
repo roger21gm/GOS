@@ -48,32 +48,30 @@ public:
 
                 // Construct signature to lookup the predicate in the symbol table
                 const int type = sym->getType()->getTypeIndex();
-                int elemType = -1;
-                if (type == SymbolTable::tArray)
-                    elemType = Utils::as<ArraySymbol>(sym)->getElementsType()->getTypeIndex();
-                PredSymbol::Param param = {
-                        sym->getName(),
-                        type,
-                        elemType
-                };
+                PredSymbol::ParamRef param;
+                if (type == SymbolTable::tArray) {
+                    PredSymbol::ParamArrayRef paramArray(new PredSymbol::ParamArray);
+                    paramArray->elemType = Utils::as<ArraySymbol>(sym)->getElementsType()->getTypeIndex();
+                }
+                else param.reset(new PredSymbol::Param);
+                param->name = sym->getName();
+                param->type = type;
                 signature.params.emplace_back(param);
             }
             this->accessingNotLeafVariable = false;
         }
 
         // Check if a predicate with same signature is defined
-        std::string predSignature = PredSymbol::signatureToSymbolTableName(signature);
-        SymbolRef predSym = this->currentScope->resolve(predSignature);
+        SymbolRef predSym = this->currentScope->resolve(signature.toStringSymTable());
         if (predSym == nullptr) {
             std::map<std::string, SymbolRef> symbols = st->gloabls->getScopeSymbols(); // pred definitions are global
-            const std::string predName = Utils::string_split(predSignature, '(')[0];
             std::vector<std::pair<std::string, ExceptionLocation>> candidates;
             for (auto entry : symbols) {
                 if (Utils::is<PredSymbol>(entry.second)) {
                     PredSymbolRef pred = Utils::as<PredSymbol>(entry.second);
-                    const bool predHasSameName = Utils::string_split(entry.first, '(')[0] == predName;
+                    const bool predHasSameName = Utils::string_split(entry.first, '(')[0] == signature.name;
                     if (predHasSameName) {
-                        const std::string candName = VisitorsUtils::parsePredicateString(pred->getName());
+                        const std::string candName = pred->getSignature().toString();
                         ExceptionLocation candLoc = {
                                 pred->getLocation().file,
                                 pred->getLocation().line,
@@ -83,14 +81,13 @@ public:
                     }
                 }
             }
-            const std::string predSignatureParsed = VisitorsUtils::parsePredicateString(predSignature);
             throw CSP2SATPredNotExistsException(
                 {
                     _includes.top(),
                     ctx->name->getLine(),
                     ctx->name->getCharPositionInLine()
                 },
-                predSignatureParsed,
+                signature.toString(),
                 candidates
             );
         }
@@ -109,29 +106,32 @@ public:
                 // Setup a mock environment to check if all predCalls are correct.
                 // This is achieved declaring all parameters as dummy symbols in a new temporary local scope
                 this->currentScope = LocalScope::Create(this->currentScope);
-                for (PredSymbol::Param p : predSym->getSignature().params) {
+                for (PredSymbol::ParamRef p : predSym->getSignature().params) {
                     SymbolRef dummySym;
-                    switch (p.type) {
+                    switch (p->type) {
                         case SymbolTable::tInt: {
-                            auto assignableSym = AssignableSymbol::Create(p.name, Type::Create(SymbolTable::tInt, ""));
+                            auto assignableSym = AssignableSymbol::Create(p->name, Type::Create(SymbolTable::tInt, ""));
                             assignableSym->setValue(IntValue::Create(0));
                             dummySym = assignableSym;
                             break;
                         }
                         case SymbolTable::tBool: {
-                            auto assignableSym = AssignableSymbol::Create(p.name, Type::Create(SymbolTable::tBool, ""));
+                            auto assignableSym = AssignableSymbol::Create(p->name, Type::Create(SymbolTable::tBool, ""));
                             assignableSym->setValue(BoolValue::Create());
                             dummySym = assignableSym;
                             break;
                         }
                         case SymbolTable::tVarBool:
-                            dummySym = VariableSymbol::Create(p.name, literal());
+                            dummySym = VariableSymbol::Create(p->name, literal());
                             break;
-                        case SymbolTable::tArray:
-                            dummySym = ArraySymbol::Create(p.name, this->currentScope, Type::Create(p.elemType, ""));
+                        case SymbolTable::tArray: {
+                            assert(Utils::is<PredSymbol::ParamArray>(p));
+                            PredSymbol::ParamArrayRef pArray = Utils::as<PredSymbol::ParamArray>(p);
+                            dummySym = ArraySymbol::Create(pArray->name, this->currentScope, Type::Create(pArray->elemType, ""));
                             break;
+                        }
                         default:
-                            throw std::invalid_argument("Type " + std::to_string(p.type) + " not supported");
+                            throw std::invalid_argument("Type " + std::to_string(p->type) + " not supported");
                     }
                     Utils::as<BaseScope>(this->currentScope)->define(dummySym);
                 }
@@ -173,11 +173,10 @@ public:
     }
 
     antlrcpp::Any visitVarDefinition(BUPParser::VarDefinitionContext *ctx) override {
-        PredSymbol::ParamRef param(new PredSymbol::Param);
-        param->name = ctx->name->getText();
+        PredSymbol::ParamRef param;
 
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->children.empty()) {
-            if(!ctx->arrayDefinition()->expr().empty())
+            if(!ctx->arrayDefinition()->expr().empty()) {
                 throw CSP2SATArrayBoundsException(
                         {
                                 st->parsedFiles.front()->getPath(),
@@ -185,22 +184,28 @@ public:
                                 ctx->name->getCharPositionInLine()
                         }, false
                 );
-            param->type = SymbolTable::tArray;
-            param->elemType = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
+            }
+            PredSymbol::ParamArrayRef paramArray(new PredSymbol::ParamArray);
+            paramArray->type = SymbolTable::tArray;
+            paramArray->elemType = SymbolTable::tVarBool;
+            paramArray->nDimensions = ctx->arrayDefinition()->TK_LCLAUDATOR().size();
+            param = paramArray;
         }
-        else
+        else {
+            param.reset(new PredSymbol::Param);
             param->type = SymbolTable::tVarBool;
+        }
+        param->name = ctx->name->getText();
 
         return param;
     }
 
     antlrcpp::Any visitParamDefinition(BUPParser::ParamDefinitionContext *ctx) override {
-        PredSymbol::ParamRef param(new PredSymbol::Param);
-        param->name = ctx->name->getText();
+        PredSymbol::ParamRef param;
 
         const int type = Utils::as<Type>(currentScope->resolve(ctx->type->getText()))->getTypeIndex();
         if (ctx->arrayDefinition() && !ctx->arrayDefinition()->children.empty()) {
-            if(!ctx->arrayDefinition()->expr().empty())
+            if(!ctx->arrayDefinition()->expr().empty()) {
                 throw CSP2SATArrayBoundsException(
                         {
                                 st->parsedFiles.front()->getPath(),
@@ -208,11 +213,18 @@ public:
                                 ctx->name->getCharPositionInLine()
                         }, false
                 );
-            param->type = SymbolTable::tArray;
-            param->elemType = type;
+            }
+            PredSymbol::ParamArrayRef paramArray(new PredSymbol::ParamArray);
+            paramArray->type = SymbolTable::tArray;
+            paramArray->elemType = type;
+            paramArray->nDimensions = ctx->arrayDefinition()->TK_LCLAUDATOR().size();
+            param = paramArray;
         }
-        else
+        else {
+            param.reset(new PredSymbol::Param);
             param->type = type;
+        }
+        param->name = ctx->name->getText();
 
         return param;
     }
@@ -229,7 +241,7 @@ public:
             for (auto defCtx: ctx->predDefParams()->definition()) {
                 try {
                     PredSymbol::ParamRef param = visit(defCtx);
-                    signature.params.push_back(*param);
+                    signature.params.push_back(param);
                 } catch (GOSException &e) {
                     std::cerr << e.getErrorMessage() << std::endl;
                 }
@@ -237,10 +249,10 @@ public:
         }
 
         // Check if a predicate with same signature is already declared
-        if(this->currentScope->existsInScope(PredSymbol::signatureToSymbolTableName(signature))) {
+        if(this->currentScope->existsInScope(signature.toStringSymTable())) {
             throw CSP2SATAlreadyExistException(
                 {
-                        _includes.top(),
+                    _includes.top(),
                     line,
                     col
                 },

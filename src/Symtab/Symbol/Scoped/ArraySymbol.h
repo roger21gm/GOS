@@ -20,8 +20,8 @@ class ArraySymbol;
 typedef std::shared_ptr<ArraySymbol> ArraySymbolRef;
 class ArraySymbol : public ScopedSymbol {
 public:
-    static ArraySymbolRef Create(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType, int size) {
-        return ArraySymbolRef(new ArraySymbol(name, enclosingScope, arrayElementsType, size));
+    static ArraySymbolRef Create(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType, int size, int nDimensions) {
+        return ArraySymbolRef(new ArraySymbol(name, enclosingScope, arrayElementsType, size, nDimensions));
     }
     static ArraySymbolRef Create(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType) {
         return ArraySymbolRef(new ArraySymbol(name, enclosingScope, arrayElementsType));
@@ -74,6 +74,10 @@ public:
         return this->size;
     }
 
+    int getNDimensions() {
+        return this->nDimensions;
+    }
+
     TypeRef getElementsType () {
         return this->elementsType;
     }
@@ -88,9 +92,10 @@ public:
     }
 
 protected:
-    ArraySymbol(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType, int size) :
+    ArraySymbol(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType, int size, int nDimensions) :
         ScopedSymbol(SymbolTable::tArray, name, enclosingScope)
     {
+        this->nDimensions = nDimensions;
         this->size = size;
         this->elementsType = arrayElementsType;
         this->type = Type::Create(SymbolTable::tArray, name); // Trick! creating another instance of Type since shared_from_this cannot be called from a constructor
@@ -99,6 +104,7 @@ protected:
     ArraySymbol(const std::string &name, ScopeRef enclosingScope, TypeRef arrayElementsType) : 
         ScopedSymbol(SymbolTable::tArray, name, enclosingScope) 
     {
+        this->nDimensions = 1;
         this->size = 0;
         this->elementsType = arrayElementsType;
         this->type = Type::Create(SymbolTable::tArray, name);
@@ -108,6 +114,7 @@ private:
     std::vector<SymbolRef> elements;
     TypeRef elementsType;
     int size;
+    int nDimensions;
 };
 
 }

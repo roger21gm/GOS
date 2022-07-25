@@ -76,23 +76,22 @@ public:
 
 
 
-    antlrcpp::Any visitExprTop(BUPParser::ExprTopContext *ctx) override {
+    antlrcpp::Any visitExpr(BUPParser::ExprContext *ctx) override {
         try {
-            return BUPBaseVisitor::visitExprTop(ctx);
+            ValueRef condition = visit(ctx->condition);
+            if (ctx->TK_INTERROGANT()) {
+                if (condition->getRealValue())
+                    return visit(ctx->op1);
+                else
+                    return visit(ctx->op2);
+            }
+            else return condition;
         } catch (GOSException &e) {
             throw;
         }
     }
 
-    antlrcpp::Any visitExprTernary(BUPParser::ExprTernaryContext *ctx) override {
-        ValueRef condition = visit(ctx->condition);
-        if (condition->getRealValue())
-            return visit(ctx->op1);
-        else
-            return visit(ctx->op2);
-    }
-
-    antlrcpp::Any visitExprListAggregateOp(BUPParser::ExprListAggregateOpContext *ctx) override {
+    antlrcpp::Any visitExprListAgg(BUPParser::ExprListAggContext *ctx) override {
         ArraySymbolRef list = visit(ctx->list());
         ValueRef result = nullptr;
 

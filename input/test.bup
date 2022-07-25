@@ -12,7 +12,7 @@ viewpoint:
 predicates:
 
     pred(var bool predArray[][]) {
-        //forall(i in 1..sizeof(predArray)){EK(predArray[i], 1);}; // TODO mirar pq sizeof no funciona
+        forall(i in 1..sizeof(predArray)-1){true;}; // TODO mirar pq sizeof no funciona
         true;
     }
 
@@ -96,7 +96,7 @@ constraints:
     //pred(true, n);
     //testArray(t);
     //predInclude2(a);
-    pred(varArray);
+    pred(varArray2);
     true;
 
 output:

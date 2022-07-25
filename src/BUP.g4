@@ -152,14 +152,10 @@ arrayDefinition: (TK_LCLAUDATOR arraySize=expr? TK_RCLAUDATOR)*;
 
 // EXPRESSIONS
 
-expr:
-    exprListAgg #exprTop
-    | condition=exprAnd TK_INTERROGANT op1=expr TK_COLON op2=expr #exprTernary;
+expr: condition=exprAnd (TK_INTERROGANT op1=expr TK_COLON op2=expr)?; // Ternary
 
 opAggregateExpr: TK_OP_AGG_LENGTH | TK_OP_AGG_MAX | TK_OP_AGG_MIN | TK_OP_AGG_SUM | TK_OP_AGG_SIZEOF;
-exprListAgg:
-    opAggregateExpr TK_LPAREN list TK_RPAREN #exprListAggregateOp
-    | exprAnd #exprAnd2;
+exprListAgg: opAggregateExpr TK_LPAREN list TK_RPAREN;
 
 exprAnd: exprOr (TK_OP_LOGIC_AND exprOr)*;
 exprOr: exprEq (TK_OP_LOGIC_OR exprEq)*;
@@ -178,7 +174,7 @@ exprMulDivMod: exprNot (opMulDivMod exprNot)*;
 
 exprNot: op=TK_OP_LOGIC_NOT? expr_base;
 
-expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess;
+expr_base: valueBaseType | TK_LPAREN expr TK_RPAREN | varAccess | exprListAgg;
 
 varAccess: id=TK_IDENT varAccessObjectOrArray*;
 

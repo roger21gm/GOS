@@ -50,8 +50,11 @@ public:
                 const int type = sym->getType()->getTypeIndex();
                 PredSymbol::ParamRef param;
                 if (type == SymbolTable::tArray) {
+                    ArraySymbolRef arraySym = Utils::as<ArraySymbol>(sym);
                     PredSymbol::ParamArrayRef paramArray(new PredSymbol::ParamArray);
-                    paramArray->elemType = Utils::as<ArraySymbol>(sym)->getElementsType()->getTypeIndex();
+                    paramArray->elemType = arraySym->getElementsType()->getTypeIndex();
+                    paramArray->nDimensions = arraySym->getNDimensions();
+                    param = paramArray;
                 }
                 else param.reset(new PredSymbol::Param);
                 param->name = sym->getName();

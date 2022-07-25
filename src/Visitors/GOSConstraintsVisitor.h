@@ -511,6 +511,7 @@ public:
                     sym = assignableSym;
                 }
                 else sym = res; // Defined symbol
+                paramsSymbols.emplace_back(sym);
 
                 // Construct signature to lookup the predicate in the symbol table
                 const int type = sym->getType()->getTypeIndex();

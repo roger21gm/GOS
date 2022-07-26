@@ -128,7 +128,8 @@ predCall: name=TK_IDENT TK_LPAREN predCallParams? TK_RPAREN;
 predCallParams: predCallParam (TK_COMMA predCallParam)*;
 predCallParam:
     varAccess
-    | expr;
+    | expr
+    | list;
 predVarDefinitionBlock: (varDefinition TK_SEMICOLON)*;
 predInclude: TK_INCLUDE TK_STRING TK_SEMICOLON;
 

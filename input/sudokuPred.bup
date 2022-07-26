@@ -1,28 +1,35 @@
 viewpoint:
     param int n;
-    param int iniSudoku[9][9];
+    param int iniSudoku[n][n];
     var p[n][n][n];
 
 predicates:
-
+    exactly_one_dimension(var matrix[][][], param int dimension) {
+        forall(i in 0..sizeof(matrix[0])-1,
+               j in 0..sizeof(matrix[_][0])-1) {
+            if (dimension == 0) {
+                EO(p[_][i][j]);
+            } else if (dimension == 1) {
+                EO(p[i][_][j]);
+            } else {
+                EO(p[i][j][_]);
+            };
+        };
+    }
 
 constraints:
-    forall(i in 0..8, j in 0..8){
-        EK(p[i][j][_], 1); // Un únic valor per cel·la
-        AMK(p[i][_][j], 1); // Cada valor apareix una vegada per fila
-        AMK(p[_][i][j], 1); // Cada valor apareix una vegada per columna.
+    exactly_one_dimension(p, 0); // Cada valor apareix una vegada per columna.
+    exactly_one_dimension(p, 1); // Cada valor apareix una vegada per fila
+    exactly_one_dimension(p, 2); // Un únic valor per cel·la
+
+
+    // Cada valor apareix una vegada als subquadrats de 3x3.
+    forall(i in [0,3,6], j in [0,3,6], k in 0..n-1) {
+        AMO([p[i+l][j+g][k] | l in 0..2, g in 0..2]);
     };
 
-
-    //Cada valor apareix una vagada als subquadrats de 3x3.
-    forall(i in [0,3,6], j in [0,3,6], k in 0..8){
-        AMK([p[i+l][j+g][k] | l in 0..2, g in 0..2], 1);
-    };
-
-
-
-    //Inicialitzem els valors fixats del sudoku.
-    forall(i in 0..8, j in 0..8){
+    // Inicialitzem els valors fixats del sudoku.
+    forall(i in 0..n-1, j in 0..n-1) {
         if(iniSudoku[i][j] != 0){
             p[i][j][iniSudoku[i][j]-1];
         };
@@ -30,4 +37,4 @@ constraints:
 
 output:
     "Solució sudoku: \n";
-    [ k+1 ++ " " ++ ((j+1) % 3 == 0 ? " " : "") ++ (j==8 ? (i+1) % 3 == 0 ? "\n\n": "\n" : "") | i in 0..8, j in 0..8, k in 0..8 where p[i][j][k]];
+    [ k+1 ++ " " ++ ((j+1) % 3 == 0 ? " " : "") ++ (j==8 ? (i+1) % 3 == 0 ? "\n\n": "\n" : "") | i in 0..n-1, j in 0..n-1, k in 0..n-1 where p[i][j][k]];
